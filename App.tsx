@@ -283,10 +283,6 @@ const App: React.FC = () => {
             주제만 입력하면<br/>
             <span className="text-primary">원고와 디자인이 뚝딱!</span>
           </h2>
-          <p className="text-gray-500 text-sm md:text-base">
-            Gemini Gems 또는 GPTs에게 <strong>'주제'</strong>만 던져주세요.<br/>
-            알아서 써준 내용을 붙여넣으면 끝납니다.
-          </p>
         </section>
 
         {/* --- GUIDE SECTION --- */}
@@ -300,8 +296,7 @@ const App: React.FC = () => {
                 <HelpCircle size={20} />
               </div>
               <div className="text-left">
-                <h3 className="font-bold text-gray-800">나만의 AI 봇 만드는 법</h3>
-                <p className="text-xs text-gray-500">주제만 넣으면 원고 써주는 봇 만들기</p>
+                <h3 className="font-bold text-gray-800">사용 방법</h3>
               </div>
             </div>
             {showGuide ? <ArrowDown className="text-gray-400 rotate-180 transition-transform" /> : <ArrowDown className="text-gray-400 transition-transform" />}

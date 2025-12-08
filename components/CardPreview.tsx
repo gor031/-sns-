@@ -6,9 +6,10 @@ interface CardPreviewProps {
   slide: Slide;
   totalSlides: number;
   themeIndex?: number;
-  onUpdate: (field: 'header' | 'body', value: string) => void;
+  onUpdate: (header: string, body: string) => void;
   onRegenerate?: (header: string, body: string) => Promise<{ header: string; body: string }>;
   captureId: string;
+  hideControls?: boolean;
 }
 
 // High Contrast Themes for better readability and "Instagram" vibe
@@ -201,7 +202,8 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
   themeIndex = 0, 
   onUpdate,
   onRegenerate,
-  captureId
+  captureId,
+  hideControls = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -227,8 +229,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
   };
 
   const saveEditing = () => {
-    onUpdate('header', editHeader);
-    onUpdate('body', editBody);
+    onUpdate(editHeader, editBody);
     setIsEditing(false);
   };
 
@@ -454,7 +455,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
       </div>
       
       {/* Edit Button */}
-      {!isEditing && (
+      {!isEditing && !hideControls && (
         <button 
           onClick={startEditing}
           className="w-full py-3 bg-white border-2 border-gray-200 text-gray-600 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 hover:text-primary transition-all shadow-sm"

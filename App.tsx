@@ -171,18 +171,21 @@ const App: React.FC = () => {
     }
   };
 
-  const handleUpdateSlide = (field: 'header' | 'body', value: string) => {
+  const handleUpdateSlide = (header: string, body: string) => {
     if (!cardData) return;
     
-    const newSlides = [...cardData.slides];
-    newSlides[currentSlideIndex] = {
-      ...newSlides[currentSlideIndex],
-      [field]: value
-    };
-
-    setCardData({
-      ...cardData,
-      slides: newSlides
+    setCardData(prev => {
+      if (!prev) return null;
+      const newSlides = [...prev.slides];
+      newSlides[currentSlideIndex] = {
+        ...newSlides[currentSlideIndex],
+        header,
+        body
+      };
+      return {
+        ...prev,
+        slides: newSlides
+      };
     });
   };
 
@@ -223,7 +226,8 @@ const App: React.FC = () => {
       const folder = zip.folder("card-news");
 
       for (let i = 0; i < cardData.slides.length; i++) {
-        const element = document.getElementById(`export-slide-${i}`);
+        // Target the inner ID which doesn't include the button wrapper
+        const element = document.getElementById(`export-slide-inner-${i}`);
         if (element) {
           // @ts-ignore
           const canvas = await window.html2canvas(element, {
@@ -413,6 +417,7 @@ const App: React.FC = () => {
                     totalSlides={cardData.slides.length}
                     themeIndex={cardData.themeIndex}
                     onUpdate={() => {}} 
+                    hideControls={true}
                   />
                 </div>
               ))}

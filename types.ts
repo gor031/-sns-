@@ -1,7 +1,16 @@
+
+export interface TextStyle {
+  align: 'left' | 'center' | 'right';
+  fontSize: string; // tailwind class e.g. "text-3xl"
+  color: string; // tailwind class e.g. "text-white" or hex
+}
+
 export interface Slide {
   pageNumber: number;
   header: string;
   body: string;
+  headerStyle?: TextStyle;
+  bodyStyle?: TextStyle;
 }
 
 export interface CardNewsData {

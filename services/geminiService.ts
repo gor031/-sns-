@@ -1,4 +1,5 @@
-import { CardNewsData } from "../types";
+
+import { CardNewsData, Slide } from "../types";
 
 // Helper to clean Markdown code blocks (```json ... ```)
 const cleanJsonString = (text: string): string => {
@@ -36,11 +37,26 @@ export const parseCardNewsJson = (input: string): CardNewsData => {
     }
 
     // Ensure required fields exist
-    const validatedSlides = data.slides.map((slide: any, index: number) => ({
-      pageNumber: slide.pageNumber || index + 1,
-      header: slide.header || "",
-      body: slide.body || ""
-    }));
+    const validatedSlides: Slide[] = data.slides.map((slide: any, index: number) => {
+      const isCover = (slide.pageNumber || index + 1) === 1;
+      
+      return {
+        pageNumber: slide.pageNumber || index + 1,
+        header: slide.header || "",
+        body: slide.body || "",
+        // Default Styles
+        headerStyle: {
+          align: isCover ? 'center' : 'left',
+          fontSize: isCover ? 'text-5xl' : 'text-3xl',
+          color: '' // Empty string means use theme default
+        },
+        bodyStyle: {
+          align: 'left',
+          fontSize: 'text-2xl',
+          color: ''
+        }
+      };
+    });
 
     return {
       topic: data.topic || "제목 없음",

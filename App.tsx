@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { parseCardNewsJson } from './services/geminiService';
-import { CardNewsData } from './types';
-import { CardPreview } from './components/CardPreview';
+import { CardNewsData, TextStyle } from './types';
+import { CardPreview, THEMES } from './components/CardPreview';
 import { Button } from './components/Button';
 import { 
   ChevronRight, 
@@ -102,7 +102,7 @@ const App: React.FC = () => {
       
       // Assign a random theme index if not present
       if (data.themeIndex === undefined) {
-        data.themeIndex = Math.floor(Math.random() * 100);
+        data.themeIndex = Math.floor(Math.random() * THEMES.length);
       }
       
       setCardData(data);
@@ -162,16 +162,16 @@ const App: React.FC = () => {
     }
   };
 
-  const shuffleTheme = () => {
+  const changeTheme = (index: number) => {
     if (cardData) {
       setCardData({
         ...cardData,
-        themeIndex: Math.floor(Math.random() * 100)
+        themeIndex: index
       });
     }
   };
 
-  const handleUpdateSlide = (header: string, body: string) => {
+  const handleUpdateSlide = (header: string, body: string, headerStyle?: TextStyle, bodyStyle?: TextStyle) => {
     if (!cardData) return;
     
     setCardData(prev => {
@@ -180,7 +180,9 @@ const App: React.FC = () => {
       newSlides[currentSlideIndex] = {
         ...newSlides[currentSlideIndex],
         header,
-        body
+        body,
+        headerStyle: headerStyle || newSlides[currentSlideIndex].headerStyle,
+        bodyStyle: bodyStyle || newSlides[currentSlideIndex].bodyStyle,
       };
       return {
         ...prev,
@@ -192,7 +194,9 @@ const App: React.FC = () => {
   // Download functionality for SINGLE slide
   const handleDownloadCurrent = async () => {
     try {
-      const element = document.getElementById('card-capture-target');
+      // Use the hidden export-ready element instead of the visible one
+      // This ensures the "shifted down" styles for html2canvas are applied
+      const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
       
       // @ts-ignore
@@ -408,7 +412,8 @@ const App: React.FC = () => {
             </div>
 
             {/* Hidden Container for Export Rendering */}
-            <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+            {/* FIX: Move into viewport (z-index -50) instead of far off-screen to ensure accurate text rendering metrics */}
+            <div style={{ position: 'fixed', left: '0', top: '0', zIndex: -50, opacity: 0, pointerEvents: 'none' }}>
               {cardData.slides.map((slide, idx) => (
                 <div key={idx} id={`export-slide-${idx}`} className="w-96">
                   <CardPreview 
@@ -418,6 +423,7 @@ const App: React.FC = () => {
                     themeIndex={cardData.themeIndex}
                     onUpdate={() => {}} 
                     hideControls={true}
+                    forExport={true} 
                   />
                 </div>
               ))}
@@ -456,36 +462,59 @@ const App: React.FC = () => {
                 </button>
               </div>
 
-               {/* Download & Theme Actions */}
-               <div className="flex flex-col gap-3 mt-6">
-                 
-                 <div className="flex gap-2">
-                   <Button 
-                     onClick={handleDownloadCurrent}
-                     variant="secondary"
-                     className="flex-1 py-3 text-sm"
-                   >
-                     <Download size={18} />
-                     현재 장 저장
-                   </Button>
-                   <Button 
-                     onClick={handleDownloadAll}
-                     variant="primary"
-                     isLoading={isDownloading}
-                     className="flex-1 py-3 text-sm"
-                   >
-                     <FolderDown size={18} />
-                     전체 저장 (ZIP)
-                   </Button>
-                 </div>
+               {/* Theme Selector - Grid Layout */}
+               <div className="mt-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                        <Palette size={16} className="text-primary"/>
+                        배경 테마 선택 <span className="text-xs text-gray-400 font-normal">({THEMES.length}개)</span>
+                    </div>
+                  </div>
+                  
+                  {/* Grid Layout for Themes - Showing all 50 items clearly */}
+                  <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50">
+                    {THEMES.map((theme, i) => (
+                      <button 
+                        key={theme.id}
+                        onClick={() => changeTheme(i)}
+                        className={`
+                          aspect-square w-full rounded-full border-2 transition-all cursor-pointer relative group
+                          ${cardData.themeIndex === i ? 'border-primary shadow-md scale-100 ring-2 ring-primary/20' : 'border-gray-200 hover:scale-110 opacity-80 hover:opacity-100 hover:border-gray-400'}
+                          ${theme.bg}
+                        `}
+                        title={theme.id}
+                        aria-label={`Select theme ${theme.id}`}
+                      >
+                         {/* Checkmark for selected */}
+                         {cardData.themeIndex === i && (
+                             <div className="absolute inset-0 flex items-center justify-center text-white/90 drop-shadow-md">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                             </div>
+                         )}
+                      </button>
+                    ))}
+                  </div>
+               </div>
 
-                 <button 
-                   onClick={shuffleTheme}
-                   className="w-full flex items-center justify-center gap-2 text-sm font-bold text-gray-500 bg-gray-200 hover:bg-gray-300 hover:text-gray-800 transition-all py-4 rounded-xl"
+               {/* Download Actions */}
+               <div className="flex gap-2 mt-4">
+                 <Button 
+                   onClick={handleDownloadCurrent}
+                   variant="secondary"
+                   className="flex-1 py-3 text-sm"
                  >
-                   <Palette size={18} />
-                   배경 스타일 랜덤 변경
-                 </button>
+                   <Download size={18} />
+                   현재 장 저장
+                 </Button>
+                 <Button 
+                   onClick={handleDownloadAll}
+                   variant="primary"
+                   isLoading={isDownloading}
+                   className="flex-1 py-3 text-sm"
+                 >
+                   <FolderDown size={18} />
+                   전체 저장 (ZIP)
+                 </Button>
                </div>
             </div>
           </div>

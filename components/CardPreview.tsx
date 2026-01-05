@@ -98,21 +98,26 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
   if (forExport) {
     const headerColor = theme.accent.includes('#') ? theme.accent : 'inherit';
     
-    // Use nested spans for robust z-index stacking in html2canvas
-    // Outer span: background
-    // Inner span: text (with relative positioning and positive z-index)
+    // Export-Optimized Rendering Strategy:
+    // 1. Visually lower the highlight background using a linear gradient that is transparent at the top.
+    // 2. Use nested spans with relative positioning and z-index to ensure text sits ABOVE the background.
+    // 3. Clone box decorations to handle multi-line text wrapping correctly.
     return html
       .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
         
         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-        return `<span style="background-color: ${theme.highlightBg}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
+        
+        // gradient: top 15% transparent, bottom 85% colored. This visually pushes the block down.
+        return `<span style="background: linear-gradient(to bottom, transparent 15%, ${theme.highlightBg} 15%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
          if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
          
          const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-         return `<span style="background-color: ${theme.highlightBg}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
+         
+         // gradient: top 15% transparent, bottom 85% colored.
+         return `<span style="background: linear-gradient(to bottom, transparent 15%, ${theme.highlightBg} 15%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       });
   }
 

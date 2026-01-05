@@ -102,22 +102,23 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
     // 1. Visually lower the highlight background using a linear gradient that is transparent at the top.
     // 2. Use nested spans with relative positioning and z-index to ensure text sits ABOVE the background.
     // 3. Clone box decorations to handle multi-line text wrapping correctly.
+    // Update: User requested symmetric transparency (top and bottom) to avoid "weird" look of just top transparency.
     return html
       .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
         
         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
         
-        // gradient: top 15% transparent, bottom 85% colored. This visually pushes the block down.
-        return `<span style="background: linear-gradient(to bottom, transparent 15%, ${theme.highlightBg} 15%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
+        // gradient: transparent top 10%, colored middle 80%, transparent bottom 10%
+        return `<span style="background: linear-gradient(to bottom, transparent 10%, ${theme.highlightBg} 10%, ${theme.highlightBg} 90%, transparent 90%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
          if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
          
          const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
          
-         // gradient: top 15% transparent, bottom 85% colored.
-         return `<span style="background: linear-gradient(to bottom, transparent 15%, ${theme.highlightBg} 15%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
+         // gradient: transparent top 10%, colored middle 80%, transparent bottom 10%
+         return `<span style="background: linear-gradient(to bottom, transparent 10%, ${theme.highlightBg} 10%, ${theme.highlightBg} 90%, transparent 90%); padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       });
   }
 

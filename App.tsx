@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { parseCardNewsJson } from './services/geminiService';
 import { CardNewsData, TextStyle } from './types';
@@ -17,18 +18,23 @@ import {
   Copy,
   CheckCircle2,
   Bot,
-  ArrowDown
+  ArrowDown,
+  // Added missing Check icon import
+  Check
 } from 'lucide-react';
 
 const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터'입니다.
 모바일 환경은 가독성이 생명입니다. 사용자가 주제를 던지면 무조건 **짧고, 강렬하고, 직관적인** 원고를 작성해야 합니다.
 
-당신의 작업은 반드시 다음 **2단계 프로세스**를 따라야 합니다.
+당신의 작업은 반드시 다음 **3단계 프로세스**를 따라야 합니다.
 
 ---
 
-### [1단계: 원고 기획 및 컨펌]
-사용자가 주제나 키워드를 입력하면, 바로 JSON을 만들지 말고 먼저 **텍스트 원고**를 작성하여 보여주세요.
+### [1단계: sns 올릴 제목과 내용]
+사용자가 주제나 키워드를 입력하면 sns에 올릴 제목과 내용을 먼저생성해줘(반드시 복사 버튼으로 한번에 복사가 가능하게 해줘야되)
+
+### [2단계: 원고 기획 및 컨펌]
+제목과 내용 생성한 뒤에, 바로 JSON을 만들지 말고 먼저 **텍스트 원고**를 작성하여 보여주세요.
 
 **1. 작성 원칙 (매우 중요):**
 - **다이어트**: 불필요한 조사, 형용사, 부사를 모두 삭제하세요.
@@ -37,14 +43,14 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
    - 표지 (후킹 제목)
    - 본문 (6~10장 내외, 핵심 정보만 딱딱 끊어서)
    - 결론 (행동 유도)
-- **강조 표시**: 핵심 단어는 \`**강조**\` 처리를 미리 해서 보여주세요.
+- **강조 표시**: 핵심 단어는 **강조** 처리를 미리 해서 보여주세요.
 
 **2. 마무리 멘트:**
 원고 끝에 반드시 **"이 내용으로 카드뉴스 데이터를 생성할까요?"** 라고 물어보세요.
 
 ---
 
-### [2단계: JSON 데이터 변환]
+### [3단계: JSON 데이터 변환]
 사용자가 "좋아", "만들어줘", "진행해"라고 동의하면, 위에서 확정된 원고를 **앱이 인식할 수 있는 JSON 코드**로 변환해서 출력하세요.
 
 **1. 필수 규칙:**
@@ -69,7 +75,6 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
       "header": "소제목(핵심만)",
       "body": "본문은 최대 2줄.\\n줄바꿈을 적극 활용.\\n**핵심** 단어 강조."
     }
-    // ... (원고 내용에 따라 슬라이드 계속 추가)
   ]
 }
 \`\`\``;
@@ -191,19 +196,22 @@ const App: React.FC = () => {
     });
   };
 
-  // Download functionality for SINGLE slide
   const handleDownloadCurrent = async () => {
     try {
-      // Use the hidden export-ready element instead of the visible one
-      // This ensures the "shifted down" styles for html2canvas are applied
       const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
       
       // @ts-ignore
       const canvas = await window.html2canvas(element, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
-        backgroundColor: null
+        backgroundColor: null,
+        logging: false,
+        onclone: (clonedDoc) => {
+           // Ensure export view is visible for html2canvas measurement
+           const el = clonedDoc.getElementById(`export-slide-inner-${currentSlideIndex}`);
+           if (el) el.style.opacity = "1";
+        }
       });
 
       const data = canvas.toDataURL('image/png');
@@ -219,7 +227,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Download functionality for ALL slides
   const handleDownloadAll = async () => {
     if (!cardData) return;
     setIsDownloading(true);
@@ -230,14 +237,14 @@ const App: React.FC = () => {
       const folder = zip.folder("card-news");
 
       for (let i = 0; i < cardData.slides.length; i++) {
-        // Target the inner ID which doesn't include the button wrapper
         const element = document.getElementById(`export-slide-inner-${i}`);
         if (element) {
           // @ts-ignore
           const canvas = await window.html2canvas(element, {
-            scale: 2,
+            scale: 3,
             useCORS: true,
-            backgroundColor: null
+            backgroundColor: null,
+            logging: false
           });
           
           const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -267,8 +274,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
+    <div className="min-h-screen pb-20 font-sans">
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -278,14 +284,12 @@ const App: React.FC = () => {
             <h1 className="text-xl font-black text-gray-800 tracking-tight">카드뉴스 생성기</h1>
           </div>
           <div className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
-            Viewer Mode
+            Professional Mode
           </div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
-        
-        {/* Intro Section */}
         <section className="text-center space-y-3 mb-10">
           <h2 className="text-3xl font-black text-gray-900 leading-tight">
             주제만 입력하면<br/>
@@ -293,7 +297,6 @@ const App: React.FC = () => {
           </h2>
         </section>
 
-        {/* --- GUIDE SECTION --- */}
         <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <button 
             onClick={() => setShowGuide(!showGuide)}
@@ -303,34 +306,29 @@ const App: React.FC = () => {
               <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
                 <HelpCircle size={20} />
               </div>
-              <div className="text-left">
-                <h3 className="font-bold text-gray-800">사용 방법</h3>
-              </div>
+              <h3 className="font-bold text-gray-800">사용 방법</h3>
             </div>
             {showGuide ? <ArrowDown className="text-gray-400 rotate-180 transition-transform" /> : <ArrowDown className="text-gray-400 transition-transform" />}
           </button>
 
           {showGuide && (
             <div className="p-6 space-y-8 border-t border-gray-100 animate-fade-in">
-              
-              {/* Step 1 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
                 <div className="space-y-2">
                   <h4 className="font-bold text-gray-800">Gems / GPTs 생성</h4>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Google Gemini의 <strong>'Gems'</strong> 기능이나 ChatGPT의 <strong>'나만의 GPT 만들기'</strong>로 이동합니다.
+                    AI 서비스의 <strong>'나만의 봇'</strong> 만들기 페이지로 이동합니다.
                   </p>
                 </div>
               </div>
 
-              {/* Step 2 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
                 <div className="space-y-3 w-full">
                   <h4 className="font-bold text-gray-800">지시사항(Prompt) 입력</h4>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    AI 설정의 <strong>'지시사항(System Instruction)'</strong> 칸에 아래 내용을 복사해서 붙여넣으세요. 이 설정이 있으면 <strong>주제만 넣어도 알아서 원고를 써줍니다.</strong>
+                    AI 설정의 <strong>'지시사항'</strong> 칸에 아래 내용을 복사해서 붙여넣으세요.
                   </p>
                   
                   <div className="relative">
@@ -348,72 +346,52 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Step 3 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
                 <div className="space-y-2">
-                  <h4 className="font-bold text-gray-800">주제 던지기</h4>
+                  <h4 className="font-bold text-gray-800">주제 입력</h4>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    이제 만든 봇에게 <strong>"다이어트 식단", "인스타그램 꿀팁"</strong> 같은 <strong>주제</strong>만 던지세요.<br/>
-                    봇이 써준 답변을 그대로 복사해서 아래에 붙여넣으면 끝!
+                    봇에게 주제를 던지면 <strong>3단계 프로세스</strong>에 맞춰 결과를 생성합니다. 마지막 JSON 데이터를 복사해 아래에 붙여넣으세요.
                   </p>
                 </div>
               </div>
-
             </div>
           )}
         </section>
 
-        {/* Input Section */}
         <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-          
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                 <ClipboardPaste size={16} /> AI 결과 붙여넣기
               </label>
-              <button 
-                onClick={loadSampleData}
-                className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors"
-              >
-                <Sparkles size={12} /> 예시 내용 불러오기
+              <button onClick={loadSampleData} className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors">
+                <Sparkles size={12} /> 예시 불러오기
               </button>
             </div>
-
             <textarea
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
-              placeholder="여기에 AI(Gems/GPTs)가 써준 내용을 그대로 붙여넣으세요..."
-              className="w-full h-64 p-4 rounded-xl bg-gray-50 text-gray-800 text-sm border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none placeholder-gray-400 transition-all leading-relaxed custom-scrollbar shadow-inner"
+              placeholder="AI가 생성한 JSON 코드를 여기에 붙여넣으세요..."
+              className="w-full h-64 p-4 rounded-xl bg-gray-50 text-gray-800 text-sm border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none placeholder-gray-400 transition-all leading-relaxed shadow-inner"
               spellCheck={false}
             />
           </div>
-
-          {/* Action Button */}
-          <Button 
-            onClick={handleParse} 
-            isLoading={loading}
-            className="w-full py-4 text-base shadow-xl shadow-red-100 hover:shadow-red-200"
-          >
+          <Button onClick={handleParse} isLoading={loading} className="w-full py-4 text-base">
             <Play size={18} fill="currentColor" />
             카드뉴스 변환하기
           </Button>
-
         </section>
 
-        {/* Result Section */}
         {cardData && (
           <div ref={resultRef} className="animate-fade-in space-y-8 pt-4">
-            
             <div className="flex items-center gap-2 mb-4">
               <div className="h-px bg-gray-200 flex-1"></div>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">미리보기</span>
               <div className="h-px bg-gray-200 flex-1"></div>
             </div>
 
-            {/* Hidden Container for Export Rendering */}
-            {/* FIX: Move into viewport (z-index -50) instead of far off-screen to ensure accurate text rendering metrics */}
-            <div style={{ position: 'fixed', left: '0', top: '0', zIndex: -50, opacity: 0, pointerEvents: 'none' }}>
+            <div style={{ position: 'fixed', left: '0', top: '0', zIndex: -100, opacity: 0, pointerEvents: 'none' }}>
               {cardData.slides.map((slide, idx) => (
                 <div key={idx} id={`export-slide-${idx}`} className="w-96">
                   <CardPreview 
@@ -429,7 +407,6 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Card Carousel */}
             <div className="relative max-w-sm mx-auto">
               <CardPreview 
                 captureId="card-capture-target"
@@ -438,83 +415,33 @@ const App: React.FC = () => {
                 themeIndex={cardData.themeIndex}
                 onUpdate={handleUpdateSlide}
               />
-
-              {/* Navigation */}
               <div className="flex items-center justify-between mt-6 px-4">
-                <button 
-                  onClick={prevSlide}
-                  disabled={currentSlideIndex === 0}
-                  className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 hover:text-primary transition-colors shadow-sm"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                
-                <span className="text-sm font-bold text-gray-400 tabular-nums">
-                  {currentSlideIndex + 1} / {cardData.slides.length}
-                </span>
-
-                <button 
-                  onClick={nextSlide}
-                  disabled={currentSlideIndex === cardData.slides.length - 1}
-                  className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 hover:text-primary transition-colors shadow-sm"
-                >
-                  <ChevronRight size={20} />
-                </button>
+                <button onClick={prevSlide} disabled={currentSlideIndex === 0} className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors shadow-sm"><ChevronLeft size={20} /></button>
+                <span className="text-sm font-bold text-gray-400 tabular-nums">{currentSlideIndex + 1} / {cardData.slides.length}</span>
+                <button onClick={nextSlide} disabled={currentSlideIndex === cardData.slides.length - 1} className="p-3 rounded-full bg-white border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors shadow-sm"><ChevronRight size={20} /></button>
               </div>
 
-               {/* Theme Selector - Grid Layout */}
                <div className="mt-8 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                        <Palette size={16} className="text-primary"/>
-                        배경 테마 선택 <span className="text-xs text-gray-400 font-normal">({THEMES.length}개)</span>
-                    </div>
+                  <div className="flex items-center justify-between mb-3 px-1 text-sm font-bold text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <Palette size={16} className="text-primary"/>배경 테마
+                      </div>
+                      <span className="text-xs text-gray-400 font-normal">{THEMES.length} Themes</span>
                   </div>
-                  
-                  {/* Grid Layout for Themes - Showing all 50 items clearly */}
-                  <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50">
+                  <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50 no-scrollbar">
                     {THEMES.map((theme, i) => (
-                      <button 
-                        key={theme.id}
-                        onClick={() => changeTheme(i)}
-                        className={`
-                          aspect-square w-full rounded-full border-2 transition-all cursor-pointer relative group
-                          ${cardData.themeIndex === i ? 'border-primary shadow-md scale-100 ring-2 ring-primary/20' : 'border-gray-200 hover:scale-110 opacity-80 hover:opacity-100 hover:border-gray-400'}
-                          ${theme.bg}
-                        `}
-                        title={theme.id}
-                        aria-label={`Select theme ${theme.id}`}
-                      >
-                         {/* Checkmark for selected */}
+                      <button key={theme.id} onClick={() => changeTheme(i)} className={`aspect-square w-full rounded-full border-2 transition-all cursor-pointer relative ${cardData.themeIndex === i ? 'border-primary shadow-md ring-2 ring-primary/20' : 'border-gray-200 hover:scale-110 opacity-80 hover:opacity-100'} ${theme.bg}`}>
                          {cardData.themeIndex === i && (
-                             <div className="absolute inset-0 flex items-center justify-center text-white/90 drop-shadow-md">
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                             </div>
+                             <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm"><Check size={14} strokeWidth={4} /></div>
                          )}
                       </button>
                     ))}
                   </div>
                </div>
 
-               {/* Download Actions */}
                <div className="flex gap-2 mt-4">
-                 <Button 
-                   onClick={handleDownloadCurrent}
-                   variant="secondary"
-                   className="flex-1 py-3 text-sm"
-                 >
-                   <Download size={18} />
-                   현재 장 저장
-                 </Button>
-                 <Button 
-                   onClick={handleDownloadAll}
-                   variant="primary"
-                   isLoading={isDownloading}
-                   className="flex-1 py-3 text-sm"
-                 >
-                   <FolderDown size={18} />
-                   전체 저장 (ZIP)
-                 </Button>
+                 <Button onClick={handleDownloadCurrent} variant="secondary" className="flex-1 py-3 text-sm"><Download size={18} />현재 장 저장</Button>
+                 <Button onClick={handleDownloadAll} variant="primary" isLoading={isDownloading} className="flex-1 py-3 text-sm"><FolderDown size={18} />전체 저장 (ZIP)</Button>
                </div>
             </div>
           </div>

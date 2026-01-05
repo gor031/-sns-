@@ -17,56 +17,56 @@ interface CardPreviewProps {
 }
 
 export const THEMES = [
-  { id: 'neon-dark', bg: "bg-gray-900", text: "text-white", accent: "text-[#FF0055]", highlightBg: "bg-[#FF0055]", highlightText: "text-white", decoration: "bg-gradient-to-tr from-[#FF0055] to-[#FF5588]", blob1: "rgba(255, 0, 85, 0.4)", blob2: "rgba(255, 85, 136, 0.3)" },
-  { id: 'clean-blue', bg: "bg-white", text: "text-gray-900", accent: "text-[#2962FF]", highlightBg: "bg-[#2962FF]", highlightText: "text-white", decoration: "bg-gradient-to-tr from-[#2962FF] to-[#00B0FF]", blob1: "rgba(41, 98, 255, 0.15)", blob2: "rgba(0, 176, 255, 0.15)" },
-  { id: 'warm-emotional', bg: "bg-[#FDFBF7]", text: "text-[#4A403A]", accent: "text-[#D84315]", highlightBg: "bg-[#FFCCBC]", highlightText: "text-[#BF360C]", decoration: "bg-gradient-to-br from-[#FFAB91] to-[#FF7043]", blob1: "rgba(255, 171, 145, 0.4)", blob2: "rgba(255, 112, 67, 0.3)" },
-  { id: 'vibrant-purple', bg: "bg-[#7000FF]", text: "text-white", accent: "text-[#00E5FF]", highlightBg: "bg-[#00E5FF]", highlightText: "text-black", decoration: "bg-gradient-to-bl from-[#D500F9] to-[#651FFF]", blob1: "rgba(213, 0, 249, 0.4)", blob2: "rgba(101, 31, 255, 0.4)" },
-  { id: 'trust-green', bg: "bg-[#004D40]", text: "text-[#E0F2F1]", accent: "text-[#FFD740]", highlightBg: "bg-[#FFD740]", highlightText: "text-[#004D40]", decoration: "bg-gradient-to-t from-[#00695C] to-[#4DB6AC]", blob1: "rgba(0, 105, 92, 0.5)", blob2: "rgba(77, 182, 172, 0.4)" },
-  { id: 'midnight-gold', bg: "bg-slate-900", text: "text-amber-50", accent: "text-amber-400", highlightBg: "bg-amber-400", highlightText: "text-slate-900", decoration: "bg-gradient-to-r from-amber-300 to-yellow-500", blob1: "rgba(251, 191, 36, 0.15)", blob2: "rgba(180, 83, 9, 0.15)" },
-  { id: 'sunset-gradient', bg: "bg-gradient-to-br from-indigo-900 to-purple-800", text: "text-white", accent: "text-orange-300", highlightBg: "bg-orange-400", highlightText: "text-white", decoration: "bg-gradient-to-r from-orange-400 to-pink-500", blob1: "rgba(251, 146, 60, 0.3)", blob2: "rgba(236, 72, 153, 0.3)" },
-  { id: 'ocean-depths', bg: "bg-gradient-to-b from-blue-900 to-slate-900", text: "text-cyan-100", accent: "text-cyan-400", highlightBg: "bg-cyan-500", highlightText: "text-blue-900", decoration: "bg-gradient-to-t from-cyan-400 to-blue-500", blob1: "rgba(34, 211, 238, 0.2)", blob2: "rgba(59, 130, 246, 0.2)" },
-  { id: 'forest-mist', bg: "bg-gradient-to-br from-emerald-900 to-green-800", text: "text-emerald-50", accent: "text-emerald-300", highlightBg: "bg-emerald-400", highlightText: "text-emerald-900", decoration: "bg-emerald-500", blob1: "rgba(52, 211, 153, 0.2)", blob2: "rgba(16, 185, 129, 0.2)" },
-  { id: 'berry-smoothie', bg: "bg-gradient-to-tr from-pink-500 to-rose-500", text: "text-white", accent: "text-yellow-200", highlightBg: "bg-white", highlightText: "text-rose-600", decoration: "bg-yellow-300", blob1: "rgba(255, 255, 255, 0.2)", blob2: "rgba(253, 224, 71, 0.3)" },
-  { id: 'minimal-mono', bg: "bg-gray-100", text: "text-gray-900", accent: "text-black", highlightBg: "bg-black", highlightText: "text-white", decoration: "bg-gray-800", blob1: "rgba(0, 0, 0, 0.05)", blob2: "rgba(0, 0, 0, 0.08)" },
-  { id: 'minimal-dark', bg: "bg-neutral-900", text: "text-neutral-200", accent: "text-white", highlightBg: "bg-white", highlightText: "text-black", decoration: "bg-neutral-700", blob1: "rgba(255, 255, 255, 0.05)", blob2: "rgba(255, 255, 255, 0.03)" },
-  { id: 'paper-white', bg: "bg-[#F5F5F5]", text: "text-[#333333]", accent: "text-[#000000]", highlightBg: "bg-[#333333]", highlightText: "text-white", decoration: "bg-[#999999]", blob1: "rgba(0,0,0,0.03)", blob2: "rgba(0,0,0,0.03)" },
-  { id: 'soft-gray', bg: "bg-slate-200", text: "text-slate-800", accent: "text-slate-600", highlightBg: "bg-slate-600", highlightText: "text-white", decoration: "bg-slate-400", blob1: "rgba(71, 85, 105, 0.1)", blob2: "rgba(51, 65, 85, 0.1)" },
-  { id: 'high-contrast', bg: "bg-black", text: "text-yellow-400", accent: "text-white", highlightBg: "bg-yellow-400", highlightText: "text-black", decoration: "bg-white", blob1: "rgba(250, 204, 21, 0.1)", blob2: "rgba(255, 255, 255, 0.1)" },
-  { id: 'minty-fresh', bg: "bg-emerald-50", text: "text-emerald-900", accent: "text-emerald-600", highlightBg: "bg-emerald-200", highlightText: "text-emerald-800", decoration: "bg-gradient-to-tr from-emerald-400 to-teal-400", blob1: "rgba(52, 211, 153, 0.2)", blob2: "rgba(16, 185, 129, 0.2)" },
-  { id: 'soft-lavender', bg: "bg-purple-50", text: "text-slate-700", accent: "text-purple-600", highlightBg: "bg-purple-200", highlightText: "text-purple-800", decoration: "bg-purple-400", blob1: "rgba(192, 132, 252, 0.2)", blob2: "rgba(168, 85, 247, 0.15)" },
-  { id: 'peach-fuzz', bg: "bg-orange-50", text: "text-stone-800", accent: "text-orange-500", highlightBg: "bg-orange-200", highlightText: "text-orange-900", decoration: "bg-orange-400", blob1: "rgba(251, 146, 60, 0.2)", blob2: "rgba(253, 186, 116, 0.2)" },
-  { id: 'sky-blue', bg: "bg-sky-50", text: "text-sky-900", accent: "text-sky-500", highlightBg: "bg-sky-200", highlightText: "text-sky-800", decoration: "bg-sky-400", blob1: "rgba(14, 165, 233, 0.1)", blob2: "rgba(56, 189, 248, 0.15)" },
-  { id: 'lemon-chiffon', bg: "bg-yellow-50", text: "text-yellow-900", accent: "text-yellow-600", highlightBg: "bg-yellow-200", highlightText: "text-yellow-800", decoration: "bg-yellow-400", blob1: "rgba(250, 204, 21, 0.1)", blob2: "rgba(253, 224, 71, 0.15)" },
-  { id: 'retro-yellow', bg: "bg-yellow-400", text: "text-black", accent: "text-red-600", highlightBg: "bg-black", highlightText: "text-yellow-400", decoration: "bg-red-500", blob1: "rgba(0,0,0,0.1)", blob2: "rgba(239, 68, 68, 0.2)" },
-  { id: 'red-power', bg: "bg-red-600", text: "text-white", accent: "text-yellow-300", highlightBg: "bg-white", highlightText: "text-red-600", decoration: "bg-yellow-400", blob1: "rgba(255, 255, 255, 0.2)", blob2: "rgba(0, 0, 0, 0.2)" },
-  { id: 'orange-soda', bg: "bg-orange-500", text: "text-white", accent: "text-yellow-300", highlightBg: "bg-white", highlightText: "text-orange-500", decoration: "bg-yellow-400", blob1: "rgba(255, 255, 255, 0.3)", blob2: "rgba(252, 211, 77, 0.3)" },
-  { id: 'lime-punch', bg: "bg-lime-400", text: "text-black", accent: "text-blue-700", highlightBg: "bg-blue-600", highlightText: "text-white", decoration: "bg-blue-500", blob1: "rgba(37, 99, 235, 0.2)", blob2: "rgba(29, 78, 216, 0.2)" },
-  { id: 'hot-pink', bg: "bg-pink-500", text: "text-white", accent: "text-lime-300", highlightBg: "bg-lime-300", highlightText: "text-pink-600", decoration: "bg-lime-400", blob1: "rgba(190, 242, 100, 0.3)", blob2: "rgba(255, 255, 255, 0.2)" },
-  { id: 'deep-space', bg: "bg-slate-950", text: "text-cyan-50", accent: "text-cyan-400", highlightBg: "bg-cyan-500", highlightText: "text-slate-900", decoration: "bg-gradient-to-r from-cyan-500 to-blue-500", blob1: "rgba(6, 182, 212, 0.15)", blob2: "rgba(59, 130, 246, 0.15)" },
-  { id: 'cyberpunk', bg: "bg-black", text: "text-green-50", accent: "text-green-400", highlightBg: "bg-green-500", highlightText: "text-black", decoration: "bg-gradient-to-r from-green-400 to-lime-400", blob1: "rgba(74, 222, 128, 0.3)", blob2: "rgba(132, 204, 22, 0.2)" },
-  { id: 'vampire-red', bg: "bg-[#2A0A0A]", text: "text-red-100", accent: "text-red-500", highlightBg: "bg-red-600", highlightText: "text-black", decoration: "bg-red-700", blob1: "rgba(220, 38, 38, 0.2)", blob2: "rgba(153, 27, 27, 0.3)" },
-  { id: 'indigo-night', bg: "bg-indigo-950", text: "text-indigo-100", accent: "text-pink-400", highlightBg: "bg-pink-500", highlightText: "text-white", decoration: "bg-gradient-to-r from-pink-500 to-purple-500", blob1: "rgba(236, 72, 153, 0.2)", blob2: "rgba(99, 102, 241, 0.2)" },
-  { id: 'galaxy-void', bg: "bg-[#0F172A]", text: "text-purple-100", accent: "text-purple-400", highlightBg: "bg-purple-600", highlightText: "text-white", decoration: "bg-purple-500", blob1: "rgba(168, 85, 247, 0.2)", blob2: "rgba(192, 132, 252, 0.1)" },
-  { id: 'corporate-blue', bg: "bg-blue-900", text: "text-white", accent: "text-blue-200", highlightBg: "bg-white", highlightText: "text-blue-900", decoration: "bg-blue-400", blob1: "rgba(96, 165, 250, 0.2)", blob2: "rgba(37, 99, 235, 0.2)" },
-  { id: 'slate-teal', bg: "bg-slate-800", text: "text-slate-100", accent: "text-teal-400", highlightBg: "bg-teal-500", highlightText: "text-slate-900", decoration: "bg-gradient-to-tr from-teal-400 to-emerald-400", blob1: "rgba(45, 212, 191, 0.2)", blob2: "rgba(52, 211, 153, 0.2)" },
-  { id: 'navy-gold', bg: "bg-blue-950", text: "text-slate-200", accent: "text-yellow-500", highlightBg: "bg-yellow-600", highlightText: "text-white", decoration: "bg-yellow-700", blob1: "rgba(234, 179, 8, 0.2)", blob2: "rgba(30, 58, 138, 0.5)" },
-  { id: 'steel-gray', bg: "bg-gray-600", text: "text-white", accent: "text-gray-300", highlightBg: "bg-gray-300", highlightText: "text-gray-800", decoration: "bg-gray-400", blob1: "rgba(255, 255, 255, 0.1)", blob2: "rgba(0, 0, 0, 0.2)" },
-  { id: 'executive', bg: "bg-[#1C1C1C]", text: "text-gray-200", accent: "text-white", highlightBg: "bg-white", highlightText: "text-black", decoration: "bg-gray-500", blob1: "rgba(255, 255, 255, 0.05)", blob2: "rgba(255, 255, 255, 0.05)" },
-  { id: 'forest-calm', bg: "bg-[#2C3E2D]", text: "text-[#E8F5E9]", accent: "text-[#A5D6A7]", highlightBg: "bg-[#A5D6A7]", highlightText: "text-[#1B5E20]", decoration: "bg-[#81C784]", blob1: "rgba(165, 214, 167, 0.15)", blob2: "rgba(200, 230, 201, 0.1)" },
-  { id: 'coffee-house', bg: "bg-[#3E2723]", text: "text-[#EFEBE9]", accent: "text-[#D7CCC8]", highlightBg: "bg-[#A1887F]", highlightText: "text-white", decoration: "bg-[#8D6E63]", blob1: "rgba(215, 204, 200, 0.1)", blob2: "rgba(161, 136, 127, 0.1)" },
-  { id: 'sand-dune', bg: "bg-[#D7CCC8]", text: "text-[#3E2723]", accent: "text-[#5D4037]", highlightBg: "bg-[#5D4037]", highlightText: "text-[#D7CCC8]", decoration: "bg-[#795548]", blob1: "rgba(62, 39, 35, 0.1)", blob2: "rgba(93, 64, 55, 0.1)" },
-  { id: 'olive-garden', bg: "bg-[#556B2F]", text: "text-[#FFFFF0]", accent: "text-[#808000]", highlightBg: "bg-[#6B8E23]", highlightText: "text-white", decoration: "bg-[#9ACD32]", blob1: "rgba(154, 205, 50, 0.2)", blob2: "rgba(107, 142, 35, 0.3)" },
-  { id: 'ocean-breeze', bg: "bg-cyan-50", text: "text-cyan-900", accent: "text-cyan-600", highlightBg: "bg-cyan-200", highlightText: "text-cyan-800", decoration: "bg-gradient-to-r from-cyan-400 to-blue-400", blob1: "rgba(34, 211, 238, 0.2)", blob2: "rgba(6, 182, 212, 0.15)" },
-  { id: 'royal-luxury', bg: "bg-zinc-900", text: "text-orange-50", accent: "text-yellow-500", highlightBg: "bg-gradient-to-r from-yellow-600 to-yellow-400", highlightText: "text-black", decoration: "bg-gradient-to-r from-yellow-500 to-yellow-200", blob1: "rgba(234, 179, 8, 0.15)", blob2: "rgba(250, 204, 21, 0.1)" },
-  { id: 'rose-gold', bg: "bg-[#B76E79]", text: "text-white", accent: "text-[#FFD700]", highlightBg: "bg-white", highlightText: "text-[#B76E79]", decoration: "bg-[#E6C2C9]", blob1: "rgba(255, 215, 0, 0.2)", blob2: "rgba(255, 255, 255, 0.2)" },
-  { id: 'platinum', bg: "bg-[#E5E4E2]", text: "text-slate-800", accent: "text-slate-500", highlightBg: "bg-slate-400", highlightText: "text-white", decoration: "bg-slate-300", blob1: "rgba(100, 116, 139, 0.1)", blob2: "rgba(148, 163, 184, 0.1)" },
-  { id: 'champagne', bg: "bg-[#F7E7CE]", text: "text-[#5C4033]", accent: "text-[#C2B280]", highlightBg: "bg-[#C2B280]", highlightText: "text-white", decoration: "bg-[#D4C494]", blob1: "rgba(194, 178, 128, 0.2)", blob2: "rgba(92, 64, 51, 0.1)" },
-  { id: 'ruby', bg: "bg-[#9B111E]", text: "text-white", accent: "text-[#FFD700]", highlightBg: "bg-[#FFD700]", highlightText: "text-[#9B111E]", decoration: "bg-[#E0115F]", blob1: "rgba(255, 215, 0, 0.2)", blob2: "rgba(255, 255, 255, 0.1)" },
-  { id: 'bubblegum', bg: "bg-gradient-to-b from-blue-300 to-pink-300", text: "text-white", accent: "text-purple-600", highlightBg: "bg-white", highlightText: "text-pink-500", decoration: "bg-purple-400", blob1: "rgba(255, 255, 255, 0.4)", blob2: "rgba(236, 72, 153, 0.3)" },
-  { id: 'tropical-punch', bg: "bg-gradient-to-tr from-green-400 to-blue-500", text: "text-white", accent: "text-yellow-200", highlightBg: "bg-white", highlightText: "text-green-600", decoration: "bg-yellow-400", blob1: "rgba(253, 224, 71, 0.3)", blob2: "rgba(255, 255, 255, 0.2)" },
-  { id: 'cherry-blossom', bg: "bg-pink-50", text: "text-pink-900", accent: "text-pink-500", highlightBg: "bg-pink-200", highlightText: "text-pink-700", decoration: "bg-pink-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(251, 207, 232, 0.4)" },
-  { id: 'grape-soda', bg: "bg-purple-800", text: "text-purple-100", accent: "text-fuchsia-300", highlightBg: "bg-fuchsia-400", highlightText: "text-purple-900", decoration: "bg-purple-500", blob1: "rgba(232, 121, 249, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" },
-  { id: 'pastel-dream', bg: "bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100", text: "text-slate-700", accent: "text-pink-500", highlightBg: "bg-pink-200", highlightText: "text-pink-800", decoration: "bg-gradient-to-r from-pink-300 to-purple-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" }
+  { id: 'neon-dark', bg: "bg-gray-900", text: "text-white", accent: "text-[#FF0055]", highlightBg: "#FF0055", highlightText: "text-white", decoration: "bg-gradient-to-tr from-[#FF0055] to-[#FF5588]", blob1: "rgba(255, 0, 85, 0.4)", blob2: "rgba(255, 85, 136, 0.3)" },
+  { id: 'clean-blue', bg: "bg-white", text: "text-gray-900", accent: "text-[#2962FF]", highlightBg: "#2962FF", highlightText: "text-white", decoration: "bg-gradient-to-tr from-[#2962FF] to-[#00B0FF]", blob1: "rgba(41, 98, 255, 0.15)", blob2: "rgba(0, 176, 255, 0.15)" },
+  { id: 'warm-emotional', bg: "bg-[#FDFBF7]", text: "text-[#4A403A]", accent: "text-[#D84315]", highlightBg: "#FFCCBC", highlightText: "text-[#BF360C]", decoration: "bg-gradient-to-br from-[#FFAB91] to-[#FF7043]", blob1: "rgba(255, 171, 145, 0.4)", blob2: "rgba(255, 112, 67, 0.3)" },
+  { id: 'vibrant-purple', bg: "bg-[#7000FF]", text: "text-white", accent: "text-[#00E5FF]", highlightBg: "#00E5FF", highlightText: "text-black", decoration: "bg-gradient-to-bl from-[#D500F9] to-[#651FFF]", blob1: "rgba(213, 0, 249, 0.4)", blob2: "rgba(101, 31, 255, 0.4)" },
+  { id: 'trust-green', bg: "bg-[#004D40]", text: "text-[#E0F2F1]", accent: "text-[#FFD740]", highlightBg: "#FFD740", highlightText: "text-[#004D40]", decoration: "bg-gradient-to-t from-[#00695C] to-[#4DB6AC]", blob1: "rgba(0, 105, 92, 0.5)", blob2: "rgba(77, 182, 172, 0.4)" },
+  { id: 'midnight-gold', bg: "bg-slate-900", text: "text-amber-50", accent: "text-amber-400", highlightBg: "#fbbf24", highlightText: "text-slate-900", decoration: "bg-gradient-to-r from-amber-300 to-yellow-500", blob1: "rgba(251, 191, 36, 0.15)", blob2: "rgba(180, 83, 9, 0.15)" },
+  { id: 'sunset-gradient', bg: "bg-gradient-to-br from-indigo-900 to-purple-800", text: "text-white", accent: "text-orange-300", highlightBg: "#fb923c", highlightText: "text-white", decoration: "bg-gradient-to-r from-orange-400 to-pink-500", blob1: "rgba(251, 146, 60, 0.3)", blob2: "rgba(236, 72, 153, 0.3)" },
+  { id: 'ocean-depths', bg: "bg-gradient-to-b from-blue-900 to-slate-900", text: "text-cyan-100", accent: "text-cyan-400", highlightBg: "#22d3ee", highlightText: "text-blue-900", decoration: "bg-gradient-to-t from-cyan-400 to-blue-500", blob1: "rgba(34, 211, 238, 0.2)", blob2: "rgba(59, 130, 246, 0.2)" },
+  { id: 'forest-mist', bg: "bg-gradient-to-br from-emerald-900 to-green-800", text: "text-emerald-50", accent: "text-emerald-300", highlightBg: "#34d399", highlightText: "text-emerald-900", decoration: "bg-emerald-500", blob1: "rgba(52, 211, 153, 0.2)", blob2: "rgba(16, 185, 129, 0.2)" },
+  { id: 'berry-smoothie', bg: "bg-gradient-to-tr from-pink-500 to-rose-500", text: "text-white", accent: "text-yellow-200", highlightBg: "#ffffff", highlightText: "text-rose-600", decoration: "bg-yellow-300", blob1: "rgba(255, 255, 255, 0.2)", blob2: "rgba(253, 224, 71, 0.3)" },
+  { id: 'minimal-mono', bg: "bg-gray-100", text: "text-gray-900", accent: "text-black", highlightBg: "#000000", highlightText: "text-white", decoration: "bg-gray-800", blob1: "rgba(0, 0, 0, 0.05)", blob2: "rgba(0, 0, 0, 0.08)" },
+  { id: 'minimal-dark', bg: "bg-neutral-900", text: "text-neutral-200", accent: "text-white", highlightBg: "#ffffff", highlightText: "text-black", decoration: "bg-neutral-700", blob1: "rgba(255, 255, 255, 0.05)", blob2: "rgba(255, 255, 255, 0.03)" },
+  { id: 'paper-white', bg: "bg-[#F5F5F5]", text: "text-[#333333]", accent: "text-[#000000]", highlightBg: "#333333", highlightText: "text-white", decoration: "bg-[#999999]", blob1: "rgba(0,0,0,0.03)", blob2: "rgba(0,0,0,0.03)" },
+  { id: 'soft-gray', bg: "bg-slate-200", text: "text-slate-800", accent: "text-slate-600", highlightBg: "#475569", highlightText: "text-white", decoration: "bg-slate-400", blob1: "rgba(71, 85, 105, 0.1)", blob2: "rgba(51, 65, 85, 0.1)" },
+  { id: 'high-contrast', bg: "bg-black", text: "text-yellow-400", accent: "text-white", highlightBg: "#facc15", highlightText: "text-black", decoration: "bg-white", blob1: "rgba(250, 204, 21, 0.1)", blob2: "rgba(255, 255, 255, 0.1)" },
+  { id: 'minty-fresh', bg: "bg-emerald-50", text: "text-emerald-900", accent: "text-emerald-600", highlightBg: "#a7f3d0", highlightText: "text-emerald-800", decoration: "bg-gradient-to-tr from-emerald-400 to-teal-400", blob1: "rgba(52, 211, 153, 0.2)", blob2: "rgba(16, 185, 129, 0.2)" },
+  { id: 'soft-lavender', bg: "bg-purple-50", text: "text-slate-700", accent: "text-purple-600", highlightBg: "#e9d5ff", highlightText: "text-purple-800", decoration: "bg-purple-400", blob1: "rgba(192, 132, 252, 0.2)", blob2: "rgba(168, 85, 247, 0.15)" },
+  { id: 'peach-fuzz', bg: "bg-orange-50", text: "text-stone-800", accent: "text-orange-500", highlightBg: "#fed7aa", highlightText: "text-orange-900", decoration: "bg-orange-400", blob1: "rgba(251, 146, 60, 0.2)", blob2: "rgba(253, 186, 116, 0.2)" },
+  { id: 'sky-blue', bg: "bg-sky-50", text: "text-sky-900", accent: "text-sky-500", highlightBg: "#bae6fd", highlightText: "text-sky-800", decoration: "bg-sky-400", blob1: "rgba(14, 165, 233, 0.1)", blob2: "rgba(56, 189, 248, 0.15)" },
+  { id: 'lemon-chiffon', bg: "bg-yellow-50", text: "text-yellow-900", accent: "text-yellow-600", highlightBg: "#fef08a", highlightText: "text-yellow-800", decoration: "bg-yellow-400", blob1: "rgba(250, 204, 21, 0.1)", blob2: "rgba(253, 224, 71, 0.15)" },
+  { id: 'retro-yellow', bg: "bg-yellow-400", text: "text-black", accent: "text-red-600", highlightBg: "#000000", highlightText: "text-yellow-400", decoration: "bg-red-500", blob1: "rgba(0,0,0,0.1)", blob2: "rgba(239, 68, 68, 0.2)" },
+  { id: 'red-power', bg: "bg-red-600", text: "text-white", accent: "text-yellow-300", highlightBg: "#ffffff", highlightText: "text-red-600", decoration: "bg-yellow-400", blob1: "rgba(255, 255, 255, 0.2)", blob2: "rgba(0, 0, 0, 0.2)" },
+  { id: 'orange-soda', bg: "bg-orange-500", text: "text-white", accent: "text-yellow-300", highlightBg: "#ffffff", highlightText: "text-orange-500", decoration: "bg-yellow-400", blob1: "rgba(255, 255, 255, 0.3)", blob2: "rgba(252, 211, 77, 0.3)" },
+  { id: 'lime-punch', bg: "bg-lime-400", text: "text-black", accent: "text-blue-700", highlightBg: "#2563eb", highlightText: "text-white", decoration: "bg-blue-500", blob1: "rgba(37, 99, 235, 0.2)", blob2: "rgba(29, 78, 216, 0.2)" },
+  { id: 'hot-pink', bg: "bg-pink-500", text: "text-white", accent: "text-lime-300", highlightBg: "#bef264", highlightText: "text-pink-600", decoration: "bg-lime-400", blob1: "rgba(190, 242, 100, 0.3)", blob2: "rgba(255, 255, 255, 0.2)" },
+  { id: 'deep-space', bg: "bg-slate-950", text: "text-cyan-50", accent: "text-cyan-400", highlightBg: "#06b6d4", highlightText: "text-slate-900", decoration: "bg-gradient-to-r from-cyan-500 to-blue-500", blob1: "rgba(6, 182, 212, 0.15)", blob2: "rgba(59, 130, 246, 0.15)" },
+  { id: 'cyberpunk', bg: "bg-black", text: "text-green-50", accent: "text-green-400", highlightBg: "#22c55e", highlightText: "text-black", decoration: "bg-gradient-to-r from-green-400 to-lime-400", blob1: "rgba(74, 222, 128, 0.3)", blob2: "rgba(132, 204, 22, 0.2)" },
+  { id: 'vampire-red', bg: "bg-[#2A0A0A]", text: "text-red-100", accent: "text-red-500", highlightBg: "#dc2626", highlightText: "text-black", decoration: "bg-red-700", blob1: "rgba(220, 38, 38, 0.2)", blob2: "rgba(153, 27, 27, 0.3)" },
+  { id: 'indigo-night', bg: "bg-indigo-950", text: "text-indigo-100", accent: "text-pink-400", highlightBg: "#ec4899", highlightText: "text-white", decoration: "bg-gradient-to-r from-pink-500 to-purple-500", blob1: "rgba(236, 72, 153, 0.2)", blob2: "rgba(99, 102, 241, 0.2)" },
+  { id: 'galaxy-void', bg: "bg-[#0F172A]", text: "text-purple-100", accent: "text-purple-400", highlightBg: "#9333ea", highlightText: "text-white", decoration: "bg-purple-500", blob1: "rgba(168, 85, 247, 0.2)", blob2: "rgba(192, 132, 252, 0.1)" },
+  { id: 'corporate-blue', bg: "bg-blue-900", text: "text-white", accent: "text-blue-200", highlightBg: "#ffffff", highlightText: "text-blue-900", decoration: "bg-blue-400", blob1: "rgba(96, 165, 250, 0.2)", blob2: "rgba(37, 99, 235, 0.2)" },
+  { id: 'slate-teal', bg: "bg-slate-800", text: "text-slate-100", accent: "text-teal-400", highlightBg: "#14b8a6", highlightText: "text-slate-900", decoration: "bg-gradient-to-tr from-teal-400 to-emerald-400", blob1: "rgba(45, 212, 191, 0.2)", blob2: "rgba(52, 211, 153, 0.2)" },
+  { id: 'navy-gold', bg: "bg-blue-950", text: "text-slate-200", accent: "text-yellow-500", highlightBg: "#eab308", highlightText: "text-white", decoration: "bg-yellow-700", blob1: "rgba(234, 179, 8, 0.2)", blob2: "rgba(30, 58, 138, 0.5)" },
+  { id: 'steel-gray', bg: "bg-gray-600", text: "text-white", accent: "text-gray-300", highlightBg: "#d1d5db", highlightText: "text-gray-800", decoration: "bg-gray-400", blob1: "rgba(255, 255, 255, 0.1)", blob2: "rgba(0, 0, 0, 0.2)" },
+  { id: 'executive', bg: "bg-[#1C1C1C]", text: "text-gray-200", accent: "text-white", highlightBg: "#ffffff", highlightText: "text-black", decoration: "bg-gray-500", blob1: "rgba(255, 255, 255, 0.05)", blob2: "rgba(255, 255, 255, 0.05)" },
+  { id: 'forest-calm', bg: "bg-[#2C3E2D]", text: "text-[#E8F5E9]", accent: "text-[#A5D6A7]", highlightBg: "#a5d6a7", highlightText: "text-[#1B5E20]", decoration: "bg-[#81C784]", blob1: "rgba(165, 214, 167, 0.15)", blob2: "rgba(200, 230, 201, 0.1)" },
+  { id: 'coffee-house', bg: "bg-[#3E2723]", text: "text-[#EFEBE9]", accent: "text-[#D7CCC8]", highlightBg: "#a1887f", highlightText: "text-white", decoration: "bg-[#8D6E63]", blob1: "rgba(215, 204, 200, 0.1)", blob2: "rgba(161, 136, 127, 0.1)" },
+  { id: 'sand-dune', bg: "bg-[#D7CCC8]", text: "text-[#3E2723]", accent: "text-[#5D4037]", highlightBg: "#5d4037", highlightText: "text-[#D7CCC8]", decoration: "bg-[#795548]", blob1: "rgba(62, 39, 35, 0.1)", blob2: "rgba(93, 64, 55, 0.1)" },
+  { id: 'olive-garden', bg: "bg-[#556B2F]", text: "text-[#FFFFF0]", accent: "text-[#808000]", highlightBg: "#6b8e23", highlightText: "text-white", decoration: "bg-[#9ACD32]", blob1: "rgba(154, 205, 50, 0.2)", blob2: "rgba(107, 142, 35, 0.3)" },
+  { id: 'ocean-breeze', bg: "bg-cyan-50", text: "text-cyan-900", accent: "text-cyan-600", highlightBg: "#bae6fd", highlightText: "text-cyan-800", decoration: "bg-gradient-to-r from-cyan-400 to-blue-400", blob1: "rgba(34, 211, 238, 0.2)", blob2: "rgba(6, 182, 212, 0.15)" },
+  { id: 'royal-luxury', bg: "bg-zinc-900", text: "text-orange-50", accent: "text-yellow-500", highlightBg: "#ca8a04", highlightText: "text-black", decoration: "bg-gradient-to-r from-yellow-500 to-yellow-200", blob1: "rgba(234, 179, 8, 0.15)", blob2: "rgba(250, 204, 21, 0.1)" },
+  { id: 'rose-gold', bg: "bg-[#B76E79]", text: "text-white", accent: "text-[#FFD700]", highlightBg: "#ffffff", highlightText: "text-[#B76E79]", decoration: "bg-[#E6C2C9]", blob1: "rgba(255, 215, 0, 0.2)", blob2: "rgba(255, 255, 255, 0.2)" },
+  { id: 'platinum', bg: "bg-[#E5E4E2]", text: "text-slate-800", accent: "text-slate-500", highlightBg: "#94a3b8", highlightText: "text-white", decoration: "bg-slate-300", blob1: "rgba(100, 116, 139, 0.1)", blob2: "rgba(148, 163, 184, 0.1)" },
+  { id: 'champagne', bg: "bg-[#F7E7CE]", text: "text-[#5C4033]", accent: "text-[#C2B280]", highlightBg: "#c2b280", highlightText: "text-white", decoration: "bg-[#D4C494]", blob1: "rgba(194, 178, 128, 0.2)", blob2: "rgba(92, 64, 51, 0.1)" },
+  { id: 'ruby', bg: "bg-[#9B111E]", text: "text-white", accent: "text-[#FFD700]", highlightBg: "#ffd700", highlightText: "text-[#9B111E]", decoration: "bg-[#E0115F]", blob1: "rgba(255, 215, 0, 0.2)", blob2: "rgba(255, 255, 255, 0.1)" },
+  { id: 'bubblegum', bg: "bg-gradient-to-b from-blue-300 to-pink-300", text: "text-white", accent: "text-purple-600", highlightBg: "#ffffff", highlightText: "text-pink-500", decoration: "bg-purple-400", blob1: "rgba(255, 255, 255, 0.4)", blob2: "rgba(236, 72, 153, 0.3)" },
+  { id: 'tropical-punch', bg: "bg-gradient-to-tr from-green-400 to-blue-500", text: "text-white", accent: "text-yellow-200", highlightBg: "#ffffff", highlightText: "text-green-600", decoration: "bg-yellow-400", blob1: "rgba(253, 224, 71, 0.3)", blob2: "rgba(255, 255, 255, 0.2)" },
+  { id: 'cherry-blossom', bg: "bg-pink-50", text: "text-pink-900", accent: "text-pink-500", highlightBg: "#fbcfe8", highlightText: "text-pink-700", decoration: "bg-pink-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(251, 207, 232, 0.4)" },
+  { id: 'grape-soda', bg: "bg-purple-800", text: "text-purple-100", accent: "text-fuchsia-300", highlightBg: "#e879f9", highlightText: "text-purple-900", decoration: "bg-purple-500", blob1: "rgba(232, 121, 249, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" },
+  { id: 'pastel-dream', bg: "bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100", text: "text-slate-700", accent: "text-pink-500", highlightBg: "#fbcfe8", highlightText: "text-pink-800", decoration: "bg-gradient-to-r from-pink-300 to-purple-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" }
 ];
 
 const TEXT_COLORS = [
@@ -95,18 +95,35 @@ const markdownToHtml = (text: string): string => {
 const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forExport: boolean = false) => {
   if (!html) return '';
   
-  // FIX: Stability for highlights during image export.
-  // Using box-decoration-clone often leads to background shifts in html2canvas.
-  // We use inline-block for forExport to ensure the background is strictly tied to the text block.
-  const decorationClass = forExport ? 'inline-block' : 'box-decoration-clone';
+  // High Stability Rendering for html2canvas
+  // Use simple 'display: inline' and background gradient to prevent box overlapping text
+  const baseHighlightClass = isHeader ? `${theme.accent} inline` : `font-bold ${theme.highlightText}`;
+  
+  if (forExport) {
+    // During export, we use an inline style that is very safe for html2canvas.
+    // Linear gradient background ensures the highlight is "behind" the text rendering logic.
+    return html
+      .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
+        if (isHeader) return `<span style="color: ${theme.accent.includes('#') ? theme.accent : 'inherit'}; display: inline;">${p1}</span>`;
+        return `<span style="background: ${theme.highlightBg}; color: ${theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit'}; display: inline; padding: 2px 0; z-index: 1;">${p1}</span>`;
+      })
+      .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
+        if (isHeader) return `<span style="color: ${theme.accent.includes('#') ? theme.accent : 'inherit'}; display: inline;">${p1}</span>`;
+        return `<span style="background: ${theme.highlightBg}; color: ${theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit'}; display: inline; padding: 2px 0; z-index: 1;">${p1}</span>`;
+      });
+  }
+
+  // Normal preview style using Tailwind classes
+  const decorationClass = 'box-decoration-clone';
   const highlightClass = isHeader
        ? `${theme.accent} inline` 
-       : `font-bold ${theme.highlightBg} ${theme.highlightText} ${forExport ? 'px-1 py-0' : 'px-1 py-0.5 rounded-sm'} ${decorationClass} leading-snug`;
+       : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
 
+  // We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
   return html
-      .replace(/<b>/g, `<span class="${highlightClass}">`)
+      .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
       .replace(/<\/b>/g, '</span>')
-      .replace(/<strong>/g, `<span class="${highlightClass}">`)
+      .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
       .replace(/<\/strong>/g, '</span>');
 };
 
@@ -203,6 +220,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
     <div 
       className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || theme.text} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
+      style={{ lineHeight: '1.4' }}
       dangerouslySetInnerHTML={{ __html: processHtmlForPreview(/<\/?[a-z][\s\S]*>/i.test(content) ? content : markdownToHtml(content), theme, isHeader, forExport) }}
     />
   );
@@ -214,7 +232,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
         <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-0" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
         <div className="relative z-10 h-full flex flex-col p-8 justify-center">
             <div className={`${isCover ? 'flex-1 flex flex-col items-center justify-center' : 'mb-6 pb-6 border-b border-black/10'}`}>
-                {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.replace('text-', 'bg-')}`}></div>}
+                {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.includes('#') ? '' : theme.accent.replace('text-', 'bg-')}`} style={theme.accent.includes('#') ? { backgroundColor: theme.accent } : {}}></div>}
                 <div className="w-full">{renderContent(slide.header, true, slide.headerStyle)}</div>
                 {isCover && <div className={`w-32 h-2.5 rounded-full mt-8 ${theme.decoration}`}></div>}
             </div>

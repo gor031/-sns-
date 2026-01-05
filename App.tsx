@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { parseCardNewsJson } from './services/geminiService';
 import { CardNewsData, TextStyle } from './types';
@@ -207,11 +206,7 @@ const App: React.FC = () => {
         useCORS: true,
         backgroundColor: null,
         logging: false,
-        onclone: (clonedDoc) => {
-           // Ensure export view is visible for html2canvas measurement
-           const el = clonedDoc.getElementById(`export-slide-inner-${currentSlideIndex}`);
-           if (el) el.style.opacity = "1";
-        }
+        // No longer need onclone to toggle opacity since we use left: -9999px
       });
 
       const data = canvas.toDataURL('image/png');
@@ -391,7 +386,8 @@ const App: React.FC = () => {
               <div className="h-px bg-gray-200 flex-1"></div>
             </div>
 
-            <div style={{ position: 'fixed', left: '0', top: '0', zIndex: -100, opacity: 0, pointerEvents: 'none' }}>
+            {/* Hidden Container for Export Rendering: Positioned off-screen with opacity 1 to ensure full rendering */}
+            <div style={{ position: 'fixed', left: '-9999px', top: '0', zIndex: -1, opacity: 1, pointerEvents: 'none' }}>
               {cardData.slides.map((slide, idx) => (
                 <div key={idx} id={`export-slide-${idx}`} className="w-96">
                   <CardPreview 

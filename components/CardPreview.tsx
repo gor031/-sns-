@@ -66,7 +66,7 @@ export const THEMES = [
   { id: 'tropical-punch', bg: "bg-gradient-to-tr from-green-400 to-blue-500", text: "text-white", accent: "text-yellow-200", highlightBg: "#ffffff", highlightText: "text-green-600", decoration: "bg-yellow-400", blob1: "rgba(253, 224, 71, 0.3)", blob2: "rgba(255, 255, 255, 0.2)" },
   { id: 'cherry-blossom', bg: "bg-pink-50", text: "text-pink-900", accent: "text-pink-500", highlightBg: "#fbcfe8", highlightText: "text-pink-700", decoration: "bg-pink-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(251, 207, 232, 0.4)" },
   { id: 'grape-soda', bg: "bg-purple-800", text: "text-purple-100", accent: "text-fuchsia-300", highlightBg: "#e879f9", highlightText: "text-purple-900", decoration: "bg-purple-500", blob1: "rgba(232, 121, 249, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" },
-  { id: 'pastel-dream', bg: "bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100", text: "text-slate-700", accent: "text-pink-500", highlightBg: "#fbcfe8", highlightText: "text-pink-800", decoration: "bg-gradient-to-r from-pink-300 to-purple-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(192, 132, 252, 0.2)" }
+  { id: 'pastel-dream', bg: "bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100", text: "text-slate-700", accent: "text-pink-500", highlightBg: "#fbcfe8", highlightText: "text-pink-800", decoration: "bg-gradient-to-r from-pink-300 to-purple-300", blob1: "rgba(244, 114, 182, 0.2)", blob2: "rgba(251, 207, 232, 0.2)" }
 ];
 
 const TEXT_COLORS = [
@@ -95,21 +95,24 @@ const markdownToHtml = (text: string): string => {
 const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forExport: boolean = false) => {
   if (!html) return '';
   
-  // High Stability Rendering for html2canvas
-  // Use simple 'display: inline' and background gradient to prevent box overlapping text
-  const baseHighlightClass = isHeader ? `${theme.accent} inline` : `font-bold ${theme.highlightText}`;
-  
   if (forExport) {
-    // During export, we use an inline style that is very safe for html2canvas.
-    // Linear gradient background ensures the highlight is "behind" the text rendering logic.
+    const headerColor = theme.accent.includes('#') ? theme.accent : 'inherit';
+    
+    // Use nested spans for robust z-index stacking in html2canvas
+    // Outer span: background
+    // Inner span: text (with relative positioning and positive z-index)
     return html
       .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
-        if (isHeader) return `<span style="color: ${theme.accent.includes('#') ? theme.accent : 'inherit'}; display: inline;">${p1}</span>`;
-        return `<span style="background: ${theme.highlightBg}; color: ${theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit'}; display: inline; padding: 2px 0; z-index: 1;">${p1}</span>`;
+        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+        
+        const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
+        return `<span style="background-color: ${theme.highlightBg}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
-        if (isHeader) return `<span style="color: ${theme.accent.includes('#') ? theme.accent : 'inherit'}; display: inline;">${p1}</span>`;
-        return `<span style="background: ${theme.highlightBg}; color: ${theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit'}; display: inline; padding: 2px 0; z-index: 1;">${p1}</span>`;
+         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+         
+         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
+         return `<span style="background-color: ${theme.highlightBg}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;"><span style="position: relative; z-index: 10; color: ${txt};">${p1}</span></span>`;
       });
   }
 

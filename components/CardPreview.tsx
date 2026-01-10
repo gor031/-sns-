@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Slide, TextStyle } from '../types';
-import { 
-  Check, Edit2, Undo, AlignLeft, AlignCenter, AlignRight, 
+import {
+  Check, Edit2, Undo, AlignLeft, AlignCenter, AlignRight,
   Type, Palette, Minus, Plus, Wand2, Eraser, HelpCircle, MousePointerClick, Hand
 } from 'lucide-react';
 
@@ -70,7 +70,7 @@ export const THEMES = [
 ];
 
 const TEXT_COLORS = [
-  { label: '기본', value: 'inherit', hex: null }, 
+  { label: '기본', value: 'inherit', hex: null },
   { label: '흰색', value: 'text-white', hex: '#ffffff' },
   { label: '검정', value: 'text-black', hex: '#000000' },
   { label: '회색', value: 'text-gray-500', hex: '#6b7280' },
@@ -94,43 +94,43 @@ const markdownToHtml = (text: string): string => {
 
 const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forExport: boolean = false) => {
   if (!html) return '';
-  
+
   if (forExport) {
     const headerColor = theme.accent.includes('#') ? theme.accent : 'inherit';
-    
+
     // Export-Optimized Rendering Strategy:
     // Simplified to use solid background color instead of gradient to fix vertical alignment issues in downloads.
     return html
       .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
-        
+
         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-        
-        // Simpler solid background for reliable rendering
-        return `<span style="background-color: ${theme.highlightBg}; color: ${txt}; padding: 0px 4px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+
+        // Lower the highlight by starting the color at 40% down
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
-         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
-         
-         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-         
-         // Simpler solid background for reliable rendering
-         return `<span style="background-color: ${theme.highlightBg}; color: ${txt}; padding: 0px 4px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+
+        const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
+
+        // Lower the highlight by starting the color at 40% down
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
       });
   }
 
   // Normal preview style using Tailwind classes
   const decorationClass = 'box-decoration-clone';
   const highlightClass = isHeader
-       ? `${theme.accent} inline` 
-       : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
+    ? `${theme.accent} inline`
+    : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
 
   // We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
   return html
-      .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-      .replace(/<\/b>/g, '</span>')
-      .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-      .replace(/<\/strong>/g, '</span>');
+    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<\/b>/g, '</span>')
+    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<\/strong>/g, '</span>');
 };
 
 const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeholder, className = "" }: any) => {
@@ -148,8 +148,8 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
     document.execCommand('styleWithCSS', false, (cmd === 'bold' || cmd === 'italic' || cmd === 'underline') ? 'false' : 'true');
     document.execCommand(cmd, false, value);
     if (contentEditableRef.current) {
-        contentEditableRef.current.focus();
-        setHtml(contentEditableRef.current.innerHTML);
+      contentEditableRef.current.focus();
+      setHtml(contentEditableRef.current.innerHTML);
     }
   };
 
@@ -157,7 +157,7 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0 && contentEditableRef.current?.contains(selection.anchorNode) && !selection.isCollapsed) {
       let currentVal = 3;
-      try { currentVal = parseInt(document.queryCommandValue('fontSize')) || 3; } catch (e) {}
+      try { currentVal = parseInt(document.queryCommandValue('fontSize')) || 3; } catch (e) { }
       execCmd('fontSize', Math.min(Math.max(currentVal + delta, 1), 7).toString());
     } else {
       const currentIndex = SIZES.indexOf(styleState.fontSize);
@@ -170,34 +170,34 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
   return (
     <div className="flex flex-col gap-2 bg-white rounded-xl border border-gray-200 overflow-visible shadow-sm z-10">
       <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 border-b border-gray-100 relative select-none">
-         <button onClick={() => execCmd('undo')} className="p-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 text-gray-600 shadow-sm mr-2"><Undo size={16} /></button>
-         <div className="flex bg-white rounded-md border border-gray-200 mr-2 overflow-hidden shadow-sm">
-            <button onClick={() => setStyleState({...styleState, align: 'left'})} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'left' ? 'bg-gray-100' : ''}`}><AlignLeft size={16} /></button>
-            <button onClick={() => setStyleState({...styleState, align: 'center'})} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'center' ? 'bg-gray-100' : ''}`}><AlignCenter size={16} /></button>
-            <button onClick={() => setStyleState({...styleState, align: 'right'})} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'right' ? 'bg-gray-100' : ''}`}><AlignRight size={16} /></button>
-         </div>
-         <div className="flex items-center bg-white rounded-md border border-gray-200 mr-2 overflow-hidden shadow-sm">
-            <button onClick={() => changeSize(-1)} className="p-1.5 hover:bg-gray-50"><Minus size={14} /></button>
-            <div className="px-2 text-xs font-bold w-8 text-center"><Type size={14} /></div>
-            <button onClick={() => changeSize(1)} className="p-1.5 hover:bg-gray-50"><Plus size={14} /></button>
-         </div>
-         <div className="relative">
-            <button onClick={() => setShowColorPicker(!showColorPicker)} className="p-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 mr-2 shadow-sm"><Palette size={16}/></button>
-            {showColorPicker && (
-              <div className="absolute top-full left-0 mt-2 p-2 bg-white rounded-lg shadow-xl border border-gray-100 grid grid-cols-4 gap-2 z-50 w-48">
-                 {TEXT_COLORS.map((c, i) => (
-                   <button key={i} onClick={() => { if(c.hex) execCmd('foreColor', c.hex); else execCmd('removeFormat'); setShowColorPicker(false); }} className="w-8 h-8 rounded-full border" style={{ backgroundColor: c.hex || 'transparent' }}>
-                     {!c.hex && <Eraser size={14} className="mx-auto text-gray-400"/>}
-                   </button>
-                 ))}
-              </div>
-            )}
-         </div>
-         <div className="w-px h-6 bg-gray-300 mx-1"></div>
-         <button onClick={() => execCmd('bold')} className="p-1.5 font-bold hover:bg-gray-100 px-3">B</button>
-         <button onClick={() => execCmd('italic')} className="p-1.5 italic hover:bg-gray-100 px-3">I</button>
-         <button onClick={() => execCmd('underline')} className="p-1.5 underline hover:bg-gray-100 px-3">U</button>
-         <button onClick={() => setShowHelp(!showHelp)} className="ml-auto p-1.5 text-gray-400 hover:text-primary"><HelpCircle size={18} /></button>
+        <button onClick={() => execCmd('undo')} className="p-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 text-gray-600 shadow-sm mr-2"><Undo size={16} /></button>
+        <div className="flex bg-white rounded-md border border-gray-200 mr-2 overflow-hidden shadow-sm">
+          <button onClick={() => setStyleState({ ...styleState, align: 'left' })} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'left' ? 'bg-gray-100' : ''}`}><AlignLeft size={16} /></button>
+          <button onClick={() => setStyleState({ ...styleState, align: 'center' })} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'center' ? 'bg-gray-100' : ''}`}><AlignCenter size={16} /></button>
+          <button onClick={() => setStyleState({ ...styleState, align: 'right' })} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'right' ? 'bg-gray-100' : ''}`}><AlignRight size={16} /></button>
+        </div>
+        <div className="flex items-center bg-white rounded-md border border-gray-200 mr-2 overflow-hidden shadow-sm">
+          <button onClick={() => changeSize(-1)} className="p-1.5 hover:bg-gray-50"><Minus size={14} /></button>
+          <div className="px-2 text-xs font-bold w-8 text-center"><Type size={14} /></div>
+          <button onClick={() => changeSize(1)} className="p-1.5 hover:bg-gray-50"><Plus size={14} /></button>
+        </div>
+        <div className="relative">
+          <button onClick={() => setShowColorPicker(!showColorPicker)} className="p-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 mr-2 shadow-sm"><Palette size={16} /></button>
+          {showColorPicker && (
+            <div className="absolute top-full left-0 mt-2 p-2 bg-white rounded-lg shadow-xl border border-gray-100 grid grid-cols-4 gap-2 z-50 w-48">
+              {TEXT_COLORS.map((c, i) => (
+                <button key={i} onClick={() => { if (c.hex) execCmd('foreColor', c.hex); else execCmd('removeFormat'); setShowColorPicker(false); }} className="w-8 h-8 rounded-full border" style={{ backgroundColor: c.hex || 'transparent' }}>
+                  {!c.hex && <Eraser size={14} className="mx-auto text-gray-400" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        <button onClick={() => execCmd('bold')} className="p-1.5 font-bold hover:bg-gray-100 px-3">B</button>
+        <button onClick={() => execCmd('italic')} className="p-1.5 italic hover:bg-gray-100 px-3">I</button>
+        <button onClick={() => execCmd('underline')} className="p-1.5 underline hover:bg-gray-100 px-3">U</button>
+        <button onClick={() => setShowHelp(!showHelp)} className="ml-auto p-1.5 text-gray-400 hover:text-primary"><HelpCircle size={18} /></button>
       </div>
       <div ref={contentEditableRef} className={`w-full p-4 outline-none min-h-[80px] break-keep break-words ${styleState.align === 'center' ? 'text-center' : styleState.align === 'right' ? 'text-right' : 'text-left'} ${className}`} contentEditable onInput={(e) => setHtml(e.currentTarget.innerHTML)} />
     </div>
@@ -224,7 +224,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
   useEffect(() => { if (isEditing) onUpdate(editHeader, editBody, editHeaderStyle, editBodyStyle); }, [editHeader, editBody, editHeaderStyle, editBodyStyle, isEditing]);
 
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
-    <div 
+    <div
       className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || theme.text} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
       style={{ lineHeight: '1.4' }}
       dangerouslySetInnerHTML={{ __html: processHtmlForPreview(/<\/?[a-z][\s\S]*>/i.test(content) ? content : markdownToHtml(content), theme, isHeader, forExport) }}
@@ -237,23 +237,23 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
         <div className="absolute top-[-20%] right-[-20%] w-[100%] h-[70%] z-0" style={{ background: `radial-gradient(circle at center, ${theme.blob1} 0%, transparent 60%)` }}></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-0" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
         <div className="relative z-10 h-full flex flex-col p-8 justify-center">
-            <div className={`${isCover ? 'flex-1 flex flex-col items-center justify-center' : 'mb-6 pb-6 border-b border-black/10'}`}>
-                {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.includes('#') ? '' : theme.accent.replace('text-', 'bg-')}`} style={theme.accent.includes('#') ? { backgroundColor: theme.accent } : {}}></div>}
-                <div className="w-full">{renderContent(slide.header, true, slide.headerStyle)}</div>
-                {isCover && <div className={`w-32 h-2.5 rounded-full mt-8 ${theme.decoration}`}></div>}
-            </div>
-            {!isCover && <div className="flex-1 relative">{renderContent(slide.body, false, slide.bodyStyle)}</div>}
+          <div className={`${isCover ? 'flex-1 flex flex-col items-center justify-center' : 'mb-6 pb-6 border-b border-black/10'}`}>
+            {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.includes('#') ? '' : theme.accent.replace('text-', 'bg-')}`} style={theme.accent.includes('#') ? { backgroundColor: theme.accent } : {}}></div>}
+            <div className="w-full">{renderContent(slide.header, true, slide.headerStyle)}</div>
+            {isCover && <div className={`w-32 h-2.5 rounded-full mt-8 ${theme.decoration}`}></div>}
+          </div>
+          {!isCover && <div className="flex-1 relative">{renderContent(slide.body, false, slide.bodyStyle)}</div>}
         </div>
       </div>
       {!hideControls && (
         <div className="w-full md:w-96">
           {!isEditing ? (
-             <button onClick={() => setIsEditing(true)} className="w-full py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-lg"><Wand2 size={20} />디자인 및 텍스트 수정</button>
+            <button onClick={() => setIsEditing(true)} className="w-full py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-lg"><Wand2 size={20} />디자인 및 텍스트 수정</button>
           ) : (
             <div className="bg-white rounded-3xl border-2 border-primary/20 p-6 shadow-xl space-y-6">
               <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                 <h3 className="font-bold flex items-center gap-2"><Edit2 size={18} className="text-primary"/> 에디터</h3>
-                 <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-md hover:bg-red-500 transition-colors flex items-center gap-2"><Check size={16} /> 완료</button>
+                <h3 className="font-bold flex items-center gap-2"><Edit2 size={18} className="text-primary" /> 에디터</h3>
+                <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-md hover:bg-red-500 transition-colors flex items-center gap-2"><Check size={16} /> 완료</button>
               </div>
               <ContentEditableInput html={editHeader} setHtml={setEditHeader} styleState={editHeaderStyle} setStyleState={setEditHeaderStyle} className="font-bold" />
               <ContentEditableInput html={editBody} setHtml={setEditBody} styleState={editBodyStyle} setStyleState={setEditBodyStyle} className="font-medium" />

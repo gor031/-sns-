@@ -98,34 +98,58 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
   if (forExport) {
     const headerColor = theme.accent.includes('#') ? theme.accent : 'inherit';
 
+    // Helper to resolve text color from Tailwind class for html2canvas
+    const getTextColorFromClass = (className: string) => {
+      if (!className) return '#000000';
+      if (className.includes('text-white')) return '#ffffff';
+      if (className.includes('text-black')) return '#000000';
+      if (className.includes('text-rose-600')) return '#e11d48';
+      if (className.includes('text-emerald-800')) return '#065f46';
+      if (className.includes('text-yellow-800')) return '#854d0e';
+      if (className.includes('text-pink-700')) return '#be185d';
+      if (className.includes('text-blue-900')) return '#1e3a8a';
+      if (className.includes('text-purple-800')) return '#6b21a8';
+      if (className.includes('text-emerald-900')) return '#064e3b';
+      if (className.includes('text-slate-900')) return '#0f172a';
+      if (className.includes('text-green-600')) return '#16a34a';
+      if (className.includes('text-pink-500')) return '#ec4899';
+      if (className.includes('text-orange-900')) return '#7c2d12';
+      if (className.includes('text-sky-800')) return '#075985';
+      if (className.includes('text-indigo-900')) return '#312e81';
+      return '#000000'; // Default fallback
+    };
+
+    const highlightTextColor = getTextColorFromClass(theme.highlightText);
+
     // Export-Optimized Rendering Strategy:
     // Simplified to use solid background color instead of gradient to fix vertical alignment issues in downloads.
     return html
-    // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
-    // Use class for text color to ensure it matches the preview exactly (resolves "white on white" issue)
-    return `<span class="${theme.highlightText}" style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
-  })
-      .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
-    if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+      .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
+        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
 
-    // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
-    // Use class for text color to ensure it matches the preview exactly
-    return `<span class="${theme.highlightText}" style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
-  });
+        // Lower highlight + padding + explicit inline color
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${highlightTextColor}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+      })
+      .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
+        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+
+        // Lower highlight + padding + explicit inline color
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${highlightTextColor}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+      });
   }
 
-// Normal preview style using Tailwind classes
-const decorationClass = 'box-decoration-clone';
-const highlightClass = isHeader
-  ? `${theme.accent} inline`
-  : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
+  // Normal preview style using Tailwind classes
+  const decorationClass = 'box-decoration-clone';
+  const highlightClass = isHeader
+    ? `${theme.accent} inline`
+    : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
 
-// We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
-return html
-  .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-  .replace(/<\/b>/g, '</span>')
-  .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-  .replace(/<\/strong>/g, '</span>');
+  // We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
+  return html
+    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<\/b>/g, '</span>')
+    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<\/strong>/g, '</span>');
 };
 
 const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeholder, className = "" }: any) => {

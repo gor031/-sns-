@@ -106,16 +106,16 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
 
         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
 
-        // Lower the highlight by starting the color at 40% down
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+        // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
 
         const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
 
-        // Lower the highlight by starting the color at 40% down
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+        // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
+        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
       });
   }
 

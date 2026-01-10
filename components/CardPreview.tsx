@@ -101,36 +101,31 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
     // Export-Optimized Rendering Strategy:
     // Simplified to use solid background color instead of gradient to fix vertical alignment issues in downloads.
     return html
-      .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
-        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
-
-        const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-
-        // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
-      })
+    // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
+    // Use class for text color to ensure it matches the preview exactly (resolves "white on white" issue)
+    return `<span class="${theme.highlightText}" style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+  })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
-        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
+    if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
 
-        const txt = theme.highlightText.includes('white') ? '#ffffff' : theme.highlightText.includes('black') ? '#000000' : 'inherit';
-
-        // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${txt}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
-      });
+    // Lower the highlight by starting the color at 40% down and add bottom padding to prevent cutoff
+    // Use class for text color to ensure it matches the preview exactly
+    return `<span class="${theme.highlightText}" style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+  });
   }
 
-  // Normal preview style using Tailwind classes
-  const decorationClass = 'box-decoration-clone';
-  const highlightClass = isHeader
-    ? `${theme.accent} inline`
-    : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
+// Normal preview style using Tailwind classes
+const decorationClass = 'box-decoration-clone';
+const highlightClass = isHeader
+  ? `${theme.accent} inline`
+  : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
 
-  // We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
-  return html
-    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-    .replace(/<\/b>/g, '</span>')
-    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
-    .replace(/<\/strong>/g, '</span>');
+// We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
+return html
+  .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+  .replace(/<\/b>/g, '</span>')
+  .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+  .replace(/<\/strong>/g, '</span>');
 };
 
 const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeholder, className = "" }: any) => {

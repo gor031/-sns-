@@ -101,21 +101,51 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
     // Helper to resolve text color from Tailwind class for html2canvas
     const getTextColorFromClass = (className: string) => {
       if (!className) return '#000000';
+
+      // Handle arbitrary values like text-[#1B5E20]
+      const hexMatch = className.match(/text-\[#([0-9A-Fa-f]{6})\]/);
+      if (hexMatch) return `#${hexMatch[1]}`;
+
+      // Standard Tailwind classes used in themes
       if (className.includes('text-white')) return '#ffffff';
       if (className.includes('text-black')) return '#000000';
-      if (className.includes('text-rose-600')) return '#e11d48';
-      if (className.includes('text-emerald-800')) return '#065f46';
-      if (className.includes('text-yellow-800')) return '#854d0e';
-      if (className.includes('text-pink-700')) return '#be185d';
-      if (className.includes('text-blue-900')) return '#1e3a8a';
-      if (className.includes('text-purple-800')) return '#6b21a8';
-      if (className.includes('text-emerald-900')) return '#064e3b';
+
+      // Grays / Slates / Zincs / Neutrals
+      if (className.includes('text-gray-800')) return '#1f2937';
+      if (className.includes('text-gray-900')) return '#111827';
       if (className.includes('text-slate-900')) return '#0f172a';
-      if (className.includes('text-green-600')) return '#16a34a';
+      if (className.includes('text-neutral-900')) return '#171717';
+
+      // Reds / Pinks / Roses
+      if (className.includes('text-red-600')) return '#dc2626';
+      if (className.includes('text-rose-600')) return '#e11d48';
       if (className.includes('text-pink-500')) return '#ec4899';
+      if (className.includes('text-pink-600')) return '#db2777';
+      if (className.includes('text-pink-700')) return '#be185d';
+      if (className.includes('text-pink-800')) return '#9d174d';
+
+      // Oranges / Yellows / Ambers
+      if (className.includes('text-orange-500')) return '#f97316';
       if (className.includes('text-orange-900')) return '#7c2d12';
+      if (className.includes('text-yellow-400')) return '#facc15';
+      if (className.includes('text-yellow-800')) return '#854d0e';
+
+      // Greens / Emeralds / Teals
+      if (className.includes('text-green-600')) return '#16a34a';
+      if (className.includes('text-emerald-800')) return '#065f46';
+      if (className.includes('text-emerald-900')) return '#064e3b';
+      if (className.includes('text-teal-900')) return '#134e4a';
+
+      // Blues / Cyans / Skys / Indigos
+      if (className.includes('text-blue-900')) return '#1e3a8a';
+      if (className.includes('text-cyan-800')) return '#155e75';
       if (className.includes('text-sky-800')) return '#075985';
       if (className.includes('text-indigo-900')) return '#312e81';
+
+      // Purples / Violets
+      if (className.includes('text-purple-800')) return '#6b21a8';
+      if (className.includes('text-purple-900')) return '#581c87';
+
       return '#000000'; // Default fallback
     };
 

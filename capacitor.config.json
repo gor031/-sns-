@@ -1,0 +1,8 @@
+{
+    "appId": "com.example.cardnewsgen",
+    "appName": "Card News Generator",
+    "webDir": "dist",
+    "server": {
+        "androidScheme": "https"
+    }
+}

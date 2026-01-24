@@ -152,33 +152,34 @@ const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forE
     const highlightTextColor = getTextColorFromClass(theme.highlightText);
 
     // Export-Optimized Rendering Strategy:
-    // Simplified to use solid background color instead of gradient to fix vertical alignment issues in downloads.
+    // Highlighting now changes text color only, removing background to fix vertical alignment and wrapping issues.
     return html
       .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
 
-        // Lower highlight + padding + explicit inline color
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${highlightTextColor}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+        // Highlight: Change text color to highlightBg (accent color), remove background
+        return `<span style="color: ${theme.highlightBg}; display: inline;">${p1}</span>`;
       })
       .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
         if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
 
-        // Lower highlight + padding + explicit inline color
-        return `<span style="background: linear-gradient(to bottom, transparent 40%, ${theme.highlightBg} 40%); color: ${highlightTextColor}; padding: 0px 4px 8px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone;">${p1}</span>`;
+        // Highlight: Change text color to highlightBg (accent color), remove background
+        return `<span style="color: ${theme.highlightBg}; display: inline;">${p1}</span>`;
       });
   }
 
   // Normal preview style using Tailwind classes
   const decorationClass = 'box-decoration-clone';
+  // Removed padding/rounded/highlightText from highlightClass as we are now just coloring the text
   const highlightClass = isHeader
     ? `${theme.accent} inline`
-    : `font-bold ${theme.highlightText} px-1 py-0.5 rounded-sm ${decorationClass} leading-snug`;
+    : `font-bold ${decorationClass} leading-snug`;
 
-  // We use an inline style for the background color to avoid complex Tailwind interactions in html2canvas
+  // We use an inline style for the text color (previously background color)
   return html
-    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `color: ${theme.highlightBg};` : ''}">`)
     .replace(/<\/b>/g, '</span>')
-    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `background-color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `color: ${theme.highlightBg};` : ''}">`)
     .replace(/<\/strong>/g, '</span>');
 };
 

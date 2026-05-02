@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:gal/gal.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -18,56 +17,66 @@ import '../services/gemini_service.dart';
 import '../theme/card_theme.dart';
 import '../widgets/card_preview.dart';
 import '../widgets/rich_text_toolbar.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import '../utils/quill_markdown_converter.dart';
-import '../services/openai_service.dart';
+import '../widgets/styled_text_controller.dart'; // New Import
 
 const String SYSTEM_PROMPT = """
 당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터'입니다.
-사용자가 주제를 입력하면 즉시 **최적화된 카드뉴스 JSON 데이터**를 생성하십시오.
+모바일 환경은 가독성이 생명입니다. 사용자가 주제를 던지면 무조건 **짧고, 강렬하고, 직관적인** 원고를 작성해야 합니다.
 
-**[작성 원칙]**
-1. **가독성**: 한 슬라이드당 최대 2문장 이내로 작성하세요. 가독성을 위해 적절히 줄바꿈(\n) 코드를 삽입하세요.
-2. **구조 (최소 6장~최대 10장 구성)**: 
-   - 1페이지: 시선을 사로잡는 **표지 제목** (body는 비워둠)
-   - 2페이지~마지막 페이지: 각 장의 주제를 담은 **소제목(header)**과 핵심 정보를 요약한 **본문(body)**을 반드시 함께 작성하세요. 
-   - **마무리 멘트(마지막 슬라이드)도 반드시 소제목(header)이 있어야 합니다.** (예: "결론", "함께 해봐요" 등)
-3. **말투**: ~해요, ~하세요 와 같이 친근하면서도 설득력 있는 말투를 사용하세요.
-4. **SNS 홍보**: 인터스타그램, 블로그 등에 바로 올릴 수 있도록 **snsBody**를 아주 길게 작성하세요. 카드뉴스 슬라이드의 본문 내용 전체를 길게 요약/풀어서 풍성한 글을 만들어 줍니다. 또한 사람들의 이목을 끌 수 있는 **강력한 snsTitle**도 함께 생성하세요.
-5. **강조**: 핵심 단어는 **강조** 처리를 하세요.
-6. **결과물**: 서론/결론 없이 오직 마크다운 코드 블록(```json)으로 감싸진 JSON 데이터만 출력하세요.
+당신의 작업은 반드시 다음 **3단계 프로세스**를 따라야 합니다.
 
-**[데이터 구조 예시]**
+---
+
+### [1단계: sns 올릴 제목과 내용]
+사용자가 주제나 키워드를 입력하면 sns에 올릴 제목과 내용을 먼저생성해줘(반드시 복사 버튼으로 한번에 복사가 가능하게 해줘야되)
+
+### [2단계: 원고 기획 및 컨펌]
+제목과 내용 생성한 뒤에, 바로 JSON을 만들지 말고 먼저 **텍스트 원고**를 작성하여 보여주세요.
+
+**1. 작성 원칙 (매우 중요):**
+- **다이어트**: 불필요한 조사, 형용사, 부사를 모두 삭제하세요.
+- **길이 제한**: 한 슬라이드당 **최대 2문장**을 넘기지 마세요. (이미지가 텍스트를 압도하지 않게)
+- **구조**: 
+   - 표지 (후킹 제목)
+   - 본문 (6~10장 내외, 핵심 정보만 딱딱 끊어서)
+   - 결론 (행동 유도)
+- **강조 표시**: 핵심 단어는 **강조** 처리를 미리 해서 보여주세요.
+
+**2. 마무리 멘트:**
+원고 끝에 반드시 **"이 내용으로 카드뉴스 데이터를 생성할까요?"** 라고 물어보세요.
+
+---
+
+### [3단계: JSON 데이터 변환]
+사용자가 "좋아", "만들어줘", "진행해"라고 동의하면, 위에서 확정된 원고를 **앱이 인식할 수 있는 JSON 코드**로 변환해서 출력하세요.
+
+**1. 필수 규칙:**
+- 서론/결론 없이 **오직 JSON 코드만** 출력하세요.
+- 반드시 Markdown 코드 블록(```json)으로 감싸야 합니다.
+
+**2. 데이터 구조 (변형 금지):**
 ```json
 {
   "topic": "주제",
   "targetAudience": "타겟",
   "tone": "어조",
-  "snsTitle": "SNS 업로드용 제목",
-  "snsBody": "SNS에 함께 올릴 홍보 문구와 해시태그",
   "hashtags": ["태그1", "태그2"],
   "slides": [
     {
       "pageNumber": 1,
-      "header": "표지 제목 **강조**",
+      "header": "표지 제목(짧고 굵게) **강조**",
       "body": "" 
     },
     {
       "pageNumber": 2,
-      "header": "1. 첫 번째 소제목",
-      "body": "본문은 반드시 내용을 채워야 합니다.\\n줄바꿈과 **강조**를 적절히 섞으세요."
-    },
-    {
-      "pageNumber": 3,
-      "header": "마무리 소제목",
-      "body": "마지막 페이지도 반드시 **소제목**을 넣어주세요."
+      "header": "소제목(핵심만)",
+      "body": "본문은 최대 2줄.\\n줄바꿈을 적극 활용.\\n**핵심** 단어 강조."
     }
   ]
 }
 ```""";
 
-enum InputMode { json, manual, auto }
-
+enum InputMode { json, manual }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -90,10 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<GlobalKey> _slideKeys = [];
 
 
-  // AI Auto Mode State
-  final OpenAIService _openAIService = OpenAIService();
-  final TextEditingController _topicController = TextEditingController();
-
   // Manual Input State
   final TextEditingController _signatureController = TextEditingController(); // New
   InputMode _inputMode = InputMode.json;
@@ -113,12 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // Ad State
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  // Direct Editing Controllers (Quill-based)
-  QuillController? _headerController;
-  QuillController? _bodyController;
+  // Direct Editing Controllers (Styled)
+  StyledTextEditingController? _headerController;
+  StyledTextEditingController? _bodyController;
   final FocusNode _headerFocus = FocusNode();
   final FocusNode _bodyFocus = FocusNode();
-  QuillController? _activeController; // For toolbar
+  TextEditingController? _activeController; // For toolbar
   final AdService _adService = AdService();
 
   @override
@@ -132,9 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_bodyFocus.hasFocus) setState(() => _activeController = _bodyController);
     });
     
-    // Initialize OpenAI
-    OpenAIService.init();
-
     // Load Banner Ad
     _bannerAd = _adService.createBannerAd()..load().then((value) {
         setState(() {
@@ -146,60 +148,25 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_cardData != null && _cardData!.slides.isNotEmpty) {
       _initControllersForPage(0);
     }
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showUpdateNotice();
-    });
   }
 
   void _initControllersForPage(int pageIndex) {
     if (_cardData == null || pageIndex >= _cardData!.slides.length) return;
-
+    
     final slide = _cardData!.slides[pageIndex];
-
+    
     _headerController?.dispose();
     _bodyController?.dispose();
 
-    // Header QuillController
-    final headerDelta = QuillMarkdownConverter.markdownToDelta(slide.header);
-    _headerController = QuillController(
-      document: Document.fromDelta(headerDelta),
-      selection: const TextSelection.collapsed(offset: 0),
-      keepStyleOnNewLine: true,
-    );
-    
-    final hAlign = slide.headerStyle?.align ?? 'center';
-    _headerController!.formatText(0, _headerController!.document.length, 
-      hAlign == 'center' ? Attribute.centerAlignment : hAlign == 'right' ? Attribute.rightAlignment : Attribute.leftAlignment);
+    _headerController = StyledTextEditingController(text: slide.header);
+    _bodyController = StyledTextEditingController(text: slide.body);
 
+    // Sync back to data model on change
     _headerController!.addListener(() {
-      if (_cardData != null && pageIndex < _cardData!.slides.length) {
-        _cardData!.slides[pageIndex].header =
-            QuillMarkdownConverter.deltaToMarkdown(
-          _headerController!.document.toDelta(),
-        );
-      }
+      _cardData!.slides[pageIndex].header = _headerController!.text;
     });
-
-    // Body QuillController
-    final bodyDelta = QuillMarkdownConverter.markdownToDelta(slide.body);
-    _bodyController = QuillController(
-      document: Document.fromDelta(bodyDelta),
-      selection: const TextSelection.collapsed(offset: 0),
-      keepStyleOnNewLine: true,
-    );
-    
-    final bAlign = slide.bodyStyle?.align ?? 'left';
-    _bodyController!.formatText(0, _bodyController!.document.length, 
-      bAlign == 'center' ? Attribute.centerAlignment : bAlign == 'right' ? Attribute.rightAlignment : Attribute.leftAlignment);
-
     _bodyController!.addListener(() {
-      if (_cardData != null && pageIndex < _cardData!.slides.length) {
-        _cardData!.slides[pageIndex].body =
-            QuillMarkdownConverter.deltaToMarkdown(
-          _bodyController!.document.toDelta(),
-        );
-      }
+      _cardData!.slides[pageIndex].body = _bodyController!.text;
     });
   }
 
@@ -212,30 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
       FocusScope.of(context).unfocus();
       _activeController = null;
     });
-  }
-
-  Future<void> _showUpdateNotice() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeen = prefs.getBool('has_seen_update_v105') ?? false;
-    if (!hasSeen && mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: Text("업데이트 안내 🎉", style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Text("새로운 기능이 추가되었습니다!\n\n💡 AI 자동 생성 기능\n주제만 입력하면 AI가 카드뉴스 6~10장의 세부 내용을 알아서 작성해줍니다.\n\n지금 바로 상단의 [AI 자동 생성] 모드로 사용해보세요!"),
-          actions: [
-            ElevatedButton(
-              onPressed: () async {
-                await prefs.setBool('has_seen_update_v105', true);
-                if (mounted) Navigator.pop(context);
-              },
-              child: Text("닫기 (다시 보지 않기)"),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   @override
@@ -253,7 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _headerFocus.dispose();
     _bodyFocus.dispose();
     _bannerAd?.dispose();
-    _topicController.dispose();
     super.dispose();
   }
 
@@ -309,25 +251,40 @@ class _HomeScreenState extends State<HomeScreen> {
       await _adService.incrementUsage();
       generationLogic();
     } else {
-      // Quota exceeded - Automatically trigger Rewarded Interstitial Ad
-        print("HomeScreen: Limit reached, triggering Rewarded Interstitial Ad automatically");
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("무료 사용량을 모두 소진하여, 짧은 광고 시청 후 생성됩니다.")),
+      // Quota exceeded - Ask for Ad
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+                title: Text("무료 사용량 소진 (3/3)"),
+                content: Text("오늘의 무료 생성 횟수를 모두 사용했습니다.\n광고를 시청하면 카드를 계속 생성할 수 있습니다!"),
+                actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("취소"),
+                    ),
+                    ElevatedButton(
+                        onPressed: () async {
+                            Navigator.pop(context); // Close dialog
+                            print("HomeScreen: User clicked watch ad");
+                            final earned = await _adService.showRewardedAd(context);
+                            print("HomeScreen: Ad completed. Earned: $earned");
+                            
+                            if (earned) {
+                                print("HomeScreen: Executing generation logic");
+                                generationLogic();
+                            } else {
+                                print("HomeScreen: Reward not earned");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("광고 보상을 받지 못했습니다. 끝까지 시청해주세요.")),
+                                );
+                            }
+                        },
+                        child: Text("광고 보고 생성하기"),
+                    )
+                ],
+            )
         );
-        
-        final earned = await _adService.showRewardedAd(context);
-        print("HomeScreen: Ad completed. Earned: $earned");
-        
-        if (earned) {
-            print("HomeScreen: Executing generation logic");
-            generationLogic();
-        } else {
-            print("HomeScreen: Reward not earned");
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("광고 시청이 원활히 완료되지 않았습니다.")),
-            );
-        }
     }
   }
 
@@ -763,38 +720,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           // TOOLBAR (Visible when editing)
           if (_activeController != null)
-            Container(
-              color: Colors.white,
-              child: ListenableBuilder(
-                listenable: _activeController!,
-                builder: (context, child) {
-                  return RichTextToolbar(
-                    style: _activeController == _headerController
-                        ? (_cardData!.slides[_currentPageIndex].headerStyle ??
-                            CustomTextStyle(
-                                align: 'left',
-                                fontSize: 'text-3xl',
-                                color: '#000000'))
-                        : (_cardData!.slides[_currentPageIndex].bodyStyle ??
-                            CustomTextStyle(
-                                align: 'left',
-                                fontSize: 'text-base',
-                                color: '#000000')),
-                    onUpdate: (newStyle) {
-                      setState(() {
-                        if (_activeController == _headerController) {
-                          _cardData!.slides[_currentPageIndex].headerStyle =
-                              newStyle;
-                        } else if (_activeController == _bodyController) {
-                          _cardData!.slides[_currentPageIndex].bodyStyle =
-                              newStyle;
-                        }
-                      });
-                    },
-                    controller: _activeController!,
-                  );
-                },
-              ),
+             Container(
+                color: Colors.white,
+                // No padding needed for viewInsets if resizeToAvoidBottomInset is true (default)
+                // But sometimes we need it if we want it strictly above.
+                // With Column + Expanded, the toolbar will be at the bottom of the screen.
+                // When keyboard opens, the scaffold resizes, pushing the bottom up. 
+                // So the toolbar stays on top of the keyboard.
+                child: ValueListenableBuilder(
+                  valueListenable: _activeController!,
+                  builder: (context, value, child) {
+                    return RichTextToolbar(
+                      style: _activeController == _headerController 
+                          ? (_cardData!.slides[_currentPageIndex].headerStyle ?? CustomTextStyle(align: 'left', fontSize: 'text-3xl', color: '#000000'))
+                          : (_cardData!.slides[_currentPageIndex].bodyStyle ?? CustomTextStyle(align: 'left', fontSize: 'text-base', color: '#000000')),
+                      onUpdate: (newStyle) {
+                        setState(() {
+                          if (_activeController == _headerController) {
+                             _cardData!.slides[_currentPageIndex].headerStyle = newStyle;
+                          } else if (_activeController == _bodyController) {
+                             _cardData!.slides[_currentPageIndex].bodyStyle = newStyle;
+                          }
+                        });
+                      },
+                      controller: _activeController!,
+                    );
+                  }
+                ),
             ),
             
           // Offstage Export View removed (moved to top of stack)
@@ -918,24 +870,6 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _inputMode = InputMode.auto),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: _inputMode == InputMode.auto ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: _inputMode == InputMode.auto ? [BoxShadow(color: Colors.black12, blurRadius: 4)] : [],
-                      ),
-                      alignment: Alignment.center,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text("AI 자동 생성", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.auto ? Colors.blue[900] : Colors.grey[600])),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
                     onTap: () => setState(() => _inputMode = InputMode.json),
                     child: Container(
                       padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -947,7 +881,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       alignment: Alignment.center,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text("결과 붙여넣기", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.json ? Colors.blue[900] : Colors.grey[600])),
+                        child: Text("AI 결과 붙여넣기 (JSON)", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.json ? Colors.blue[900] : Colors.grey[600])),
                       ),
                     ),
                   ),
@@ -965,7 +899,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       alignment: Alignment.center,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text("직접 입력", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.manual ? Colors.blue[900] : Colors.grey[600])),
+                        child: Text("직접 입력하기", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.manual ? Colors.blue[900] : Colors.grey[600])),
                       ),
                     ),
                   ),
@@ -975,9 +909,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SizedBox(height: 24),
 
-          if (_inputMode == InputMode.auto)
-            _buildAutoInputForm()
-          else if (_inputMode == InputMode.json)
+          if (_inputMode == InputMode.json)
             _buildJsonInputForm()
           else
             _buildManualInputForm(),
@@ -1319,74 +1251,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         SizedBox(height: 20),
         
-        // SNS Content Section (Copy for posting)
-        if (_cardData?.snsTitle != null || _cardData?.snsBody != null)
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.blue.shade100),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.campaign, color: Colors.blue.shade800, size: 20),
-                    SizedBox(width: 8),
-                    Text("SNS 홍보 문구 (복사해서 사용하세요)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
-                  ],
-                ),
-                SizedBox(height: 16),
-                if (_cardData?.snsTitle != null) ...[
-                  Text("제목", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade300)),
-                  SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(child: Text(_cardData!.snsTitle!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-                      IconButton(
-                        icon: Icon(Icons.copy, size: 18, color: Colors.blue),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _cardData!.snsTitle!));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("제목이 복사되었습니다!")));
-                        },
-                      ),
-                    ],
-                  ),
-                  Divider(color: Colors.blue.shade100),
-                ],
-                if (_cardData?.snsBody != null) ...[
-                  Text("내용", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade300)),
-                  SizedBox(height: 4),
-                  Text(_cardData!.snsBody!, style: TextStyle(fontSize: 14, height: 1.5)),
-                  SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        final tags = _cardData!.hashtags.map((t) => '#\$t').join(' ');
-                        final textToCopy = "${_cardData!.snsTitle ?? ''}\n\n${_cardData!.snsBody ?? ''}\n\n$tags";
-                        Clipboard.setData(ClipboardData(text: textToCopy));
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("제목, 내용, 태그까지 한 번에 복사되었습니다!")));
-                      },
-                      icon: Icon(Icons.content_copy, size: 16),
-                      label: Text("내용 전체 한 번에 복사하기"),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.blue.shade800,
-                        side: BorderSide(color: Colors.blue.shade300),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-        SizedBox(height: 12),
-        
         // Save All Button
         Container(
           padding: EdgeInsets.symmetric(horizontal: 24),
@@ -1409,68 +1273,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAutoInputForm() {
-    return Container(
-      padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text("어떤 주제로 카드뉴스를 만들까요?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          SizedBox(height: 12),
-          TextField(
-            controller: _topicController,
-            decoration: InputDecoration(
-              hintText: "예: 다이어트 성공 비법, 2024 재테크 전략",
-              filled: true,
-              fillColor: Colors.grey[50],
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            ),
-          ),
-          SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _isLoading ? null : () => _checkLimitAndGenerate(_runAutoGenerate),
-            icon: Icon(Icons.auto_awesome),
-            label: Text(_isLoading ? "생성 중..." : "AI 카드 뉴스 생성하기"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[600],
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Future<void> _runAutoGenerate() async {
-    if (_topicController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('주제를 입력해주세요!')));
-      return;
-    }
-    setState(() => _isLoading = true);
-    try {
-      _openAIService.addMessage('system', SYSTEM_PROMPT);
-      final response = await _openAIService.chat(_topicController.text);
-      final data = OpenAIService.parseCardNewsJson(response);
-      setState(() {
-        _cardData = data;
-        _currentThemeIndex = 0;
-        _currentPageIndex = 0;
-        _slideKeys = List.generate(data.slides.length, (_) => GlobalKey());
-        _isLoading = false;
-        _initControllersForPage(0);
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('생성 중 에러 발생: $e')));
-    }
-  }
+
 
 }

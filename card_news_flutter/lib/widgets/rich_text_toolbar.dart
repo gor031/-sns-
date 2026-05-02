@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../models/card_news.dart';
@@ -8,7 +7,7 @@ import '../models/card_news.dart';
 class RichTextToolbar extends StatelessWidget {
   final CustomTextStyle style;
   final Function(CustomTextStyle) onUpdate;
-  final QuillController controller;
+  final TextEditingController controller;
 
   const RichTextToolbar({
     Key? key,
@@ -16,17 +15,109 @@ class RichTextToolbar extends StatelessWidget {
     required this.onUpdate,
     required this.controller,
   }) : super(key: key);
+  
+  // Helper to get the actual controller to manipulate
+  TextEditingController get _controller => controller;
 
-  /// 현재 선택 영역에 Bold가 적용되어 있는지 확인
-  bool _isBoldActive() {
-    final attrs = controller.getSelectionStyle().attributes;
-    return attrs.containsKey(Attribute.bold.key) &&
-        attrs[Attribute.bold.key]?.value == true;
-  }
+  void _wrapSelection(String start, String end) {
+    final controller = _controller;
+    String text = controller.text;
+    final selection = controller.selection;
+    if (selection.start < 0) return;
 
-  void _toggleBold() {
-    controller.formatSelection(
-        _isBoldActive() ? Attribute.clone(Attribute.bold, null) : Attribute.bold);
+    bool isColorTag = start.startsWith('<c:');
+    
+    // Find if the cursor is inside an existing wrapper of this type
+    RegExp exp;
+    if (isColorTag) {
+      exp = RegExp(r'<c:#[a-fA-F0-9]+>(.*?)</c>', dotAll: true);
+    } else {
+      final escapedStart = RegExp.escape(start);
+      final escapedEnd = RegExp.escape(end);
+      exp = RegExp('$escapedStart(.*?)$escapedEnd', dotAll: true);
+    }
+
+    final matches = exp.allMatches(text);
+    RegExpMatch? activeMatch;
+    
+    for (final match in matches) {
+      // Check if cursor/selection intersects with the match
+      if (selection.start >= match.start && selection.end <= match.end) {
+        activeMatch = match;
+        break; 
+      }
+    }
+
+    if (activeMatch != null) {
+      // User is toggling OFF an active tag, or changing color
+      String innerText = activeMatch.group(1)!;
+      
+      String replacement;
+      int cursorOffset = 0;
+
+      if (isColorTag) {
+         // Overwrite color
+         replacement = '$start$innerText$end';
+         // Keep cursor relative to inner text
+         int startTagLen = activeMatch.group(0)!.indexOf(innerText);
+         int innerCursorPos = selection.start - (activeMatch.start + startTagLen);
+         if (innerCursorPos < 0) innerCursorPos = 0;
+         cursorOffset = activeMatch.start + start.length + innerCursorPos;
+      } else {
+         // Toggling OFF
+         replacement = innerText;
+         // Adjust cursor to remove the left tag
+         int innerCursorPos = selection.start - (activeMatch.start + start.length);
+         if (innerCursorPos < 0) innerCursorPos = 0;
+         cursorOffset = activeMatch.start + innerCursorPos;
+      }
+
+      String newText = text.replaceRange(activeMatch.start, activeMatch.end, replacement);
+      
+      int extentOffset = cursorOffset + (selection.end - selection.start);
+      if (extentOffset > newText.length) extentOffset = newText.length;
+      if (cursorOffset > newText.length) cursorOffset = newText.length;
+
+      controller.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection(baseOffset: cursorOffset, extentOffset: extentOffset),
+      );
+      return;
+    }
+
+    // --- If NOT active, wrap the selection ---
+    String selectedText = text.substring(selection.start, selection.end);
+    
+    // Strip redundant inner tags
+    if (isColorTag) {
+      selectedText = selectedText.replaceAll(RegExp(r'<c:#[a-zA-Z0-9]+>'), '');
+      selectedText = selectedText.replaceAll('</c>', '');
+    } else {
+      selectedText = selectedText.replaceAll(start, '');
+      selectedText = selectedText.replaceAll(end, '');
+    }
+
+    String newText = text.replaceRange(
+      selection.start, 
+      selection.end, 
+      '$start$selectedText$end'
+    );
+
+    // If there was no selection, place cursor inside the tags so they can type
+    int newSelectionStart;
+    int newSelectionEnd;
+    if (selection.isCollapsed) {
+       newSelectionStart = selection.start + start.length;
+       newSelectionEnd = newSelectionStart;
+    } else {
+       newSelectionStart = selection.start + start.length;
+       newSelectionEnd = newSelectionStart + selectedText.length;
+    }
+
+    controller.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection(baseOffset: newSelectionStart, extentOffset: newSelectionEnd),
+    );
   }
 
   void _pickColor(BuildContext context) {
@@ -36,23 +127,48 @@ class RichTextToolbar extends StatelessWidget {
         title: const Text('텍스트 색상'),
         content: SingleChildScrollView(
           child: ColorPicker(
-            pickerColor: Colors.black,
+            pickerColor: Colors.black, // Default
             onColorChanged: (color) {
-              final hex =
-                  '#${color.red.toRadixString(16).padLeft(2, '0')}'
-                  '${color.green.toRadixString(16).padLeft(2, '0')}'
-                  '${color.blue.toRadixString(16).padLeft(2, '0')}';
-              controller.formatSelection(ColorAttribute(hex));
+              // Use full 8-digit hex (AARRGGBB) to ensure exact color match including alpha
+              final hex = '#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+              // Check if we have selection, if so wrap it. IF no selection, maybe update simple global style?
+              // User request: "Drag to change color". So assume selection.
+              if (_controller.selection.isValid && !_controller.selection.isCollapsed) {
+                 _wrapSelection('<c:$hex>', '</c>');
+              } else {
+                 // Fallback or global update if needed (but focusing on inline now)
+                 // onUpdate(style..color = hex); 
+              }
             },
             hexInputBar: true,
           ),
         ),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('완료')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('완료')),
         ],
       ),
     );
+  }
+
+  bool _isStyleActive(String tag) {
+    final text = _controller.text;
+    final selection = _controller.selection;
+    if (!selection.isValid) return false;
+
+    // Regex to find all occurrences of the tag pair
+    // e.g. \*\*(.*?)\*\*
+    final escaped = RegExp.escape(tag);
+    final RegExp exp = RegExp('$escaped(.*?)$escaped', dotAll: true);
+    final matches = exp.allMatches(text);
+
+    for (final match in matches) {
+      // Check if cursor (selection.start) is within the match range
+      // inclusive of the tags themselves so user can easily toggle off at the boundary
+      if (selection.start >= match.start && selection.start <= match.end) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -103,13 +219,13 @@ class RichTextToolbar extends StatelessWidget {
             child: Row(
               children: [
                 // Formatting Buttons (Text Based)
-                _buildTextButton("굵게", _isBoldActive(), _toggleBold),
+                _buildTextButton("굵게", _isStyleActive('**'), () => _wrapSelection('**', '**')),
                 SizedBox(width: 8),
                 
                 // Alignment
-                _buildIconTextButton(Icons.format_align_left, "왼쪽", style.align == 'left', () => _setAlignment('left')),
-                _buildIconTextButton(Icons.format_align_center, "중앙", style.align == 'center', () => _setAlignment('center')),
-                _buildIconTextButton(Icons.format_align_right, "오른쪽", style.align == 'right', () => _setAlignment('right')),
+                _buildIconTextButton(Icons.format_align_left, "왼쪽", style.align == 'left', () => onUpdate(style..align = 'left')),
+                _buildIconTextButton(Icons.format_align_center, "중앙", style.align == 'center', () => onUpdate(style..align = 'center')),
+                _buildIconTextButton(Icons.format_align_right, "오른쪽", style.align == 'right', () => onUpdate(style..align = 'right')),
                 SizedBox(width: 8),
 
                 // Color Picker
@@ -142,16 +258,6 @@ class RichTextToolbar extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _setAlignment(String alignOption) {
-    onUpdate(style..align = alignOption);
-    final attr = alignOption == 'center'
-        ? Attribute.centerAlignment
-        : alignOption == 'right'
-            ? Attribute.rightAlignment
-            : Attribute.leftAlignment;
-    controller.formatText(0, controller.document.length, attr);
   }
 
   Widget _buildTextButton(String label, bool isActive, VoidCallback onTap) {

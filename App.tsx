@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import { parseCardNewsJson } from './services/geminiService';
 import { CardNewsData, TextStyle } from './types';
 import { CardPreview, THEMES } from './components/CardPreview';
+import { Marketplace } from './components/Marketplace';
+import { DesignStudio } from './components/studio/DesignStudio';
+import { TemplateMarketData } from './types';
 import { Button } from './components/Button';
 import { 
   ChevronRight, 
@@ -19,7 +22,12 @@ import {
   Bot,
   ArrowDown,
   // Added missing Check icon import
-  Check
+  Check,
+  Store,
+  Edit3,
+  Upload,
+  Share2,
+  Wand2
 } from 'lucide-react';
 
 const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터'입니다.
@@ -87,6 +95,7 @@ const App: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [showGuide, setShowGuide] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [currentTab, setCurrentTab] = useState<'editor'|'market'|'studio'>('editor');
 
   // Refs for scrolling
   const resultRef = useRef<HTMLDivElement>(null);
@@ -268,6 +277,25 @@ const App: React.FC = () => {
     });
   };
 
+  const handleUseTemplate = (tmpl: TemplateMarketData) => {
+    setCardData(tmpl.jsonData);
+    setJsonInput(JSON.stringify(tmpl.jsonData, null, 2));
+    setCurrentSlideIndex(0);
+    setCurrentTab('editor');
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const handleCustomBackground = () => {
+    const url = prompt('크리에이터 전용 기능입니다.\n사용할 이미지 URL을 입력하세요 (예: https://...)');
+    if (url && cardData) {
+      setCardData({ ...cardData, customBackgroundImage: url });
+    }
+  };
+
+  const handleMarketPublish = () => {
+    alert('템플릿이 성공적으로 마켓에 심사 요청되었습니다! (데모 화면)');
+  };
+
   return (
     <div className="min-h-screen pb-20 font-sans">
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
@@ -278,12 +306,19 @@ const App: React.FC = () => {
             </div>
             <h1 className="text-xl font-black text-gray-800 tracking-tight">카드뉴스 생성기</h1>
           </div>
-          <div className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
-            Professional Mode
+          <div className="flex items-center gap-3">
+             <button onClick={() => setCurrentTab('editor')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'editor' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}><Edit3 size={16}/> 에디터</button>
+             <button onClick={() => setCurrentTab('studio')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'studio' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}><Wand2 size={16}/> 디자인 스튜디오</button>
+             <button onClick={() => setCurrentTab('market')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}><Store size={16}/> 템플릿 마켓</button>
           </div>
         </div>
       </header>
 
+      {currentTab === 'studio' ? (
+         <DesignStudio />
+      ) : currentTab === 'market' ? (
+         <Marketplace onUseTemplate={handleUseTemplate} />
+      ) : (
       <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
         <section className="text-center space-y-3 mb-10">
           <h2 className="text-3xl font-black text-gray-900 leading-tight">
@@ -393,6 +428,7 @@ const App: React.FC = () => {
                   <CardPreview 
                     captureId={`export-slide-inner-${idx}`}
                     slide={slide}
+                    bgImageUrl={cardData.customBackgroundImage}
                     totalSlides={cardData.slides.length}
                     themeIndex={cardData.themeIndex}
                     onUpdate={() => {}} 
@@ -407,6 +443,7 @@ const App: React.FC = () => {
               <CardPreview 
                 captureId="card-capture-target"
                 slide={cardData.slides[currentSlideIndex]} 
+                bgImageUrl={cardData.customBackgroundImage}
                 totalSlides={cardData.slides.length}
                 themeIndex={cardData.themeIndex}
                 onUpdate={handleUpdateSlide}
@@ -422,7 +459,7 @@ const App: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Palette size={16} className="text-primary"/>배경 테마
                       </div>
-                      <span className="text-xs text-gray-400 font-normal">{THEMES.length} Themes</span>
+                      <button onClick={handleCustomBackground} className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded hover:bg-primary/20 flex items-center gap-1 transition-colors"><Upload size={12}/> 배경 업로드 (크리에이터 전용)</button>
                   </div>
                   <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50 no-scrollbar">
                     {THEMES.map((theme, i) => (
@@ -439,10 +476,16 @@ const App: React.FC = () => {
                  <Button onClick={handleDownloadCurrent} variant="secondary" className="flex-1 py-3 text-sm"><Download size={18} />현재 장 저장</Button>
                  <Button onClick={handleDownloadAll} variant="primary" isLoading={isDownloading} className="flex-1 py-3 text-sm"><FolderDown size={18} />전체 저장 (ZIP)</Button>
                </div>
+
+               <div className="mt-8 pt-6 border-t border-gray-100/50 flex flex-col items-center gap-3">
+                  <p className="text-sm text-gray-500 font-medium">이 디자인 그대로 공유해서 수익을 창출해보세요!</p>
+                  <button onClick={handleMarketPublish} className="w-full max-w-xs py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-600/30"><Share2 size={18} /> 템플릿 마켓에 등록하기</button>
+               </div>
             </div>
           </div>
         )}
       </main>
+      )}
     </div>
   );
 };

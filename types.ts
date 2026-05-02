@@ -20,6 +20,18 @@ export interface CardNewsData {
   slides: Slide[];
   hashtags: string[];
   themeIndex?: number; // Stores the random visual theme ID for this deck
+  customBackgroundImage?: string; // For Creator's custom uploaded image
+}
+
+export interface TemplateMarketData {
+  id: string;
+  title: string;
+  authorName: string;
+  thumbnail: string;
+  pricePoints: number;
+  downloads: number;
+  isCreatorOriginal: boolean;
+  jsonData: CardNewsData;
 }
 
 export enum RelationshipType {

@@ -1,7 +1,7 @@
 name: card_news_flutter
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.7+10
+version: 1.0.5+7
 
 environment:
   sdk: ^3.9.2
@@ -14,8 +14,6 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   gal: ^2.3.2
   google_fonts: ^7.0.2
-  dart_openai: ^5.1.0
-  flutter_dotenv: ^5.1.0
   google_generative_ai: ^0.4.7
   google_mobile_ads: ^7.0.0
   path_provider: ^2.1.5
@@ -23,7 +21,6 @@ dependencies:
   provider: ^6.1.5+1
   share_plus: ^12.0.1
   shared_preferences: ^2.5.4
-  flutter_quill: ^11.5.0
 
 dev_dependencies:
   flutter_test:
@@ -32,8 +29,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - .env
 
 flutter_launcher_icons:
   android: "ic_launcher"

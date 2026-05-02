@@ -9,6 +9,7 @@ interface CardPreviewProps {
   slide: Slide;
   totalSlides: number;
   themeIndex?: number;
+  bgImageUrl?: string;
   onUpdate: (header: string, body: string, headerStyle?: TextStyle, bodyStyle?: TextStyle) => void;
   onRegenerate?: (header: string, body: string) => Promise<{ header: string; body: string }>;
   captureId: string;
@@ -254,7 +255,7 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
   );
 };
 
-export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0, onUpdate, captureId, hideControls = false, forExport = false }) => {
+export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0, bgImageUrl, onUpdate, captureId, hideControls = false, forExport = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editHeader, setEditHeader] = useState('');
   const [editBody, setEditBody] = useState('');
@@ -283,9 +284,15 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
 
   return (
     <div className="flex flex-col gap-6 w-full items-center">
-      <div id={captureId} className={`relative w-full md:w-96 aspect-[4/5] overflow-hidden flex flex-col ${forExport ? '' : 'transition-colors duration-500 shadow-2xl'} ${theme.bg} select-none`}>
-        <div className="absolute top-[-20%] right-[-20%] w-[100%] h-[70%] z-0" style={{ background: `radial-gradient(circle at center, ${theme.blob1} 0%, transparent 60%)` }}></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-0" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
+      <div id={captureId} className={`relative w-full md:w-96 aspect-[4/5] overflow-hidden flex flex-col ${forExport ? '' : 'transition-colors duration-500 shadow-2xl'} ${bgImageUrl ? 'bg-black' : theme.bg} select-none`}>
+        {bgImageUrl && (
+          <div className="absolute inset-0 z-0">
+            <img src={bgImageUrl} alt="Custom Background" className="w-full h-full object-cover opacity-60" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-black/50" />
+          </div>
+        )}
+        <div className="absolute top-[-20%] right-[-20%] w-[100%] h-[70%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob1} 0%, transparent 60%)` }}></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
         <div className="relative z-10 h-full flex flex-col p-8 justify-center">
           <div className={`${isCover ? 'flex-1 flex flex-col items-center justify-center' : 'mb-6 pb-6 border-b border-black/10'}`}>
             {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.includes('#') ? '' : theme.accent.replace('text-', 'bg-')}`} style={theme.accent.includes('#') ? { backgroundColor: theme.accent } : {}}></div>}

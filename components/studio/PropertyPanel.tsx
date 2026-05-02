@@ -3,7 +3,7 @@ import { FabricObject, Textbox, Rect, Circle, Triangle, Line, FabricImage, Group
 import {
   X, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Minus, Plus, RotateCw, Lock, Unlock, Palette, Type, Move,
-  ArrowUpRight, CornerUpRight, Sparkles, Wand2, Image as ImageIcon
+  ArrowUpRight, CornerUpRight, Sparkles, Wand2, Scissors, Image as ImageIcon
 } from 'lucide-react';
 
 interface PropertyPanelProps {

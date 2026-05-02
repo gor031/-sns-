@@ -86,6 +86,32 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
 }
 \`\`\``;
 
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, info: any) {
+    console.error('ErrorBoundary caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{padding: 40, background: '#fff0f0', margin: 20, borderRadius: 12, border: '2px solid red'}}>
+          <h2 style={{color: 'red', marginBottom: 10}}>⚠️ 컴포넌트 에러 발생</h2>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, color: '#333'}}>{this.state.error?.message}</pre>
+          <pre style={{whiteSpace: 'pre-wrap', fontSize: 12, color: '#666', marginTop: 10}}>{this.state.error?.stack}</pre>
+          <button onClick={() => this.setState({hasError: false, error: null})} style={{marginTop: 16, padding: '8px 16px', background: '#333', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer'}}>다시 시도</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const App: React.FC = () => {
   // State
   const [jsonInput, setJsonInput] = useState('');
@@ -315,7 +341,7 @@ const App: React.FC = () => {
       </header>
 
       {currentTab === 'studio' ? (
-         <DesignStudio />
+         <ErrorBoundary><DesignStudio /></ErrorBoundary>
       ) : currentTab === 'market' ? (
          <Marketplace onUseTemplate={handleUseTemplate} />
       ) : (

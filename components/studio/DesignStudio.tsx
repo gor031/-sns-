@@ -73,6 +73,44 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
   const [autoAIMode, setAutoAIMode] = useState<'bg-remove' | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
 
+  const syncObjects = useCallback(() => {
+    if (!fabricRef.current) return;
+    setCanvasObjects([...fabricRef.current.getObjects()]);
+  }, []);
+
+  const saveHistoryDirect = useCallback((canvas: Canvas, currentPages?: string[], currentIndex?: number, cw?: number, ch?: number) => {
+    if (isHistoryUpdate.current) return;
+    const p = currentPages ?? pagesRef.current;
+    const idx = currentIndex ?? currentPageIndexRef.current;
+    const w = cw ?? canvasWidthRef.current;
+    const h = ch ?? canvasHeightRef.current;
+    const json = JSON.stringify(canvas.toJSON());
+    const newPages = [...p];
+    newPages[idx] = json;
+
+    const stateToSave: StudioState = { pages: newPages, currentPageIndex: idx, width: w, height: h };
+
+    setHistory(prev => {
+      const newHistory = [...prev.slice(0, historyIndexRef.current + 1), stateToSave];
+      setHistoryIndex(newHistory.length - 1);
+      return newHistory;
+    });
+    setPages(newPages);
+  }, []);
+
+  const saveHistory = useCallback(() => {
+    if (!fabricRef.current) return;
+    saveHistoryDirect(fabricRef.current);
+  }, [saveHistoryDirect]);
+
+  const applyZoom = (canvas: Canvas, z: number, w: number, h: number) => {
+    canvas.setZoom(z);
+    canvas.setDimensions({
+      width: w * z,
+      height: h * z,
+    });
+  };
+
   // Initialize Fabric Canvas
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -204,43 +242,6 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     }
   }, [canvasWidth, canvasHeight, zoom]);
 
-  const syncObjects = useCallback(() => {
-    if (!fabricRef.current) return;
-    setCanvasObjects([...fabricRef.current.getObjects()]);
-  }, []);
-
-  const saveHistoryDirect = useCallback((canvas: Canvas, currentPages?: string[], currentIndex?: number, cw?: number, ch?: number) => {
-    if (isHistoryUpdate.current) return;
-    const p = currentPages ?? pagesRef.current;
-    const idx = currentIndex ?? currentPageIndexRef.current;
-    const w = cw ?? canvasWidthRef.current;
-    const h = ch ?? canvasHeightRef.current;
-    const json = JSON.stringify(canvas.toJSON());
-    const newPages = [...p];
-    newPages[idx] = json;
-
-    const stateToSave: StudioState = { pages: newPages, currentPageIndex: idx, width: w, height: h };
-
-    setHistory(prev => {
-      const newHistory = [...prev.slice(0, historyIndexRef.current + 1), stateToSave];
-      setHistoryIndex(newHistory.length - 1);
-      return newHistory;
-    });
-    setPages(newPages);
-  }, []);
-
-  const saveHistory = useCallback(() => {
-    if (!fabricRef.current) return;
-    saveHistoryDirect(fabricRef.current);
-  }, [saveHistoryDirect]);
-
-  const applyZoom = (canvas: Canvas, z: number, w: number, h: number) => {
-    canvas.setZoom(z);
-    canvas.setDimensions({
-      width: w * z,
-      height: h * z,
-    });
-  };
 
   const handleZoomIn = () => {
     const newZoom = Math.min(zoom + 0.1, 2);

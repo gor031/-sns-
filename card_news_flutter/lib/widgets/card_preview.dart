@@ -99,44 +99,47 @@ class CardPreview extends StatelessWidget {
                     ],
 
                     // Header
-                    GestureDetector(
-                      onTap: onHeaderTap,
-                      child: Container(
+                    if (headerController != null)
+                      Container(
                         width: double.infinity,
-                        // If controller is provided, show editable field
-                        child: headerController != null 
-                            ? _buildEditableField(
-                                controller: headerController!,
-                                focusNode: headerFocus,
-                                baseStyle: _getGoogleFont(
-                                  slide.headerStyle?.fontFamily,
-                                  TextStyle(
-                                    fontSize: _parseFontSize(slide.headerStyle?.fontSize, isCover ? 36 : 28),
-                                    fontWeight: FontWeight.bold,
-                                    color: _parseColor(slide.headerStyle?.color) ?? theme.textColor,
-                                    height: 1.3,
-                                  ),
-                                ),
-                                align: _parseAlign(slide.headerStyle?.align, isCover ? TextAlign.center : TextAlign.left),
-                                isHeader: true,
-                              )
-                            : _buildRichText(
-                                text: slide.header,
-                                customStyle: slide.headerStyle, 
-                                defaultAlign: isCover ? TextAlign.center : TextAlign.left,
-                                baseStyle: _getGoogleFont(
-                                  slide.headerStyle?.fontFamily,
-                                  TextStyle(
-                                    fontSize: _parseFontSize(slide.headerStyle?.fontSize, isCover ? 36 : 28),
-                                    fontWeight: FontWeight.bold,
-                                    color: _parseColor(slide.headerStyle?.color) ?? theme.textColor, // Support custom color
-                                    height: 1.3,
-                                  ),
-                                ),
-                                isHeader: true,
+                        child: _buildEditableField(
+                          controller: headerController!,
+                          focusNode: headerFocus,
+                          baseStyle: _getGoogleFont(
+                            slide.headerStyle?.fontFamily,
+                            TextStyle(
+                              fontSize: _parseFontSize(slide.headerStyle?.fontSize, isCover ? 36 : 28),
+                              fontWeight: FontWeight.bold,
+                              color: _parseColor(slide.headerStyle?.color) ?? theme.textColor,
+                              height: 1.3,
+                            ),
+                          ),
+                          align: _parseAlign(slide.headerStyle?.align, isCover ? TextAlign.center : TextAlign.left),
+                          isHeader: true,
+                        ),
+                      )
+                    else
+                      GestureDetector(
+                        onTap: onHeaderTap,
+                        child: Container(
+                          width: double.infinity,
+                          child: _buildRichText(
+                            text: slide.header,
+                            customStyle: slide.headerStyle,
+                            defaultAlign: isCover ? TextAlign.center : TextAlign.left,
+                            baseStyle: _getGoogleFont(
+                              slide.headerStyle?.fontFamily,
+                              TextStyle(
+                                fontSize: _parseFontSize(slide.headerStyle?.fontSize, isCover ? 36 : 28),
+                                fontWeight: FontWeight.bold,
+                                color: _parseColor(slide.headerStyle?.color) ?? theme.textColor,
+                                height: 1.3,
                               ),
+                            ),
+                            isHeader: true,
+                          ),
+                        ),
                       ),
-                    ),
 
                     if (isCover)
                       Center(
@@ -151,28 +154,32 @@ class CardPreview extends StatelessWidget {
                     if (!isCover) ...[
                       SizedBox(height: 24),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: onBodyTap,
-                          child: Container(
-                            width: double.infinity,
-                            color: Colors.transparent,
-                            child: bodyController != null
-                                ? _buildEditableField(
-                                    controller: bodyController!,
-                                    focusNode: bodyFocus,
-                                    baseStyle: _getGoogleFont(
-                                      slide.bodyStyle?.fontFamily,
-                                      TextStyle(
-                                        fontSize: _parseFontSize(slide.bodyStyle?.fontSize, 22),
-                                        fontWeight: FontWeight.w500,
-                                        color: _parseColor(slide.bodyStyle?.color) ?? theme.textColor,
-                                        height: 1.4,
-                                      ),
+                        child: bodyController != null
+                            ? Container(
+                                width: double.infinity,
+                                color: Colors.transparent,
+                                child: _buildEditableField(
+                                  controller: bodyController!,
+                                  focusNode: bodyFocus,
+                                  baseStyle: _getGoogleFont(
+                                    slide.bodyStyle?.fontFamily,
+                                    TextStyle(
+                                      fontSize: _parseFontSize(slide.bodyStyle?.fontSize, 22),
+                                      fontWeight: FontWeight.w500,
+                                      color: _parseColor(slide.bodyStyle?.color) ?? theme.textColor,
+                                      height: 1.4,
                                     ),
-                                    align: _parseAlign(slide.bodyStyle?.align, TextAlign.left),
-                                    isHeader: false,
-                                  )
-                                : _buildRichText(
+                                  ),
+                                  align: _parseAlign(slide.bodyStyle?.align, TextAlign.left),
+                                  isHeader: false,
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: onBodyTap,
+                                child: Container(
+                                  width: double.infinity,
+                                  color: Colors.transparent,
+                                  child: _buildRichText(
                                     text: slide.body,
                                     customStyle: slide.bodyStyle,
                                     defaultAlign: TextAlign.left,
@@ -187,8 +194,8 @@ class CardPreview extends StatelessWidget {
                                     ),
                                     isHeader: false,
                                   ),
-                          ),
-                        ),
+                                ),
+                              ),
                       ),
                     ],
                   ],

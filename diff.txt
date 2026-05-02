@@ -1,0 +1,363 @@
+diff --git a/card_news_flutter/lib/screens/home_screen.dart b/card_news_ai/lib/screens/home_screen.dart
+index 033a172..25a9ffc 100644
+--- a/card_news_flutter/lib/screens/home_screen.dart
++++ b/card_news_ai/lib/screens/home_screen.dart
+@@ -18,65 +18,52 @@ import '../theme/card_theme.dart';
+ import '../widgets/card_preview.dart';
+ import '../widgets/rich_text_toolbar.dart';
+ import '../widgets/styled_text_controller.dart'; // New Import
++import '../services/openai_service.dart';
+ 
+ const String SYSTEM_PROMPT = """
+ 당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터'입니다.
+-모바일 환경은 가독성이 생명입니다. 사용자가 주제를 던지면 무조건 **짧고, 강렬하고, 직관적인** 원고를 작성해야 합니다.
+-
+-당신의 작업은 반드시 다음 **3단계 프로세스**를 따라야 합니다.
+-
+----
+-
+-### [1단계: sns 올릴 제목과 내용]
+-사용자가 주제나 키워드를 입력하면 sns에 올릴 제목과 내용을 먼저생성해줘(반드시 복사 버튼으로 한번에 복사가 가능하게 해줘야되)
+-
+-### [2단계: 원고 기획 및 컨펌]
+-제목과 내용 생성한 뒤에, 바로 JSON을 만들지 말고 먼저 **텍스트 원고**를 작성하여 보여주세요.
+-
+-**1. 작성 원칙 (매우 중요):**
+-- **다이어트**: 불필요한 조사, 형용사, 부사를 모두 삭제하세요.
+-- **길이 제한**: 한 슬라이드당 **최대 2문장**을 넘기지 마세요. (이미지가 텍스트를 압도하지 않게)
+-- **구조**: 
+-   - 표지 (후킹 제목)
+-   - 본문 (6~10장 내외, 핵심 정보만 딱딱 끊어서)
+-   - 결론 (행동 유도)
+-- **강조 표시**: 핵심 단어는 **강조** 처리를 미리 해서 보여주세요.
+-
+-**2. 마무리 멘트:**
+-원고 끝에 반드시 **"이 내용으로 카드뉴스 데이터를 생성할까요?"** 라고 물어보세요.
+-
+----
+-
+-### [3단계: JSON 데이터 변환]
+-사용자가 "좋아", "만들어줘", "진행해"라고 동의하면, 위에서 확정된 원고를 **앱이 인식할 수 있는 JSON 코드**로 변환해서 출력하세요.
+-
+-**1. 필수 규칙:**
+-- 서론/결론 없이 **오직 JSON 코드만** 출력하세요.
+-- 반드시 Markdown 코드 블록(```json)으로 감싸야 합니다.
+-
+-**2. 데이터 구조 (변형 금지):**
++사용자가 주제를 입력하면 즉시 **최적화된 카드뉴스 JSON 데이터**를 생성하십시오.
++
++**[작성 원칙]**
++1. **가독성**: 한 슬라이드당 최대 2문장 이내로 작성하세요.
++2. **구조**: 
++   - 1페이지: 시선을 사로잡는 **표지 제목** (body는 비워둠)
++   - 2페이지~마지막 페이지: 각 장의 주제를 담은 **소제목(header)**과 핵심 정보를 요약한 **본문(body)**을 반드시 함께 작성하세요. 
++   - **마무리 멘트(마지막 슬라이드)도 반드시 소제목(header)이 있어야 합니다.** (예: "결론", "함께 해봐요" 등)
++3. **SNS 홍보**: 카드를 다 만든 뒤 SNS(인스타그램 등)에 올릴 때 사용할 **강력한 제목(snsTitle)**과 **내용(snsBody)**도 함께 생성하세요.
++4. **강조**: 핵심 단어는 **강조** 처리를 하세요.
++5. **결과물**: 서론/결론 없이 오직 마크다운 코드 블록(```json)으로 감싸진 JSON 데이터만 출력하세요.
++
++**[데이터 구조 예시]**
+ ```json
+ {
+   "topic": "주제",
+   "targetAudience": "타겟",
+   "tone": "어조",
++  "snsTitle": "SNS 업로드용 제목",
++  "snsBody": "SNS에 함께 올릴 홍보 문구와 해시태그",
+   "hashtags": ["태그1", "태그2"],
+   "slides": [
+     {
+       "pageNumber": 1,
+-      "header": "표지 제목(짧고 굵게) **강조**",
++      "header": "표지 제목 **강조**",
+       "body": "" 
+     },
+     {
+       "pageNumber": 2,
+-      "header": "소제목(핵심만)",
+-      "body": "본문은 최대 2줄.\\n줄바꿈을 적극 활용.\\n**핵심** 단어 강조."
++      "header": "1. 첫 번째 소제목",
++      "body": "본문은 반드시 내용을 채워야 합니다.\\n줄바꿈과 **강조**를 적절히 섞으세요."
++    },
++    {
++      "pageNumber": 3,
++      "header": "마무리 소제목",
++      "body": "마지막 페이지도 반드시 **소제목**을 넣어주세요."
+     }
+   ]
+ }
+ ```""";
+ 
+-enum InputMode { json, manual }
++enum InputMode { json, manual, auto }
+ 
+ class HomeScreen extends StatefulWidget {
+   const HomeScreen({Key? key}) : super(key: key);
+@@ -107,6 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
+     {'header': TextEditingController(), 'body': TextEditingController()}, // Default Page 1
+   ];
+ 
++  // AI Auto Mode State
++  final OpenAIService _openAIService = OpenAIService();
++  final TextEditingController _topicController = TextEditingController();
++
+   // Inline Editing State
+   int? _editingSlideIndex;
+   String? _editingField; // 'header' or 'body'
+@@ -137,6 +128,9 @@ class _HomeScreenState extends State<HomeScreen> {
+       if (_bodyFocus.hasFocus) setState(() => _activeController = _bodyController);
+     });
+     
++    // Initialize OpenAI
++    OpenAIService.init();
++
+     // Load Banner Ad
+     _bannerAd = _adService.createBannerAd()..load().then((value) {
+         setState(() {
+@@ -196,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
+     _headerFocus.dispose();
+     _bodyFocus.dispose();
+     _bannerAd?.dispose();
++    _topicController.dispose();
+     super.dispose();
+   }
+ 
+@@ -627,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
+     return Scaffold(
+       backgroundColor: Colors.grey[200], // Darker gray for better contrast
+       appBar: AppBar(
+-        title: Text('카드뉴스 생성기', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w900, color: Colors.black)),
++        title: Text('도깨비방망이', style: GoogleFonts.notoSansKr(fontWeight: FontWeight.w900, color: Colors.black)),
+         centerTitle: false,
+         backgroundColor: Colors.white,
+         elevation: 1,
+@@ -644,6 +639,7 @@ class _HomeScreenState extends State<HomeScreen> {
+                  _headerController = null;
+                  _bodyController = null;
+                  _activeController = null;
++                 _topicController.clear();
+               });
+             },
+            ),
+@@ -671,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
+                         ),
+                         SizedBox(width: 12),
+                         Text(
+-                          '카드뉴스 생성기',
++                          '도깨비방망이',
+                           style: GoogleFonts.notoSansKr(fontSize: 20, fontWeight: FontWeight.w900),
+                         ),
+                         Spacer(),
+@@ -710,15 +706,7 @@ class _HomeScreenState extends State<HomeScreen> {
+               ),
+             ),
+           ),
+-          // BANNER AD - always shown at the bottom
+-          if (_isBannerAdLoaded && _bannerAd != null)
+-            Container(
+-              alignment: Alignment.center,
+-              width: _bannerAd!.size.width.toDouble(),
+-              height: _bannerAd!.size.height.toDouble(),
+-              child: AdWidget(ad: _bannerAd!),
+-            ),
+-          // TOOLBAR (Visible when editing)
++          // TOOLBAR (Visible when editing) - Sits mainly above keyboard due to Column + resizeToAvoidBottomInset
+           if (_activeController != null)
+              Container(
+                 color: Colors.white,
+@@ -868,6 +856,24 @@ class _HomeScreenState extends State<HomeScreen> {
+             ),
+             child: Row(
+               children: [
++                Expanded(
++                  child: GestureDetector(
++                    onTap: () => setState(() => _inputMode = InputMode.auto),
++                    child: Container(
++                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
++                      decoration: BoxDecoration(
++                        color: _inputMode == InputMode.auto ? Colors.white : Colors.transparent,
++                        borderRadius: BorderRadius.circular(10),
++                        boxShadow: _inputMode == InputMode.auto ? [BoxShadow(color: Colors.black12, blurRadius: 4)] : [],
++                      ),
++                      alignment: Alignment.center,
++                      child: FittedBox(
++                        fit: BoxFit.scaleDown,
++                        child: Text("AI 자동 생성", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.auto ? Colors.blue[900] : Colors.grey[600])),
++                      ),
++                    ),
++                  ),
++                ),
+                 Expanded(
+                   child: GestureDetector(
+                     onTap: () => setState(() => _inputMode = InputMode.json),
+@@ -881,7 +887,7 @@ class _HomeScreenState extends State<HomeScreen> {
+                       alignment: Alignment.center,
+                       child: FittedBox(
+                         fit: BoxFit.scaleDown,
+-                        child: Text("AI 결과 붙여넣기 (JSON)", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.json ? Colors.blue[900] : Colors.grey[600])),
++                        child: Text("결과 붙여넣기", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.json ? Colors.blue[900] : Colors.grey[600])),
+                       ),
+                     ),
+                   ),
+@@ -899,7 +905,7 @@ class _HomeScreenState extends State<HomeScreen> {
+                       alignment: Alignment.center,
+                       child: FittedBox(
+                         fit: BoxFit.scaleDown,
+-                        child: Text("직접 입력하기", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.manual ? Colors.blue[900] : Colors.grey[600])),
++                        child: Text("직접 입력", style: TextStyle(fontWeight: FontWeight.bold, color: _inputMode == InputMode.manual ? Colors.blue[900] : Colors.grey[600])),
+                       ),
+                     ),
+                   ),
+@@ -909,7 +915,9 @@ class _HomeScreenState extends State<HomeScreen> {
+           ),
+           SizedBox(height: 24),
+ 
+-          if (_inputMode == InputMode.json)
++          if (_inputMode == InputMode.auto)
++            _buildAutoInputForm()
++          else if (_inputMode == InputMode.json)
+             _buildJsonInputForm()
+           else
+             _buildManualInputForm(),
+@@ -1251,6 +1259,72 @@ class _HomeScreenState extends State<HomeScreen> {
+ 
+         SizedBox(height: 20),
+         
++        // SNS Content Section (Copy for posting)
++        if (_cardData?.snsTitle != null || _cardData?.snsBody != null)
++          Container(
++            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
++            padding: EdgeInsets.all(20),
++            decoration: BoxDecoration(
++              color: Colors.blue.shade50,
++              borderRadius: BorderRadius.circular(20),
++              border: Border.all(color: Colors.blue.shade100),
++            ),
++            child: Column(
++              crossAxisAlignment: CrossAxisAlignment.start,
++              children: [
++                Row(
++                  children: [
++                    Icon(Icons.campaign, color: Colors.blue.shade800, size: 20),
++                    SizedBox(width: 8),
++                    Text("SNS 홍보 문구 (복사해서 사용하세요)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
++                  ],
++                ),
++                SizedBox(height: 16),
++                if (_cardData?.snsTitle != null) ...[
++                  Text("제목", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade300)),
++                  SizedBox(height: 4),
++                  Row(
++                    children: [
++                      Expanded(child: Text(_cardData!.snsTitle!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
++                      IconButton(
++                        icon: Icon(Icons.copy, size: 18, color: Colors.blue),
++                        onPressed: () {
++                          Clipboard.setData(ClipboardData(text: _cardData!.snsTitle!));
++                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("제목이 복사되었습니다!")));
++                        },
++                      ),
++                    ],
++                  ),
++                  Divider(color: Colors.blue.shade100),
++                ],
++                if (_cardData?.snsBody != null) ...[
++                  Text("내용", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue.shade300)),
++                  SizedBox(height: 4),
++                  Text(_cardData!.snsBody!, style: TextStyle(fontSize: 14, height: 1.5)),
++                  SizedBox(height: 12),
++                  SizedBox(
++                    width: double.infinity,
++                    child: OutlinedButton.icon(
++                      onPressed: () {
++                        Clipboard.setData(ClipboardData(text: "${_cardData!.snsTitle ?? ''}\n\n${_cardData!.snsBody!}"));
++                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("전체 내용이 복사되었습니다!")));
++                      },
++                      icon: Icon(Icons.content_copy, size: 16),
++                      label: Text("내용 전체 복사하기"),
++                      style: OutlinedButton.styleFrom(
++                        foregroundColor: Colors.blue.shade800,
++                        side: BorderSide(color: Colors.blue.shade300),
++                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++                      ),
++                    ),
++                  ),
++                ],
++              ],
++            ),
++          ),
++
++        SizedBox(height: 12),
++        
+         // Save All Button
+         Container(
+           padding: EdgeInsets.symmetric(horizontal: 24),
+@@ -1276,4 +1350,68 @@ class _HomeScreenState extends State<HomeScreen> {
+ 
+ 
+ 
++  Widget _buildAutoInputForm() {
++    return Container(
++      padding: EdgeInsets.all(24),
++      decoration: BoxDecoration(
++        color: Colors.white,
++        borderRadius: BorderRadius.circular(24),
++        border: Border.all(color: Colors.grey[200]!),
++        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          Text("어떤 주제로 카드뉴스를 만들까요?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
++          SizedBox(height: 12),
++          TextField(
++            controller: _topicController,
++            decoration: InputDecoration(
++              hintText: "예: 다이어트 성공 비법, 2024 재테크 전략",
++              filled: true,
++              fillColor: Colors.grey[50],
++              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
++            ),
++          ),
++          SizedBox(height: 24),
++          ElevatedButton.icon(
++            onPressed: _isLoading ? null : () => _checkLimitAndGenerate(_runAutoGenerate),
++            icon: Icon(Icons.auto_awesome),
++            label: Text(_isLoading ? "생성 중..." : "AI 카드 뉴스 생성하기"),
++            style: ElevatedButton.styleFrom(
++              backgroundColor: Colors.blue[600],
++              foregroundColor: Colors.white,
++              padding: EdgeInsets.symmetric(vertical: 16),
++              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
++            ),
++          ),
++        ],
++      ),
++    );
++  }
++
++  Future<void> _runAutoGenerate() async {
++    if (_topicController.text.trim().isEmpty) {
++      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('주제를 입력해주세요!')));
++      return;
++    }
++    setState(() => _isLoading = true);
++    try {
++      _openAIService.addMessage('system', SYSTEM_PROMPT);
++      final response = await _openAIService.chat(_topicController.text);
++      final data = OpenAIService.parseCardNewsJson(response);
++      setState(() {
++        _cardData = data;
++        _currentThemeIndex = 0;
++        _currentPageIndex = 0;
++        _slideKeys = List.generate(data.slides.length, (_) => GlobalKey());
++        _isLoading = false;
++        _initControllersForPage(0);
++      });
++    } catch (e) {
++      setState(() => _isLoading = false);
++      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('생성 중 에러 발생: $e')));
++    }
++  }
++
+ }

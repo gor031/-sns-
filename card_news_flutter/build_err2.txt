@@ -1,0 +1,69 @@
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file 'C:\Users\User\Downloads\cardnews\card_news_flutter\android\settings.gradle.kts' line: 20
+
+* What went wrong:
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> A problem occurred configuring project ':gradle'.
+   > Could not resolve all dependencies for configuration 'classpath'.
+      > java.io.IOException: ?붿뒪??怨듦컙??遺議깊빀?덈떎
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1s
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* Where:
+Settings file 'C:\Users\User\Downloads\cardnews\card_news_flutter\android\settings.gradle.kts' line: 20
+
+* What went wrong:
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> A problem occurred configuring project ':gradle'.
+   > Could not resolve all dependencies for configuration 'classpath'.
+      > java.io.IOException: ?붿뒪??怨듦컙??遺議깊빀?덈떎
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Could not stop all services.
+> java.io.IOException: ?붿뒪??怨듦컙??遺議깊빀?덈떎
+> java.io.IOException: ?붿뒪??怨듦컙??遺議깊빀?덈떎
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 1s
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Could not write cache value to 'C:\Users\User\.gradle\daemon\8.12\registry.bin'.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+Gradle task
+assembleRelease failed
+with exit code 1

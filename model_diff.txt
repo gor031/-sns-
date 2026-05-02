@@ -1,0 +1,31 @@
+diff --git a/card_news_flutter/lib/models/card_news.dart b/card_news_ai/lib/models/card_news.dart
+index b8c537e..90cd09d 100644
+--- a/card_news_flutter/lib/models/card_news.dart
++++ b/card_news_ai/lib/models/card_news.dart
+@@ -68,6 +68,8 @@ class CardNewsData {
+   final String tone;
+   final List<String> hashtags;
+   final List<Slide> slides;
++  final String? snsTitle; // New field
++  final String? snsBody;  // New field
+   int? themeIndex;
+ 
+   CardNewsData({
+@@ -76,6 +78,8 @@ class CardNewsData {
+     required this.tone,
+     required this.hashtags,
+     required this.slides,
++    this.snsTitle,
++    this.snsBody,
+     this.themeIndex,
+   });
+ 
+@@ -95,6 +99,8 @@ class CardNewsData {
+       tone: json['tone'] ?? '기본',
+       hashtags: (json['hashtags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+       slides: parsedSlides,
++      snsTitle: json['snsTitle'],
++      snsBody: json['snsBody'],
+       themeIndex: json['themeIndex'],
+     );
+   }

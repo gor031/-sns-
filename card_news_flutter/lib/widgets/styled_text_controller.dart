@@ -9,130 +9,115 @@ class StyledTextEditingController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final List<InlineSpan> children = [];
     final String text = value.text;
-    final TextStyle baseStyle = style ?? const TextStyle();
-    final TextStyle hiddenStyle = baseStyle.copyWith(color: Colors.transparent, fontSize: 0.0, height: 0.0); // Completely hide 
-    
-    // Recursive parsing helper
-    List<InlineSpan> _parseContent(String text, TextStyle currentStyle) {
-      final List<InlineSpan> spans = [];
-      // Regex for tags only, not full blocks to allow nesting
-      // But simplifying: just recurse for the content inside valid blocks.
-      // We'll reuse the same regex pattern concept.
-      int i = 0;
-      
-      while (i < text.length) {
-        // Find next potential tag
-        int nextBold = text.indexOf('**', i);
-        int nextHigh = text.indexOf('==', i);
-        int nextColor = text.indexOf('<c:', i);
-        
-        List<int> indices = [nextBold, nextHigh, nextColor].where((idx) => idx != -1).toList();
-        
-        if (indices.isEmpty) {
-          spans.add(TextSpan(text: text.substring(i), style: currentStyle));
-          break;
-        }
-        
-        indices.sort();
-        int closest = indices.first;
-        
-        // Add text before tag
-        if (closest > i) {
-          spans.add(TextSpan(text: text.substring(i, closest), style: currentStyle));
-        }
-        
-        if (closest == nextBold) {
-           int end = text.indexOf('**', closest + 2);
-           if (end != -1) {
-             spans.add(TextSpan(text: '**', style: hiddenStyle));
-             String content = text.substring(closest + 2, end);
-             spans.addAll(_parseContent(content, currentStyle.copyWith(fontWeight: FontWeight.bold)));
-             spans.add(TextSpan(text: '**', style: hiddenStyle));
-             i = end + 2;
-           } else {
-             spans.add(TextSpan(text: '**', style: currentStyle));
-             i = closest + 2;
-           }
-        } else if (closest == nextHigh) {
-           int end = text.indexOf('==', closest + 2);
-           if (end != -1) {
-             spans.add(TextSpan(text: '==', style: hiddenStyle));
-             String content = text.substring(closest + 2, end);
-             spans.addAll(_parseContent(content, currentStyle.copyWith(backgroundColor: Colors.yellow.withOpacity(0.3), color: Colors.black87)));
-             spans.add(TextSpan(text: '==', style: hiddenStyle));
-             i = end + 2;
-           } else {
-             spans.add(TextSpan(text: '==', style: currentStyle));
-             i = closest + 2;
-           }
-        } else if (closest == nextColor) {
-           // Parse <c:#HEX>
-           int tagClose = text.indexOf('>', closest);
-           if (tagClose != -1) {
-              String tag = text.substring(closest, tagClose + 1);
-              String hex = tag.substring(3, tag.length - 1);
-              
-              // Nesting logic
-              int depth = 1;
-              int current = tagClose + 1;
-              int contentEnd = -1;
-               
-              while (current < text.length) {
-                 int open = text.indexOf('<c:', current);
-                 int close = text.indexOf('</c>', current);
-                 
-                 if (close == -1) break; 
-                 
-                 if (open != -1 && open < close) {
-                    depth++;
-                    current = open + 3;
-                 } else {
-                    depth--;
-                    if (depth == 0) {
-                       contentEnd = close;
-                       break;
-                    }
-                    current = close + 4;
-                 }
-              }
-              
-              if (contentEnd != -1) {
-                 // Determine Color
-                 String hexClean = hex.replaceFirst('#', '');
-                 if (hexClean.length == 3) hexClean = hexClean.split('').map((c) => '$c$c').join('');
-                 else if (hexClean.length == 4) hexClean = hexClean.split('').map((c) => '$c$c').join('');
-                 
-                 Color color = Colors.black;
-                 try {
-                   if (hexClean.length == 6) {
-                      color = Color(int.parse(hexClean, radix: 16) + 0xFF000000);
-                   } else if (hexClean.length == 8) {
-                      color = Color(int.parse(hexClean, radix: 16));
-                   }
-                 } catch (_) {}
-                 
-                 spans.add(TextSpan(text: tag, style: hiddenStyle));
-                 String content = text.substring(tagClose + 1, contentEnd);
-                 spans.addAll(_parseContent(content, currentStyle.copyWith(color: color)));
-                 spans.add(TextSpan(text: '</c>', style: hiddenStyle));
-                 i = contentEnd + 4;
-              } else {
-                 spans.add(TextSpan(text: tag, style: currentStyle));
-                 i = tagClose + 1;
-              }
-           } else {
-              spans.add(TextSpan(text: '<c:', style: currentStyle));
-              i = closest + 3;
-           }
+    if (text.isEmpty) return TextSpan(text: text, style: style);
+
+    final List<InlineSpan> spans = _parseSpans(text, style ?? const TextStyle());
+    return TextSpan(children: spans, style: style);
+  }
+
+  List<InlineSpan> _parseSpans(String text, TextStyle baseStyle) {
+    final List<InlineSpan> spans = [];
+    // 태그를 투명하게 숨기기 위한 스타일
+    final TextStyle hiddenStyle = baseStyle.copyWith(
+      color: Colors.transparent,
+      fontSize: 0.001, // 공간을 거의 차지하지 않도록
+    );
+
+    int i = 0;
+    while (i < text.length) {
+      // 다음 태그 위치 탐색
+      final int boldIdx = text.indexOf('**', i);
+      final int colorIdx = text.indexOf('<c:', i);
+      final int newlineIdx = text.indexOf('\n', i);
+
+      // 가장 가까운 특수 위치 찾기
+      int closest = -1;
+      String? type;
+
+      void check(int idx, String t) {
+        if (idx != -1 && (closest == -1 || idx < closest)) {
+          closest = idx;
+          type = t;
         }
       }
-      return spans;
+
+      check(boldIdx, 'bold');
+      check(colorIdx, 'color');
+      check(newlineIdx, 'newline');
+
+      if (closest == -1) {
+        // 더 이상 태그 없음 - 나머지 전부 일반 텍스트
+        spans.add(TextSpan(text: text.substring(i), style: baseStyle));
+        break;
+      }
+
+      // 태그 이전 일반 텍스트 추가
+      if (closest > i) {
+        spans.add(TextSpan(text: text.substring(i, closest), style: baseStyle));
+      }
+
+      if (type == 'newline') {
+        spans.add(TextSpan(text: '\n', style: baseStyle));
+        i = closest + 1;
+      } else if (type == 'bold') {
+        final int end = text.indexOf('**', closest + 2);
+        if (end == -1) {
+          // 닫는 ** 없음 → 그냥 텍스트로
+          spans.add(TextSpan(text: text.substring(closest), style: baseStyle));
+          break;
+        }
+        // 여는 ** → 투명
+        spans.add(TextSpan(text: '**', style: hiddenStyle));
+        // 볼드 내용
+        final String content = text.substring(closest + 2, end);
+        spans.addAll(_parseSpans(
+            content, baseStyle.copyWith(fontWeight: FontWeight.bold)));
+        // 닫는 ** → 투명
+        spans.add(TextSpan(text: '**', style: hiddenStyle));
+        i = end + 2;
+      } else if (type == 'color') {
+        // <c:#HEX> ... </c>
+        final int tagClose = text.indexOf('>', closest);
+        if (tagClose == -1) {
+          spans.add(TextSpan(text: text.substring(closest), style: baseStyle));
+          break;
+        }
+        final String tag = text.substring(closest, tagClose + 1); // <c:#HEX>
+        final String hex = tag.substring(3, tag.length - 1); // #HEX
+        final Color? color = _parseColor(hex);
+
+        final int contentEnd = text.indexOf('</c>', tagClose + 1);
+        if (contentEnd == -1) {
+          spans.add(TextSpan(text: text.substring(closest), style: baseStyle));
+          break;
+        }
+
+        // 여는 태그 → 투명
+        spans.add(TextSpan(text: tag, style: hiddenStyle));
+        // 색상 적용된 내용
+        final String content = text.substring(tagClose + 1, contentEnd);
+        final TextStyle colorStyle =
+            color != null ? baseStyle.copyWith(color: color) : baseStyle;
+        spans.addAll(_parseSpans(content, colorStyle));
+        // 닫는 태그 → 투명
+        spans.add(TextSpan(text: '</c>', style: hiddenStyle));
+        i = contentEnd + 4;
+      }
     }
 
-    children.addAll(_parseContent(text, baseStyle));
+    return spans;
+  }
 
-    return TextSpan(style: style, children: children);
+  Color? _parseColor(String hex) {
+    try {
+      final String h = hex.replaceFirst('#', '');
+      if (h.length == 6) {
+        return Color(int.parse(h, radix: 16) + 0xFF000000);
+      } else if (h.length == 8) {
+        return Color(int.parse(h, radix: 16));
+      }
+    } catch (_) {}
+    return null;
   }
 }

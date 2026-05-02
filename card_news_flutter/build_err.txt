@@ -1,0 +1,15 @@
+Running Gradle task 'assembleDebug'...                          
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file 'C:\Users\User\Downloads\cardnews\card_news_flutter\android\settings.gradle.kts' line: 20
+
+* What went wrong:
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> A problem occurred configuring project ':gradle'.
+   > Could not resolve all dependencies for configuration 'classpath'.
+      > java.io.IOException: ?붿뒪??怨듦컙??遺議깊빀?덈떎
+
+* Try:
+> Run with --stacktrace option to get the stack trace.

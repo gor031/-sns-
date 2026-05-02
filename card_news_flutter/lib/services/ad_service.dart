@@ -18,15 +18,15 @@ class AdService {
 
   // Real Ad Unit IDs provided by user
   static const String bannerAdUnitId = 'ca-app-pub-8738237326772027/5592780949';
-  static const String rewardedAdUnitId = 'ca-app-pub-8738237326772027/8310637146';
+  static const String rewardedAdUnitId = 'ca-app-pub-8738237326772027/7557409081';
 
   // Test Ad Unit IDs (for safety during dev, but user wants real ones)
   // Use real ones as requested, but be aware they might not serve in test builds without test device ID.
   // Ideally, use test IDs for debug builds.
   // static const String bannerAdUnitIdTest = 'ca-app-pub-3940256099942544/6300978111';
-  // static const String rewardedAdUnitIdTest = 'ca-app-pub-3940256099942544/5224354917';
+  // static const String rewardedAdUnitIdTest = 'ca-app-pub-3940256099942544/5376652511';
 
-  RewardedAd? _rewardedAd;
+  RewardedInterstitialAd? _rewardedAd;
   bool _isRewardedAdReady = false;
 
   Future<void> initialize() async {
@@ -77,17 +77,17 @@ class AdService {
   // --- Rewarded Ad ---
 
   void _loadRewardedAd() {
-    RewardedAd.load(
+    RewardedInterstitialAd.load(
       adUnitId: rewardedAdUnitId,
       request: AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      rewardedInterstitialAdLoadCallback: RewardedInterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           _rewardedAd = ad;
           _isRewardedAdReady = true;
-          print('Rewarded Ad loaded');
+          print('Rewarded Interstitial Ad loaded');
         },
         onAdFailedToLoad: (error) {
-          print('Rewarded Ad failed to load: $error');
+          print('Rewarded Interstitial Ad failed to load: $error');
           _isRewardedAdReady = false;
           _rewardedAd = null;
         },

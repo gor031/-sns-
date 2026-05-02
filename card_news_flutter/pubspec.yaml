@@ -1,7 +1,7 @@
 name: card_news_flutter
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.6+8
+version: 1.0.7+10
 
 environment:
   sdk: ^3.9.2
@@ -23,6 +23,7 @@ dependencies:
   provider: ^6.1.5+1
   share_plus: ^12.0.1
   shared_preferences: ^2.5.4
+  flutter_quill: ^11.5.0
 
 dev_dependencies:
   flutter_test:

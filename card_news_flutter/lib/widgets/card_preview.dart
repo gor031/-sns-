@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:google_fonts/google_fonts.dart';
 import '../models/card_news.dart';
 import '../theme/card_theme.dart';
@@ -11,8 +12,8 @@ class CardPreview extends StatelessWidget {
   final GlobalKey? captureKey;
   final VoidCallback? onHeaderTap;
   final VoidCallback? onBodyTap;
-  final TextEditingController? headerController;
-  final TextEditingController? bodyController;
+  final QuillController? headerController;
+  final QuillController? bodyController;
   final FocusNode? headerFocus;
   final FocusNode? bodyFocus;
   final String? signature; // New field
@@ -293,26 +294,29 @@ class CardPreview extends StatelessWidget {
   }
 
   Widget _buildEditableField({
-    required TextEditingController controller,
+    required QuillController controller,
     required FocusNode? focusNode,
     required TextStyle baseStyle,
     required TextAlign align,
     required bool isHeader,
   }) {
-    return TextField(
+    return QuillEditor.basic(
       controller: controller,
-      focusNode: focusNode,
-      style: baseStyle,
-      textAlign: align,
-      maxLines: null,
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        isDense: true,
-        contentPadding: EdgeInsets.zero,
-        hintText: isHeader ? "제목을 입력하세요" : "내용을 입력하세요",
-        hintStyle: baseStyle.copyWith(color: Colors.grey.withOpacity(0.5)),
+      focusNode: focusNode ?? FocusNode(),
+      config: QuillEditorConfig(
+        placeholder: isHeader ? '제목을 입력하세요' : '내용을 입력하세요',
+        expands: false,
+        padding: EdgeInsets.zero,
+        customStyles: DefaultStyles(
+          paragraph: DefaultTextBlockStyle(
+            baseStyle,
+            HorizontalSpacing.zero,
+            VerticalSpacing.zero,
+            VerticalSpacing.zero,
+            null,
+          ),
+        ),
       ),
-      // We rely on the StyledController for the 'rich' look in the edit field
     );
   }
 

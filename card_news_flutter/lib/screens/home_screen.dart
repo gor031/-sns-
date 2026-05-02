@@ -18,7 +18,8 @@ import '../services/gemini_service.dart';
 import '../theme/card_theme.dart';
 import '../widgets/card_preview.dart';
 import '../widgets/rich_text_toolbar.dart';
-import '../widgets/styled_text_controller.dart'; // New Import
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import '../utils/quill_markdown_converter.dart';
 import '../services/openai_service.dart';
 
 const String SYSTEM_PROMPT = """
@@ -112,12 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // Ad State
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  // Direct Editing Controllers (Styled)
-  StyledTextEditingController? _headerController;
-  StyledTextEditingController? _bodyController;
+  // Direct Editing Controllers (Quill-based)
+  QuillController? _headerController;
+  QuillController? _bodyController;
   final FocusNode _headerFocus = FocusNode();
   final FocusNode _bodyFocus = FocusNode();
-  TextEditingController? _activeController; // For toolbar
+  QuillController? _activeController; // For toolbar
   final AdService _adService = AdService();
 
   @override
@@ -153,21 +154,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _initControllersForPage(int pageIndex) {
     if (_cardData == null || pageIndex >= _cardData!.slides.length) return;
-    
+
     final slide = _cardData!.slides[pageIndex];
-    
+
     _headerController?.dispose();
     _bodyController?.dispose();
 
-    _headerController = StyledTextEditingController(text: slide.header);
-    _bodyController = StyledTextEditingController(text: slide.body);
+    // Header QuillController
+    final headerDelta = QuillMarkdownConverter.markdownToDelta(slide.header);
+    _headerController = QuillController(
+      document: Document.fromDelta(headerDelta),
+      selection: const TextSelection.collapsed(offset: 0),
+      keepStyleOnNewLine: true,
+    );
+    
+    final hAlign = slide.headerStyle?.align ?? 'center';
+    _headerController!.formatText(0, _headerController!.document.length, 
+      hAlign == 'center' ? Attribute.centerAlignment : hAlign == 'right' ? Attribute.rightAlignment : Attribute.leftAlignment);
 
-    // Sync back to data model on change
     _headerController!.addListener(() {
-      _cardData!.slides[pageIndex].header = _headerController!.text;
+      if (_cardData != null && pageIndex < _cardData!.slides.length) {
+        _cardData!.slides[pageIndex].header =
+            QuillMarkdownConverter.deltaToMarkdown(
+          _headerController!.document.toDelta(),
+        );
+      }
     });
+
+    // Body QuillController
+    final bodyDelta = QuillMarkdownConverter.markdownToDelta(slide.body);
+    _bodyController = QuillController(
+      document: Document.fromDelta(bodyDelta),
+      selection: const TextSelection.collapsed(offset: 0),
+      keepStyleOnNewLine: true,
+    );
+    
+    final bAlign = slide.bodyStyle?.align ?? 'left';
+    _bodyController!.formatText(0, _bodyController!.document.length, 
+      bAlign == 'center' ? Attribute.centerAlignment : bAlign == 'right' ? Attribute.rightAlignment : Attribute.leftAlignment);
+
     _bodyController!.addListener(() {
-      _cardData!.slides[pageIndex].body = _bodyController!.text;
+      if (_cardData != null && pageIndex < _cardData!.slides.length) {
+        _cardData!.slides[pageIndex].body =
+            QuillMarkdownConverter.deltaToMarkdown(
+          _bodyController!.document.toDelta(),
+        );
+      }
     });
   }
 
@@ -731,33 +763,38 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           // TOOLBAR (Visible when editing)
           if (_activeController != null)
-             Container(
-                color: Colors.white,
-                // No padding needed for viewInsets if resizeToAvoidBottomInset is true (default)
-                // But sometimes we need it if we want it strictly above.
-                // With Column + Expanded, the toolbar will be at the bottom of the screen.
-                // When keyboard opens, the scaffold resizes, pushing the bottom up. 
-                // So the toolbar stays on top of the keyboard.
-                child: ValueListenableBuilder(
-                  valueListenable: _activeController!,
-                  builder: (context, value, child) {
-                    return RichTextToolbar(
-                      style: _activeController == _headerController 
-                          ? (_cardData!.slides[_currentPageIndex].headerStyle ?? CustomTextStyle(align: 'left', fontSize: 'text-3xl', color: '#000000'))
-                          : (_cardData!.slides[_currentPageIndex].bodyStyle ?? CustomTextStyle(align: 'left', fontSize: 'text-base', color: '#000000')),
-                      onUpdate: (newStyle) {
-                        setState(() {
-                          if (_activeController == _headerController) {
-                             _cardData!.slides[_currentPageIndex].headerStyle = newStyle;
-                          } else if (_activeController == _bodyController) {
-                             _cardData!.slides[_currentPageIndex].bodyStyle = newStyle;
-                          }
-                        });
-                      },
-                      controller: _activeController!,
-                    );
-                  }
-                ),
+            Container(
+              color: Colors.white,
+              child: ListenableBuilder(
+                listenable: _activeController!,
+                builder: (context, child) {
+                  return RichTextToolbar(
+                    style: _activeController == _headerController
+                        ? (_cardData!.slides[_currentPageIndex].headerStyle ??
+                            CustomTextStyle(
+                                align: 'left',
+                                fontSize: 'text-3xl',
+                                color: '#000000'))
+                        : (_cardData!.slides[_currentPageIndex].bodyStyle ??
+                            CustomTextStyle(
+                                align: 'left',
+                                fontSize: 'text-base',
+                                color: '#000000')),
+                    onUpdate: (newStyle) {
+                      setState(() {
+                        if (_activeController == _headerController) {
+                          _cardData!.slides[_currentPageIndex].headerStyle =
+                              newStyle;
+                        } else if (_activeController == _bodyController) {
+                          _cardData!.slides[_currentPageIndex].bodyStyle =
+                              newStyle;
+                        }
+                      });
+                    },
+                    controller: _activeController!,
+                  );
+                },
+              ),
             ),
             
           // Offstage Export View removed (moved to top of stack)

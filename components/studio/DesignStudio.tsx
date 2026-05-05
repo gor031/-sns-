@@ -457,16 +457,29 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       }
 
       const result: ExtractionResult = await response.json();
+      console.log('[AI-v3] === FULL API RESPONSE ===');
+      console.log('[AI-v3] result.width:', result.width, 'result.height:', result.height);
+      console.log('[AI-v3] result.mode:', result.mode);
+      console.log('[AI-v3] result.elements count:', result.elements?.length);
+      console.log('[AI-v3] result.background?:', !!result.background);
+      if (result.elements) {
+        result.elements.forEach((el, i) => {
+          console.log(`[AI-v3] element[${i}]: type=${el.type} left=${el.left} top=${el.top} w=${el.width} h=${el.height} hasImage=${!!el.image}`);
+        });
+      }
       if (!result || !result.elements) throw new Error('AI 분석 결과가 비어있습니다.');
 
       const aiWidth = result.width || 1024;
       const aiHeight = result.height || 1024;
       
-      // AI 결과(1024)를 현재 캔버스 상의 실제 크기(Scaled)로 매핑하는 비율
+      // AI 결과를 현재 캔버스 상의 실제 크기(Scaled)로 매핑하는 비율
       const fitScaleX = originalBox.width / aiWidth;
       const fitScaleY = originalBox.height / aiHeight;
 
-      console.log('[AI-v2] Fit Scales:', { fitScaleX, fitScaleY });
+      console.log('[AI-v3] === MAPPING INFO ===');
+      console.log('[AI-v3] originalBox:', JSON.stringify(originalBox));
+      console.log('[AI-v3] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
+      console.log('[AI-v3] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
 
       // 기준점 계산: Fabric은 originX/Y에 따라 left/top이 다름. 
       // 이를 절대적인 top-left(0,0) 기준으로 변환하여 계산.
@@ -474,6 +487,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       let baseTop = originalBox.top;
       if (originalBox.originX === 'center') baseLeft -= originalBox.width / 2;
       if (originalBox.originY === 'center') baseTop -= originalBox.height / 2;
+      console.log('[AI-v3] baseLeft:', baseLeft, 'baseTop:', baseTop, '(after origin correction)');
 
       const addedObjects: FabricObject[] = [];
 
@@ -519,6 +533,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           });
           canvas.add(bgImg);
           addedObjects.push(bgImg);
+          console.log('[AI-v3] Added background:', { left: baseLeft, top: baseTop, scaleX: originalBox.width / bgImg.width!, scaleY: originalBox.height / bgImg.height! });
         }
 
         for (const layer of result.elements) {
@@ -572,6 +587,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           }
 
           if (obj) {
+            console.log(`[AI-v3] Adding ${layer.type}: left=${obj.left} top=${obj.top} w=${(obj as any).width} h=${(obj as any).height} scaleX=${obj.scaleX} scaleY=${obj.scaleY}`);
             canvas.add(obj);
             addedObjects.push(obj);
           }

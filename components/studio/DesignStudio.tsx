@@ -522,7 +522,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           });
           canvas.add(bgImg);
           addedObjects.push(bgImg);
-          console.log('[AI-v3] Added background:', { left: baseLeft, top: baseTop, scaleX: originalBox.width / bgImg.width!, scaleY: originalBox.height / bgImg.height! });
+          console.log('[AI-v3] Added background:', { left: baseLeft, top: baseTop });
         }
 
         for (const layer of result.elements) {
@@ -543,6 +543,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           } else if (layer.type === 'rect') {
             obj = new Rect({
               ...props,
+              width: layer.width,
+              height: layer.height,
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
               angle: originalBox.angle,
@@ -550,23 +552,17 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
             });
           } else if (layer.type === 'circle') {
             obj = new Circle({
-              left: props.left,
-              top: props.top,
-              radius: (Math.max(layer.width, layer.height) / 2) * fitScaleX,
+              ...props,
+              radius: (Math.max(layer.width, layer.height) / 2),
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
               angle: originalBox.angle,
               name: '원형',
-              originX: 'left',
-              originY: 'top',
             });
           } else if (layer.type === 'image' && layer.image) {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
             img.set({
-              left: props.left,
-              top: props.top,
-              scaleX: props.width / img.width!,
-              scaleY: props.height / img.height!,
+              ...props,
               angle: originalBox.angle,
               name: '이미지 요소',
               originX: 'left',

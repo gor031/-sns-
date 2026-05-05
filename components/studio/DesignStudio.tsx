@@ -422,13 +422,18 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       return;
     }
 
+    // [AI-v2] 원본 객체의 상태를 정확하게 캡처
     const originalBox = {
       left: activeObj.left || 0,
       top: activeObj.top || 0,
       width: activeObj.getScaledWidth(),
       height: activeObj.getScaledHeight(),
       angle: activeObj.angle || 0,
+      originX: activeObj.originX,
+      originY: activeObj.originY,
     };
+
+    console.log('[AI-v2] Starting processing with box:', originalBox);
 
     setIsProcessingAI(true);
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
@@ -456,16 +461,29 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
 
       const aiWidth = result.width || 1024;
       const aiHeight = result.height || 1024;
+      
+      // AI 결과(1024)를 현재 캔버스 상의 실제 크기(Scaled)로 매핑하는 비율
       const fitScaleX = originalBox.width / aiWidth;
       const fitScaleY = originalBox.height / aiHeight;
+
+      console.log('[AI-v2] Fit Scales:', { fitScaleX, fitScaleY });
+
+      // 기준점 계산: Fabric은 originX/Y에 따라 left/top이 다름. 
+      // 이를 절대적인 top-left(0,0) 기준으로 변환하여 계산.
+      let baseLeft = originalBox.left;
+      let baseTop = originalBox.top;
+      if (originalBox.originX === 'center') baseLeft -= originalBox.width / 2;
+      if (originalBox.originY === 'center') baseTop -= originalBox.height / 2;
 
       const addedObjects: FabricObject[] = [];
 
       const toCanvasProps = (layer: ExtractedLayer) => ({
-        left: originalBox.left + (layer.left * fitScaleX),
-        top: originalBox.top + (layer.top * fitScaleY),
+        left: baseLeft + (layer.left * fitScaleX),
+        top: baseTop + (layer.top * fitScaleY),
         width: Math.max(1, layer.width * fitScaleX),
         height: Math.max(1, layer.height * fitScaleY),
+        originX: 'left' as const,
+        originY: 'top' as const,
       });
 
       canvas.remove(activeObj);
@@ -485,16 +503,19 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         canvas.setActiveObject(fgImg);
         addedObjects.push(fgImg);
       } else {
+        // 배경 복원
         if (result.background) {
           const bgImg = await FabricImage.fromURL(result.background, { crossOrigin: 'anonymous' });
           bgImg.set({
-            left: originalBox.left,
-            top: originalBox.top,
-            scaleX: fitScaleX * (aiWidth / bgImg.width!),
-            scaleY: fitScaleY * (aiHeight / bgImg.height!),
+            left: baseLeft,
+            top: baseTop,
+            scaleX: originalBox.width / bgImg.width!,
+            scaleY: originalBox.height / bgImg.height!,
             angle: originalBox.angle,
             selectable: true,
             name: '복원된 배경',
+            originX: 'left',
+            originY: 'top',
           });
           canvas.add(bgImg);
           addedObjects.push(bgImg);
@@ -532,6 +553,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               opacity: layer.opacity || 1,
               angle: originalBox.angle,
               name: '원형',
+              originX: 'left',
+              originY: 'top',
             });
           } else if (layer.type === 'image' && layer.image) {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
@@ -542,6 +565,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               scaleY: props.height / img.height!,
               angle: originalBox.angle,
               name: '이미지 요소',
+              originX: 'left',
+              originY: 'top',
             });
             obj = img;
           }
@@ -566,8 +591,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       setAiStatus('완료!');
       setTimeout(() => setAiStatus(''), 2000);
     } catch (err: any) {
-      console.error('[AI] Error in handleAIExtract:', err);
-      alert(err.message || 'AI 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      console.error('[AI-v2] Error:', err);
+      alert(err.message || 'AI 처리에 실패했습니다.');
       setAiStatus('오류 발생');
     } finally {
       setIsProcessingAI(false);

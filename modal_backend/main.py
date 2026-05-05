@@ -22,17 +22,17 @@ image = (
     .pip_install(
         "torch",
         "torchvision",
-        "opencv-python",
+        "opencv-python-headless",  # headless 버전으로 통일 (충돌 방지)
         "segment-anything",
-        "rembg[gpu]",
-        "paddlepaddle-gpu",
+        "rembg",                   # [gpu] 제거 - onnxruntime CPU 버전으로 안정성 확보
+        "onnxruntime",
+        "paddlepaddle",            # GPU 버전 대신 CPU 버전 (Modal GPU는 torch로 처리)
         "paddleocr",
         "fastapi[standard]",
         "python-multipart",
         "numpy",
         "Pillow",
         "requests",
-        "onnxruntime-gpu",
     )
 )
 

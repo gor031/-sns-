@@ -257,6 +257,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         top: 0,
         scaleX: 1,
         scaleY: 1,
+        originX: 'left',
+        originY: 'top',
       });
       canvas.add(img);
       canvas.setActiveObject(img);
@@ -456,8 +458,21 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
 
     try {
-      // [AI-v7] 객체 자체의 toDataURL 사용 (뷰포트 조작 없이 깔끔하게 캡처)
-      const dataURL = activeObj.toDataURL({ format: 'png', multiplier: 1 });
+      // 원본 이미지를 그대로 캡처해서 AI 분석 품질 최대화
+      const imgElement = activeObj.getElement() as HTMLImageElement;
+      let dataURL: string;
+      if (imgElement && (imgElement.src || imgElement.currentSrc)) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = objWidth;
+        tempCanvas.height = objHeight;
+        const ctx = tempCanvas.getContext('2d');
+        ctx?.drawImage(imgElement, 0, 0, objWidth, objHeight);
+        dataURL = tempCanvas.toDataURL('image/png');
+      } else {
+        // fallback: 스케일 역수로 원본 해상도에 근접하게 캡처
+        const captureMultiplier = Math.min(4, Math.max(2, Math.round(1 / Math.min(Math.abs(objScaleX), Math.abs(objScaleY)))));
+        dataURL = activeObj.toDataURL({ format: 'png', multiplier: captureMultiplier });
+      }
 
       const blob = await (await fetch(dataURL)).blob();
       const formData = new FormData();
@@ -483,9 +498,9 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       const aiWidth = result.width || objWidth;
       const aiHeight = result.height || objHeight;
       
-      // [AI-v7] AI 좌표 → 캔버스 좌표 매핑 비율
-      // AI는 intrinsic 해상도(multiplier=1)의 이미지를 분석했으므로
-      // AI 좌표를 캔버스의 실제 표시 크기로 변환해야 합니다.
+      // AI 좌표 → 캔버스 좌표 매핑 비율
+      // AI는 원본(intrinsic) 해상도 이미지를 분석했으므로
+      // AI 좌표에 scaleX/Y를 곱해 캔버스 실제 표시 좌표로 변환합니다.
       const fitScaleX = displayWidth / aiWidth;
       const fitScaleY = displayHeight / aiHeight;
 
@@ -720,6 +735,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           top: 0,
           scaleX: 1,
           scaleY: 1,
+          originX: 'left',
+          originY: 'top',
         });
       } else {
         const scale = Math.min(
@@ -734,6 +751,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           top: (canvasHeight - displayHeight) / 2,
           scaleX: scale,
           scaleY: scale,
+          originX: 'left',
+          originY: 'top',
         });
       }
       

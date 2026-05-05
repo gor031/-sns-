@@ -395,14 +395,6 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     // duplicate
     newPages.splice(index + 1, 0, newPages[index]);
     
-    const newIndex = index + 1;
-    isHistoryUpdate.current = true;
-    fabricRef.current.loadFromJSON(newPages[newIndex]).then(() => {
-      fabricRef.current?.renderAll();
-      setCurrentPageIndex(newIndex);
-      setPages(newPages);
-      isHistoryUpdate.current = false;
-      saveHistoryDirect(fabricRef.current!, newPages, newIndex, canvasWidth, canvasHeight);
     });
   };
 
@@ -421,7 +413,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     });
   };
 
-  const handleAIExtract = async (mode: AIMode, targetObj?: FabricObject) => { // Updated
+  const handleAIExtract = async (mode: AIMode, targetObj?: FabricObject) => {
     const canvas = fabricRef.current;
     if (!canvas) return;
     const activeObj = targetObj || canvas.getActiveObject();
@@ -430,110 +422,53 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       return;
     }
 
-    console.log(`[AI] Starting ${mode} processing...`);
+    const originalBox = {
+      left: activeObj.left || 0,
+      top: activeObj.top || 0,
+      width: activeObj.getScaledWidth(),
+      height: activeObj.getScaledHeight(),
+      angle: activeObj.angle || 0,
+    };
+
     setIsProcessingAI(true);
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
 
     try {
-      console.log('[AI] Converting image to DataURL at original resolution...');
-      // 원본 해상도를 유지하기 위해 multiplier 적용
-      const dataURL = activeObj.toDataURL({ 
-        format: 'png',
-        multiplier: 1 / (activeObj.scaleX || 1)
-      });
-
-      console.log('[AI] Preparing blob and form data...');
+      const multiplier = 1 / (activeObj.scaleX || 1);
+      const dataURL = activeObj.toDataURL({ format: 'png', multiplier });
+      
       const blob = await (await fetch(dataURL)).blob();
       const formData = new FormData();
       formData.append('file', blob, 'image.png');
-      const originalDataUrl = dataURL; // 원본 배경 복원용
 
-      console.log('[AI] Sending request to Modal backend...');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 240000);
-
-      let result: ExtractionResult;
-      try {
-        const response = await fetch(`/api/extract?mode=${mode}`, {
-          method: 'POST',
-          body: formData,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('[AI] Backend error details:', errorText);
-          throw new Error(`AI 서버 오류 (${response.status}): ${errorText.substring(0, 100)}`);
-        }
-
-        result = await response.json();
-        console.log('[AI] Backend response received:', result);
-      } catch (error: any) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-          throw new Error('AI 서버 응답 시간이 초과되었습니다. (4분). 서버가 부팅 중이거나 큰 이미지를 처리 중일 수 있습니다.');
-        }
-        throw error;
-      }
-
-      if (!result) throw new Error('AI 서버로부터 응답을 받지 못했습니다.');
-      if (!result.elements || result.elements.length === 0) {
-        throw new Error('이미지에서 피사체를 찾지 못했습니다.');
-      }
-
-      if (!isInitialized) {
-        const w = activeObj.width * activeObj.scaleX;
-        const h = activeObj.height * activeObj.scaleY;
-        console.log(`[AI] Initializing canvas size to ${w}x${h}`);
-        resizeCanvasTo(canvas, w, h);
-        setIsInitialized(true);
-      }
-
-      setAiStatus(mode === 'object-extract' ? '편집 가능한 레이어 생성 중...' : '이미지 생성 중...');
-
-      const sourceWidth = result.width || activeObj.width || 1;
-      const sourceHeight = result.height || activeObj.height || 1;
-      const shouldResetCanvasForLayers = mode === 'object-extract';
-
-      if (shouldResetCanvasForLayers) {
-        resizeCanvasTo(canvas, sourceWidth, sourceHeight);
-        canvas.clear();
-        
-        // 1차 수정: 원본 이미지를 맨 아래 배경으로 깔기
-        const originalBg = await FabricImage.fromURL(originalDataUrl, { crossOrigin: 'anonymous' });
-        originalBg.set({
-          left: 0,
-          top: 0,
-          scaleX: sourceWidth / (originalBg.width || 1),
-          scaleY: sourceHeight / (originalBg.height || 1),
-          selectable: false,
-          evented: false,
-          name: '원본 배경(고정)',
-          opacity: 1
-        });
-        canvas.add(originalBg);
-        canvas.sendObjectToBack(originalBg);
-        
-        setIsInitialized(true);
-      }
-
-      const baseLeft = shouldResetCanvasForLayers ? 0 : (activeObj.left || 0);
-      const baseTop = shouldResetCanvasForLayers ? 0 : (activeObj.top || 0);
-      const baseAngle = shouldResetCanvasForLayers ? 0 : (activeObj.angle || 0);
-      const baseScaleX = shouldResetCanvasForLayers ? 1 : activeObj.getScaledWidth() / sourceWidth;
-      const baseScaleY = shouldResetCanvasForLayers ? 1 : activeObj.getScaledHeight() / sourceHeight;
-
-      const toCanvasRect = (layer: ExtractedLayer) => ({
-        left: baseLeft + layer.left * baseScaleX,
-        top: baseTop + layer.top * baseScaleY,
-        width: Math.max(1, layer.width * baseScaleX),
-        height: Math.max(1, layer.height * baseScaleY),
+      const response = await fetch(`/api/extract?mode=${mode}`, {
+        method: 'POST',
+        body: formData,
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AI 서버 오류: ${errorText.substring(0, 100)}`);
+      }
+
+      const result: ExtractionResult = await response.json();
+      if (!result || !result.elements) throw new Error('AI 분석 결과가 비어있습니다.');
+
+      const aiWidth = result.width || 1024;
+      const aiHeight = result.height || 1024;
+      const fitScaleX = originalBox.width / aiWidth;
+      const fitScaleY = originalBox.height / aiHeight;
+
       const addedObjects: FabricObject[] = [];
+
+      const toCanvasProps = (layer: ExtractedLayer) => ({
+        left: originalBox.left + (layer.left * fitScaleX),
+        top: originalBox.top + (layer.top * fitScaleY),
+        width: Math.max(1, layer.width * fitScaleX),
+        height: Math.max(1, layer.height * fitScaleY),
+      });
+
+      canvas.remove(activeObj);
 
       if (mode === 'bg-remove') {
         const fgLayer = result.elements.find(l => l.type === 'image' && l.image);
@@ -541,14 +476,11 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         
         const fgImg = await FabricImage.fromURL(fgLayer.image, { crossOrigin: 'anonymous' });
         fgImg.set({
-          left: activeObj.left,
-          top: activeObj.top,
-          scaleX: activeObj.getScaledWidth() / fgImg.width!,
-          scaleY: activeObj.getScaledHeight() / fgImg.height!,
-          angle: activeObj.angle,
+          ...toCanvasProps(fgLayer),
+          angle: originalBox.angle,
           name: '피사체',
         });
-        canvas.remove(activeObj);
+        
         canvas.add(fgImg);
         canvas.setActiveObject(fgImg);
         addedObjects.push(fgImg);
@@ -556,10 +488,12 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         if (result.background) {
           const bgImg = await FabricImage.fromURL(result.background, { crossOrigin: 'anonymous' });
           bgImg.set({
-            left: baseLeft,
-            top: baseTop,
-            scaleX: baseScaleX * (sourceWidth / bgImg.width!),
-            scaleY: baseScaleY * (sourceHeight / bgImg.height!),
+            left: originalBox.left,
+            top: originalBox.top,
+            scaleX: fitScaleX * (aiWidth / bgImg.width!),
+            scaleY: fitScaleY * (aiHeight / bgImg.height!),
+            angle: originalBox.angle,
+            selectable: true,
             name: '복원된 배경',
           });
           canvas.add(bgImg);
@@ -567,42 +501,46 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         }
 
         for (const layer of result.elements) {
-          const rect = toCanvasRect(layer);
+          const props = toCanvasProps(layer);
           let obj: FabricObject | null = null;
 
           if (layer.type === 'text') {
             obj = new Textbox(layer.text || '', {
-              ...rect,
-              fontSize: (layer.fontSize || 32) * baseScaleY,
+              ...props,
+              fontSize: (layer.fontSize || 32) * fitScaleY,
               fill: layer.fill || '#111827',
               fontFamily: 'Inter',
               fontWeight: layer.fontWeight || 'normal',
               textAlign: layer.textAlign || 'left' as any,
+              angle: originalBox.angle,
               name: '텍스트',
             });
           } else if (layer.type === 'rect') {
             obj = new Rect({
-              ...rect,
+              ...props,
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
+              angle: originalBox.angle,
               name: '도형',
             });
           } else if (layer.type === 'circle') {
             obj = new Circle({
-              left: rect.left,
-              top: rect.top,
-              radius: (Math.max(layer.width, layer.height) / 2) * baseScaleX,
+              left: props.left,
+              top: props.top,
+              radius: (Math.max(layer.width, layer.height) / 2) * fitScaleX,
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
+              angle: originalBox.angle,
               name: '원형',
             });
           } else if (layer.type === 'image' && layer.image) {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
             img.set({
-              left: rect.left,
-              top: rect.top,
-              scaleX: rect.width / img.width!,
-              scaleY: rect.height / img.height!,
+              left: props.left,
+              top: props.top,
+              scaleX: props.width / img.width!,
+              scaleY: props.height / img.height!,
+              angle: originalBox.angle,
               name: '이미지 요소',
             });
             obj = img;
@@ -615,7 +553,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         }
 
         if (addedObjects.length > 1) {
-          const selectables = addedObjects.filter(o => o.name !== '복원된 배경' && o.name !== '원본 배경(고정)');
+          const selectables = addedObjects.filter(o => o.name !== '복원된 배경');
           if (selectables.length > 0) {
             const selection = new ActiveSelection(selectables, { canvas });
             canvas.setActiveObject(selection);
@@ -625,24 +563,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
 
       canvas.renderAll();
       saveHistory();
-      if (shouldResetCanvasForLayers) {
-        requestAnimationFrame(() => {
-          if (!containerRef.current || !fabricRef.current) return;
-          const containerHeight = containerRef.current.clientHeight - 80;
-          const containerWidth = containerRef.current.clientWidth - 80;
-          const scaleX = containerWidth / sourceWidth;
-          const scaleY = containerHeight / sourceHeight;
-          const fitZoom = Math.min(scaleX, scaleY, 1);
-          setZoom(fitZoom);
-          applyZoom(fabricRef.current, fitZoom, sourceWidth, sourceHeight);
-        });
-      }
-      console.log('[AI] Processing completed successfully!');
-      if (mode === 'object-extract' && result.stats) {
-        setAiStatus(`완료: 텍스트 ${result.stats.texts}, 도형 ${result.stats.shapes}, 이미지 ${result.stats.images}`);
-      } else {
-        setAiStatus('완료!');
-      }
+      setAiStatus('완료!');
       setTimeout(() => setAiStatus(''), 2000);
     } catch (err: any) {
       console.error('[AI] Error in handleAIExtract:', err);

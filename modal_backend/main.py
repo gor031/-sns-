@@ -22,18 +22,18 @@ image = (
     .pip_install(
         "torch",
         "torchvision",
-        "opencv-python-headless",  # headless 버전으로 통일 (충돌 방지)
         "segment-anything",
-        "rembg",                   # [gpu] 제거 - onnxruntime CPU 버전으로 안정성 확보
-        "onnxruntime",
-        "paddlepaddle",            # GPU 버전 대신 CPU 버전 (Modal GPU는 torch로 처리)
-        "paddleocr",
+        "easyocr",
         "fastapi[standard]",
         "python-multipart",
         "numpy",
         "Pillow",
         "requests",
     )
+    # rembg는 opencv-python-headless를 요구해서 easyocr의 opencv-python과 충돌
+    # 마지막 단계에서 강제 교체해서 해결
+    .pip_install("onnxruntime", "rembg")
+    .run_commands("pip install opencv-python-headless --force-reinstall --quiet")
 )
 
 volume = modal.Volume.from_name("ai-models-cache", create_if_missing=True)
@@ -50,7 +50,6 @@ class ImageProcessor:
     def setup(self):
         import torch
         from segment_anything import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
-        from paddleocr import PaddleOCR
         import requests
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -80,15 +79,12 @@ class ImageProcessor:
             min_mask_region_area=1200,     # 너무 작은 조각 제거
         )
 
-        # PaddleOCR: EasyOCR 대비 한글 정확도 높음
-        self.ocr_reader = PaddleOCR(
-            use_angle_cls=True,
-            lang="korean",
-            use_gpu=self.device == "cuda",
-            show_log=False,
-            det_model_dir=f"{CACHE_DIR}/paddleocr/det",
-            rec_model_dir=f"{CACHE_DIR}/paddleocr/rec",
-            cls_model_dir=f"{CACHE_DIR}/paddleocr/cls",
+        import easyocr
+        self.ocr_reader = easyocr.Reader(
+            ["ko", "en"],
+            gpu=self.device == "cuda",
+            model_storage_directory=f"{CACHE_DIR}/easyocr",
+            user_network_directory=f"{CACHE_DIR}/easyocr",
         )
 
         print("Models loaded successfully!")
@@ -164,41 +160,38 @@ class ImageProcessor:
         layers = []
         removal_mask = np.zeros((h, w), dtype=np.uint8)
 
-        # 1. PaddleOCR 텍스트 추출
-        ocr_result = self.ocr_reader.ocr(image_np, cls=True)
-        if ocr_result and ocr_result[0]:
-            for index, line in enumerate(ocr_result[0]):
-                points, (text, confidence) = line[0], line[1]
-                # 신뢰도 기준 50%로 상향 (EasyOCR은 35%였음)
-                if confidence < 0.50 or not text.strip():
-                    continue
-                x1, y1, x2, y2 = bbox_from_paddle_points(points)
-                bw = max(1, x2 - x1)
-                bh = max(1, y2 - y1)
-                if bw * bh < 100:
-                    continue
+        # 1. EasyOCR 텍스트 추출 (신뢰도 기준 35% → 50% 상향)
+        ocr_results = self.ocr_reader.readtext(image_np, detail=1, paragraph=False)
+        for index, (points, text, confidence) in enumerate(ocr_results):
+            if confidence < 0.50 or not text.strip():
+                continue
+            x1, y1, x2, y2 = bbox_from_paddle_points(points)
+            bw = max(1, x2 - x1)
+            bh = max(1, y2 - y1)
+            if bw * bh < 100:
+                continue
 
-                text_mask = np.zeros((h, w), dtype=np.uint8)
-                cv2.fillPoly(text_mask, [np.array(points, dtype=np.int32)], 255)
-                removal_mask = cv2.dilate(
-                    cv2.bitwise_or(removal_mask, text_mask),
-                    np.ones((5, 5), np.uint8), iterations=1
-                )
+            text_mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.fillPoly(text_mask, [np.array(points, dtype=np.int32)], 255)
+            removal_mask = cv2.dilate(
+                cv2.bitwise_or(removal_mask, text_mask),
+                np.ones((5, 5), np.uint8), iterations=1
+            )
 
-                layers.append({
-                    "id": f"text_{index + 1}",
-                    "type": "text",
-                    "text": text.strip(),
-                    "left": x1,
-                    "top": y1,
-                    "width": bw,
-                    "height": bh,
-                    "fontSize": max(12, int(bh * 0.78)),
-                    "fill": median_color(image_np, text_mask),
-                    "fontWeight": "bold" if bh > 42 else "normal",
-                    "textAlign": "center",
-                    "name": "텍스트"
-                })
+            layers.append({
+                "id": f"text_{index + 1}",
+                "type": "text",
+                "text": text.strip(),
+                "left": x1,
+                "top": y1,
+                "width": bw,
+                "height": bh,
+                "fontSize": max(12, int(bh * 0.78)),
+                "fill": median_color(image_np, text_mask),
+                "fontWeight": "bold" if bh > 42 else "normal",
+                "textAlign": "center",
+                "name": "텍스트"
+            })
 
         # 2. 도형 추출 (Canny 임계값 상향으로 노이즈 감소)
         gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)

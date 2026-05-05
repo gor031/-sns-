@@ -240,8 +240,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
                   <Wand2 size={18} className="text-indigo-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-800">개체 분리 & 배경 복원</p>
-                  <p className="text-[10px] text-slate-500">사진에서 물체만 떼어내고 빈 곳 채우기</p>
+                  <p className="text-sm font-bold text-slate-800">이미지 레이어 분해</p>
+                  <p className="text-[10px] text-slate-500">텍스트, 도형, 사물/사진 요소를 편집 레이어로 재구성</p>
                 </div>
                 <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                   <Sparkles size={14} className="text-indigo-400/60" />

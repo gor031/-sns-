@@ -1,12 +1,43 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5968986592421768"
-     crossorigin="anonymous"></script>
-    <script async src="https://fundingchoicesmessages.google.com/i/pub-5968986592421768?ers=1"></script><script>(function() {function signalGooglefcPresent() {if (!window.frames['googlefcPresent']) {if (document.body) {const iframe = document.createElement('iframe'); iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;'; iframe.style.display = 'none'; iframe.name = 'googlefcPresent'; document.body.appendChild(iframe);} else {setTimeout(signalGooglefcPresent, 0);}}}signalGooglefcPresent();})();</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>카드뉴스 생성기</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      (function () {
+        var host = window.location.hostname;
+        var isLocal = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+        if (isLocal) return;
+
+        var ads = document.createElement('script');
+        ads.async = true;
+        ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5968986592421768';
+        ads.crossOrigin = 'anonymous';
+        document.head.appendChild(ads);
+
+        var funding = document.createElement('script');
+        funding.async = true;
+        funding.src = 'https://fundingchoicesmessages.google.com/i/pub-5968986592421768?ers=1';
+        document.head.appendChild(funding);
+
+        function signalGooglefcPresent() {
+          if (window.frames.googlefcPresent) return;
+          if (!document.body) {
+            setTimeout(signalGooglefcPresent, 0);
+            return;
+          }
+          var iframe = document.createElement('iframe');
+          iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;';
+          iframe.style.display = 'none';
+          iframe.name = 'googlefcPresent';
+          document.body.appendChild(iframe);
+        }
+
+        signalGooglefcPresent();
+      })();
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>

@@ -5,3 +5,14 @@
 [build.environment]
   NODE_VERSION = "20"
   GEMINI_API_KEY = ""
+
+[[redirects]]
+  from = "/api/extract"
+  to = "https://gabjagi031--cardnews-ai-backend-v2-fastapi-app.modal.run/extract"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/search"
+  to = "/.netlify/functions/search"
+  status = 200

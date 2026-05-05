@@ -65,10 +65,20 @@ class ImageProcessor:
         ).to(self.device)
         self.dino_model.eval()
 
-        # ── SAM 2 (box prompt 기반 정밀 마스크) ──
+        # ── SAM 2 (box prompt + 자동 마스크) ──
         from sam2.sam2_image_predictor import SAM2ImagePredictor
+        from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
         print("Loading SAM 2...")
         self.sam2 = SAM2ImagePredictor.from_pretrained("facebook/sam2.1-hiera-small")
+        # 같은 모델 재활용 → 메모리 추가 없음
+        self.sam2_auto = SAM2AutomaticMaskGenerator(
+            self.sam2.model,
+            points_per_side=16,       # 256 포인트 (32²=1024 대비 4배 빠름)
+            pred_iou_thresh=0.82,
+            stability_score_thresh=0.90,
+            box_nms_thresh=0.7,
+            min_mask_region_area=500,
+        )
 
         # ── EasyOCR (텍스트 레이어) ──
         print("Loading EasyOCR...")
@@ -210,13 +220,26 @@ class ImageProcessor:
         det_scores = all_scores[keep]
         det_labels = [all_labels[i] for i, k in enumerate(keep) if k]
 
+        # DINO 중복 bbox 제거: bbox 레벨 NMS
+        if len(boxes_xyxy) > 0:
+            from torchvision.ops import nms as tv_nms
+            keep_idx = tv_nms(
+                torch.tensor(boxes_xyxy, dtype=torch.float32),
+                torch.tensor(det_scores, dtype=torch.float32),
+                iou_threshold=0.5
+            ).numpy()
+            boxes_xyxy = boxes_xyxy[keep_idx]
+            det_scores = det_scores[keep_idx]
+            det_labels = [det_labels[i] for i in keep_idx]
+
         # ── Step 3: SAM 2로 각 box → 정밀 마스크 → 원본 픽셀 crop ──
+        image_count = 0
+
         if len(boxes_xyxy) > 0:
             # SAM 2 이미지 세팅 (한 번만)
             with torch.inference_mode():
                 self.sam2.set_image(image_np)
 
-            image_count = 0
             # 신뢰도 내림차순 정렬
             order = np.argsort(-det_scores)
 
@@ -254,7 +277,7 @@ class ImageProcessor:
                 mask_bool = masks[0].astype(bool)  # (H, W)
 
                 # 기존 마스크와 50% 이상 겹치면 중복 → 스킵
-                skip = any(mask_iou(mask_bool, prev) > 0.50 for prev in used_masks)
+                skip = any(mask_iou(mask_bool, prev) > 0.35 for prev in used_masks)
                 if skip:
                     continue
                 used_masks.append(mask_bool)
@@ -285,23 +308,78 @@ class ImageProcessor:
                 if image_count >= 24:
                     break
 
+        # ── Step 4: SAM2 Auto Mask로 DINO 누락 영역 보완 ──
+        if image_count < 24:
+            print("Running SAM2 AutoMask for coverage 보완...")
+            with torch.inference_mode():
+                auto_masks = self.sam2_auto.generate(image_np)
+
+            # 면적 큰 것부터 처리 (중요도 높은 요소 우선)
+            auto_masks.sort(key=lambda x: x["area"], reverse=True)
+
+            for am in auto_masks:
+                if image_count >= 24:
+                    break
+
+                mask_bool = am["segmentation"]  # bool (H, W)
+                area = int(am["area"])
+
+                # 너무 작거나 너무 큰 것 제외
+                if area < full_area * 0.003 or area > full_area * 0.90:
+                    continue
+
+                # 이미 처리된 마스크와 50% 이상 겹치면 스킵
+                if any(mask_iou(mask_bool, prev) > 0.35 for prev in used_masks):
+                    continue
+                used_masks.append(mask_bool)
+
+                ys, xs = np.where(mask_bool)
+                x1, y1 = int(xs.min()), int(ys.min())
+                x2, y2 = int(xs.max()), int(ys.max())
+                bw, bh = x2 - x1, y2 - y1
+                if bw < 20 or bh < 20:
+                    continue
+
+                mask_uint8 = (mask_bool * 255).astype(np.uint8)
+                alpha = cv2.GaussianBlur(mask_uint8, (5, 5), 0)
+
+                crop_rgb = image_np[y1:y2, x1:x2].copy()
+                crop_alpha = alpha[y1:y2, x1:x2]
+
+                rgba = cv2.cvtColor(crop_rgb, cv2.COLOR_RGB2RGBA)
+                rgba[:, :, 3] = crop_alpha
+
+                removal_mask = cv2.bitwise_or(
+                    removal_mask,
+                    cv2.dilate(mask_uint8, np.ones((5, 5), np.uint8))
+                )
+
+                image_count += 1
+                layers.append({
+                    "id": f"image_{image_count}", "type": "image",
+                    "image": encode_rgba_png(rgba),
+                    "left": x1, "top": y1, "width": bw, "height": bh,
+                    "name": "요소"
+                })
+
         # ── z-index 정렬: 큰 것(배경)이 아래, 텍스트가 위 ──
         layers.sort(key=lambda item: (
             {"text": 2, "image": 1}.get(item["type"], 1),
             -(item["width"] * item["height"])
         ))
 
-        # ── 배경 복원: 추출한 영역을 inpaint로 채움 ──
+        # ── 배경 복원: 추출한 영역을 투명하게 처리 (진짜 구멍) ──
+        bg_rgba = cv2.cvtColor(image_np, cv2.COLOR_RGB2RGBA)
         if cv2.countNonZero(removal_mask) > 0:
-            bg_np = cv2.inpaint(image_np, removal_mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
-            background_pil = Image.fromarray(bg_np)
-        else:
-            background_pil = image_pil
+            # 가장자리 블러로 자연스러운 투명 경계
+            soft_alpha = cv2.GaussianBlur(removal_mask, (7, 7), 0)
+            bg_rgba[:, :, 3] = 255 - soft_alpha
+        background_pil = Image.fromarray(bg_rgba)
 
         return {
             "version": 2, "mode": mode,
             "width": w, "height": h,
-            "background": encode_pil(background_pil, "WEBP", quality=80),
+            "background": encode_pil(background_pil, "PNG"),
             "elements": layers,
             "stats": {
                 "texts": len([x for x in layers if x["type"] == "text"]),

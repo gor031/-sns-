@@ -478,7 +478,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       const formData = new FormData();
       formData.append('file', blob, 'image.png');
 
-      const response = await fetch(`/api/extract?mode=${mode}`, {
+      const AI_API_URL = import.meta.env.VITE_AI_API_URL || '';
+      const response = await fetch(`${AI_API_URL}/extract?mode=${mode}`, {
         method: 'POST',
         body: formData,
       });

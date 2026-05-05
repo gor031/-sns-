@@ -438,8 +438,40 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
 
     try {
-      const multiplier = 1 / (activeObj.scaleX || 1);
-      const dataURL = activeObj.toDataURL({ format: 'png', multiplier });
+      // [AI-v5] 캔버스 줌/이동 상태를 임시로 초기화하여 정확한 좌표 캡처
+      const originalVPT = [...canvas.viewportTransform];
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+
+      const allObjects = canvas.getObjects();
+      const originalVisibility = allObjects.map(o => ({ obj: o, visible: o.visible }));
+      
+      // 선택된 객체(또는 그룹)만 보이게 설정
+      allObjects.forEach(o => {
+        o.visible = (o === activeObj || activeObj.contains?.(o));
+      });
+      canvas.renderAll();
+
+      // 리셋된 상태에서 다시 정확한 Bounding Box 측정
+      const rect = activeObj.getBoundingRect();
+
+      const dataURL = canvas.toDataURL({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        format: 'png',
+        multiplier: 1
+      });
+
+      // 가시성 및 뷰포트 복구
+      originalVisibility.forEach(item => {
+        item.obj.visible = item.visible;
+      });
+      canvas.setViewportTransform(originalVPT);
+      canvas.renderAll();
+
+      // AI 결과 처리를 위해 캡처 당시의 좌표 저장
+      const captureBox = rect;
       
       const blob = await (await fetch(dataURL)).blob();
       const formData = new FormData();
@@ -473,9 +505,9 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       console.log('[AI-v3] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
       console.log('[AI-v3] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
 
-      // getBoundingRect()에서 구한 left/top은 이미 절대 좌상단 좌표입니다.
-      const baseLeft = originalBox.left;
-      const baseTop = originalBox.top;
+      // [AI-v5] captureBox 기준으로 좌표 계산
+      const baseLeft = captureBox.left;
+      const baseTop = captureBox.top;
       console.log('[AI-v3] baseLeft:', baseLeft, 'baseTop:', baseTop, '(using getBoundingRect)');
 
       const addedObjects: FabricObject[] = [];

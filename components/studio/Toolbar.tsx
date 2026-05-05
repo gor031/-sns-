@@ -190,9 +190,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 <span className="text-sm font-bold text-slate-600 group-hover:text-primary transition-colors">내 컴퓨터에서 업로드</span>
               </button>
               <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
-                <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><Link2 size={14} /> URL로 추가</label>
+                <label htmlFor="toolbar-image-url" className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><Link2 size={14} /> URL로 추가</label>
                 <div className="flex gap-2">
                   <input
+                    id="toolbar-image-url"
+                    name="imageUrl"
                     type="text"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
@@ -207,9 +209,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               </div>
 
               <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
-                <label className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><Search size={14} /> 무료 이미지 검색</label>
+                <label htmlFor="toolbar-search-query" className="text-xs font-bold text-slate-500 flex items-center gap-1.5"><Search size={14} /> 무료 이미지 검색</label>
                 <div className="flex flex-col gap-2">
                   <select 
+                    id="toolbar-search-source"
+                    name="searchSource"
                     value={searchSource}
                     onChange={(e) => setSearchSource(e.target.value)}
                     className="w-full px-3 py-2 text-xs font-bold bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -220,6 +224,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </select>
                   <div className="flex gap-2">
                     <input
+                      id="toolbar-search-query"
+                      name="searchQuery"
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -274,9 +280,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs font-bold text-slate-500">커스텀 색상</p>
+                <label htmlFor="toolbar-bg-color" className="text-xs font-bold text-slate-500 block">커스텀 색상</label>
                 <div className="p-1 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-primary/40 transition-colors">
                   <input
+                    id="toolbar-bg-color"
+                    name="bgColor"
                     type="color"
                     defaultValue="#ffffff"
                     onChange={(e) => onBgColor(e.target.value)}

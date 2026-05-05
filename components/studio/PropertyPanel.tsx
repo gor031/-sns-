@@ -79,9 +79,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
           
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
-              <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">X 위치</label>
+              <label htmlFor="prop-x" className="text-[10px] font-bold text-slate-400 mb-1.5 block">X 위치</label>
               <div className="relative">
-                <input type="number" value={Math.round(obj.left || 0)}
+                <input 
+                  id="prop-x"
+                  name="left"
+                  type="number" 
+                  value={Math.round(obj.left || 0)}
                   onChange={(e) => onUpdate('left', Number(e.target.value))}
                   onBlur={onCommit}
                   className="w-full pl-2 pr-6 py-1.5 text-sm bg-white border border-slate-200/80 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 tabular-nums transition-all" />
@@ -89,9 +93,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               </div>
             </div>
             <div className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
-              <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">Y 위치</label>
+              <label htmlFor="prop-y" className="text-[10px] font-bold text-slate-400 mb-1.5 block">Y 위치</label>
               <div className="relative">
-                <input type="number" value={Math.round(obj.top || 0)}
+                <input 
+                  id="prop-y"
+                  name="top"
+                  type="number" 
+                  value={Math.round(obj.top || 0)}
                   onChange={(e) => onUpdate('top', Number(e.target.value))}
                   onBlur={onCommit}
                   className="w-full pl-2 pr-6 py-1.5 text-sm bg-white border border-slate-200/80 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 tabular-nums transition-all" />
@@ -99,9 +107,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               </div>
             </div>
             <div className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
-              <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">너비</label>
+              <label htmlFor="prop-width" className="text-[10px] font-bold text-slate-400 mb-1.5 block">너비</label>
               <div className="relative">
-                <input type="number" value={Math.round((obj.width || 0) * (obj.scaleX || 1))}
+                <input 
+                  id="prop-width"
+                  name="width"
+                  type="number" 
+                  value={Math.round((obj.width || 0) * (obj.scaleX || 1))}
                   onChange={(e) => { 
                     const newWidth = Number(e.target.value);
                     const newScaleX = newWidth / (obj.width || 1);
@@ -114,9 +126,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
               </div>
             </div>
             <div className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
-              <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">높이</label>
+              <label htmlFor="prop-height" className="text-[10px] font-bold text-slate-400 mb-1.5 block">높이</label>
               <div className="relative">
-                <input type="number" value={Math.round((obj.height || 0) * (obj.scaleY || 1))}
+                <input 
+                  id="prop-height"
+                  name="height"
+                  type="number" 
+                  value={Math.round((obj.height || 0) * (obj.scaleY || 1))}
                   onChange={(e) => { 
                     const newHeight = Number(e.target.value);
                     const newScaleY = newHeight / (obj.height || 1);
@@ -130,9 +146,12 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
             </div>
           </div>
           <div className="bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-            <label className="text-[10px] font-bold text-slate-400 mb-2 flex items-center gap-1.5"><RotateCw size={10} /> 회전</label>
+            <label htmlFor="prop-angle" className="text-[10px] font-bold text-slate-400 mb-2 flex items-center gap-1.5"><RotateCw size={10} /> 회전</label>
             <div className="flex items-center gap-3">
-              <input type="range" min="0" max="360" value={Math.round(obj.angle || 0)}
+              <input 
+                id="prop-angle"
+                name="angle"
+                type="range" min="0" max="360" value={Math.round(obj.angle || 0)}
                 onChange={(e) => onUpdate('angle', Number(e.target.value))}
                 onMouseUp={onCommit}
                 className="flex-1 accent-primary h-1.5 bg-slate-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
@@ -143,9 +162,12 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
 
         {/* Opacity */}
         <div className="space-y-3 pt-5 border-t border-slate-200/60">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">투명도</p>
+          <label htmlFor="prop-opacity" className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">투명도</label>
           <div className="flex items-center gap-3 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-            <input type="range" min="0" max="100" value={Math.round((obj.opacity || 1) * 100)}
+            <input 
+              id="prop-opacity"
+              name="opacity"
+              type="range" min="0" max="100" value={Math.round((obj.opacity || 1) * 100)}
               onChange={(e) => onUpdate('opacity', Number(e.target.value) / 100)}
               onMouseUp={onCommit}
               className="flex-1 accent-primary h-1.5 bg-slate-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
@@ -156,11 +178,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
         {/* Fill Color for shapes */}
         {(isShape || isText) && (
           <div className="space-y-3 pt-5 border-t border-slate-200/60">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label htmlFor="prop-fill" className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Palette size={12} /> {isText ? '글자 색상' : '채우기 색상'}
-            </p>
+            </label>
             <div className="p-1.5 bg-slate-50/50 border border-slate-200 rounded-xl shadow-sm hover:border-primary/40 transition-colors">
-              <input type="color" value={obj.fill || '#000000'}
+              <input 
+                id="prop-fill"
+                name="fill"
+                type="color" value={obj.fill || '#000000'}
                 onChange={(e) => onUpdate('fill', e.target.value)}
                 onBlur={onCommit}
                 className="w-full h-12 rounded-lg cursor-pointer bg-transparent border-0" />
@@ -174,17 +199,23 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">테두리</p>
             <div className="flex gap-3 items-end bg-slate-50/50 p-3 rounded-xl border border-slate-100">
               <div className="flex-1">
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">색상</label>
+                <label htmlFor="prop-stroke" className="text-[10px] font-bold text-slate-400 mb-1.5 block">색상</label>
                 <div className="p-1 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-primary/40 transition-colors">
-                  <input type="color" value={obj.stroke || '#000000'}
+                  <input 
+                    id="prop-stroke"
+                    name="stroke"
+                    type="color" value={obj.stroke || '#000000'}
                     onChange={(e) => onUpdate('stroke', e.target.value)}
                     onBlur={onCommit}
                     className="w-full h-8 rounded-md cursor-pointer bg-transparent border-0" />
                 </div>
               </div>
               <div className="w-24">
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">두께 (px)</label>
-                <input type="number" min="0" max="20" value={obj.strokeWidth || 0}
+                <label htmlFor="prop-stroke-width" className="text-[10px] font-bold text-slate-400 mb-1.5 block">두께 (px)</label>
+                <input 
+                  id="prop-stroke-width"
+                  name="strokeWidth"
+                  type="number" min="0" max="20" value={obj.strokeWidth || 0}
                   onChange={(e) => onUpdate('strokeWidth', Number(e.target.value))}
                   onBlur={onCommit}
                   className="w-full px-3 py-2 text-sm bg-white border border-slate-200/80 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 tabular-nums transition-all shadow-sm" />
@@ -196,11 +227,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
         {/* Corner Radius for Rect */}
         {obj.type === 'rect' && (
           <div className="space-y-3 pt-5 border-t border-slate-200/60">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <label htmlFor="prop-rx" className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <CornerUpRight size={12} /> 모서리 둥글기
-            </p>
+            </label>
             <div className="flex items-center gap-3 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-              <input type="range" min="0" max="100" value={obj.rx || 0}
+              <input 
+                id="prop-rx"
+                name="rx"
+                type="range" min="0" max="100" value={obj.rx || 0}
                 onChange={(e) => { onUpdate('rx', Number(e.target.value)); onUpdate('ry', Number(e.target.value)); }}
                 onMouseUp={onCommit}
                 className="flex-1 accent-primary h-1.5 bg-slate-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
@@ -266,8 +300,10 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
             <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100 space-y-4">
               {/* Font Family */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">서체</label>
+                <label htmlFor="prop-font-family" className="text-[10px] font-bold text-slate-400 mb-1.5 block">서체</label>
                 <select
+                  id="prop-font-family"
+                  name="fontFamily"
                   value={obj.fontFamily || 'Noto Sans KR'}
                   onChange={(e) => { onUpdate('fontFamily', e.target.value); onCommit(); }}
                   className="w-full px-3 py-2.5 text-sm bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-sm"
@@ -278,10 +314,13 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
 
               {/* Font Size */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">크기 (px)</label>
+                <label htmlFor="prop-font-size" className="text-[10px] font-bold text-slate-400 mb-1.5 block">크기 (px)</label>
                 <div className="flex items-center gap-1.5">
                   <button onClick={() => { onUpdate('fontSize', Math.max(8, (obj.fontSize || 48) - 2)); onCommit(); }} className="p-2.5 bg-white border border-slate-200 shadow-sm rounded-xl hover:bg-slate-50 hover:border-primary/40 transition-all active:scale-95"><Minus size={16} className="text-slate-600" /></button>
-                  <input type="number" min="8" max="200" value={obj.fontSize || 48}
+                  <input 
+                    id="prop-font-size"
+                    name="fontSize"
+                    type="number" min="8" max="200" value={obj.fontSize || 48}
                     onChange={(e) => onUpdate('fontSize', Number(e.target.value))}
                     onBlur={onCommit}
                     className="flex-1 px-3 py-2 text-base text-center bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 tabular-nums transition-all shadow-sm font-semibold" />
@@ -320,9 +359,12 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
 
               {/* Line Height */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">줄 간격</label>
+                <label htmlFor="prop-line-height" className="text-[10px] font-bold text-slate-400 mb-1.5 block">줄 간격</label>
                 <div className="flex items-center gap-3">
-                  <input type="range" min="0.8" max="3" step="0.1" value={obj.lineHeight || 1.4}
+                  <input 
+                    id="prop-line-height"
+                    name="lineHeight"
+                    type="range" min="0.8" max="3" step="0.1" value={obj.lineHeight || 1.4}
                     onChange={(e) => onUpdate('lineHeight', Number(e.target.value))}
                     onMouseUp={onCommit}
                     className="flex-1 accent-primary h-1.5 bg-slate-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
@@ -332,9 +374,12 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
 
               {/* Letter Spacing */}
               <div>
-                <label className="text-[10px] font-bold text-slate-400 mb-1.5 block">자간</label>
+                <label htmlFor="prop-char-spacing" className="text-[10px] font-bold text-slate-400 mb-1.5 block">자간</label>
                 <div className="flex items-center gap-3">
-                  <input type="range" min="-200" max="800" step="10" value={obj.charSpacing || 0}
+                  <input 
+                    id="prop-char-spacing"
+                    name="charSpacing"
+                    type="range" min="-200" max="800" step="10" value={obj.charSpacing || 0}
                     onChange={(e) => onUpdate('charSpacing', Number(e.target.value))}
                     onMouseUp={onCommit}
                     className="flex-1 accent-primary h-1.5 bg-slate-200 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />

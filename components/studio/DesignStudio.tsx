@@ -422,18 +422,17 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       return;
     }
 
-    // [AI-v2] 원본 객체의 상태를 정확하게 캡처
+    // [AI-v2] 원본 객체의 상태를 정확하게 캡처 (절대 좌표 기준 AABB)
+    const boundingRect = activeObj.getBoundingRect();
     const originalBox = {
-      left: activeObj.left || 0,
-      top: activeObj.top || 0,
-      width: activeObj.getScaledWidth(),
-      height: activeObj.getScaledHeight(),
+      left: boundingRect.left,
+      top: boundingRect.top,
+      width: boundingRect.width,
+      height: boundingRect.height,
       angle: activeObj.angle || 0,
-      originX: activeObj.originX,
-      originY: activeObj.originY,
     };
 
-    console.log('[AI-v2] Starting processing with box:', originalBox);
+    console.log('[AI-v2] Starting processing with bounding rect:', originalBox);
 
     setIsProcessingAI(true);
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
@@ -460,19 +459,12 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       console.log('[AI-v3] === FULL API RESPONSE ===');
       console.log('[AI-v3] result.width:', result.width, 'result.height:', result.height);
       console.log('[AI-v3] result.mode:', result.mode);
-      console.log('[AI-v3] result.elements count:', result.elements?.length);
-      console.log('[AI-v3] result.background?:', !!result.background);
-      if (result.elements) {
-        result.elements.forEach((el, i) => {
-          console.log(`[AI-v3] element[${i}]: type=${el.type} left=${el.left} top=${el.top} w=${el.width} h=${el.height} hasImage=${!!el.image}`);
-        });
-      }
       if (!result || !result.elements) throw new Error('AI 분석 결과가 비어있습니다.');
 
       const aiWidth = result.width || 1024;
       const aiHeight = result.height || 1024;
       
-      // AI 결과를 현재 캔버스 상의 실제 크기(Scaled)로 매핑하는 비율
+      // AI 결과를 현재 캔버스 상의 실제 크기(AABB)로 매핑하는 비율
       const fitScaleX = originalBox.width / aiWidth;
       const fitScaleY = originalBox.height / aiHeight;
 
@@ -481,21 +473,18 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       console.log('[AI-v3] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
       console.log('[AI-v3] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
 
-      // 기준점 계산: Fabric은 originX/Y에 따라 left/top이 다름. 
-      // 이를 절대적인 top-left(0,0) 기준으로 변환하여 계산.
-      let baseLeft = originalBox.left;
-      let baseTop = originalBox.top;
-      if (originalBox.originX === 'center') baseLeft -= originalBox.width / 2;
-      if (originalBox.originY === 'center') baseTop -= originalBox.height / 2;
-      console.log('[AI-v3] baseLeft:', baseLeft, 'baseTop:', baseTop, '(after origin correction)');
+      // getBoundingRect()에서 구한 left/top은 이미 절대 좌상단 좌표입니다.
+      const baseLeft = originalBox.left;
+      const baseTop = originalBox.top;
+      console.log('[AI-v3] baseLeft:', baseLeft, 'baseTop:', baseTop, '(using getBoundingRect)');
 
       const addedObjects: FabricObject[] = [];
 
       const toCanvasProps = (layer: ExtractedLayer) => ({
         left: baseLeft + (layer.left * fitScaleX),
         top: baseTop + (layer.top * fitScaleY),
-        width: Math.max(1, layer.width * fitScaleX),
-        height: Math.max(1, layer.height * fitScaleY),
+        scaleX: fitScaleX,
+        scaleY: fitScaleY,
         originX: 'left' as const,
         originY: 'top' as const,
       });

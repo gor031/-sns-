@@ -394,8 +394,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     
     // duplicate
     newPages.splice(index + 1, 0, newPages[index]);
-    
-    });
+    setPages(newPages);
+    setCurrentPageIndex(index + 1);
   };
 
   const deletePage = (index: number) => {

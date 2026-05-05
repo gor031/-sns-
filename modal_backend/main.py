@@ -193,17 +193,22 @@ class ImageProcessor:
         with torch.no_grad():
             outputs = self.dino_model(**inputs)
 
+        # transformers 버전에 따라 파라미터명이 다름 → 수동 필터링으로 통일
         dino_results = self.dino_processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
-            box_threshold=0.25,
-            text_threshold=0.20,
             target_sizes=[(h, w)]
         )
 
-        boxes_xyxy = dino_results[0]["boxes"].cpu().numpy()  # [x1, y1, x2, y2]
-        det_labels = dino_results[0]["labels"]
-        det_scores = dino_results[0]["scores"].cpu().numpy()
+        all_boxes  = dino_results[0]["boxes"].cpu().numpy()
+        all_scores = dino_results[0]["scores"].cpu().numpy()
+        all_labels = dino_results[0]["labels"]
+
+        # confidence 0.25 이상만 사용
+        keep = all_scores >= 0.25
+        boxes_xyxy = all_boxes[keep]
+        det_scores = all_scores[keep]
+        det_labels = [all_labels[i] for i, k in enumerate(keep) if k]
 
         # ── Step 3: SAM 2로 각 box → 정밀 마스크 → 원본 픽셀 crop ──
         if len(boxes_xyxy) > 0:

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/extract",
+      "destination": "https://gabjagi031--cardnews-ai-backend-v2-fastapi-app.modal.run/extract"
+    },
+    {
+      "source": "/api/search",
+      "destination": "https://gabjagi031--cardnews-ai-backend-v2-fastapi-app.modal.run/search"
+    }
+  ]
+}

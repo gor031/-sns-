@@ -496,14 +496,15 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       const aiWidth = result.width || 1024;
       const aiHeight = result.height || 1024;
       
-      // AI 결과를 현재 캔버스 상의 실제 크기(AABB)로 매핑하는 비율
-      const fitScaleX = originalBox.width / aiWidth;
-      const fitScaleY = originalBox.height / aiHeight;
+      // [AI-v6] AI 결과를 현재 캔버스 상의 실제 크기(AABB)로 매핑하는 비율
+      // captureBox는 줌이 1인 상태에서 측정된 순수 캔버스 좌표계 크기입니다.
+      const fitScaleX = captureBox.width / aiWidth;
+      const fitScaleY = captureBox.height / aiHeight;
 
-      console.log('[AI-v3] === MAPPING INFO ===');
-      console.log('[AI-v3] originalBox:', JSON.stringify(originalBox));
-      console.log('[AI-v3] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
-      console.log('[AI-v3] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
+      console.log('[AI-v6] === MAPPING INFO ===');
+      console.log('[AI-v6] captureBox:', JSON.stringify(captureBox));
+      console.log('[AI-v6] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
+      console.log('[AI-v6] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
 
       // [AI-v5] captureBox 기준으로 좌표 계산
       const baseLeft = captureBox.left;
@@ -519,6 +520,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         scaleY: fitScaleY,
         originX: 'left' as const,
         originY: 'top' as const,
+        angle: 0, // 이미 회전된 이미지를 캡처했으므로 결과물 각도는 0
       });
 
       canvas.remove(activeObj);
@@ -530,7 +532,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         const fgImg = await FabricImage.fromURL(fgLayer.image, { crossOrigin: 'anonymous' });
         fgImg.set({
           ...toCanvasProps(fgLayer),
-          angle: originalBox.angle,
+          angle: 0,
           name: '피사체',
         });
         
@@ -544,9 +546,9 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           bgImg.set({
             left: baseLeft,
             top: baseTop,
-            scaleX: originalBox.width / bgImg.width!,
-            scaleY: originalBox.height / bgImg.height!,
-            angle: originalBox.angle,
+            scaleX: captureBox.width / bgImg.width!,
+            scaleY: captureBox.height / bgImg.height!,
+            angle: 0,
             selectable: true,
             name: '복원된 배경',
             originX: 'left',
@@ -569,7 +571,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               fontFamily: 'Inter',
               fontWeight: layer.fontWeight || 'normal',
               textAlign: layer.textAlign || 'left' as any,
-              angle: originalBox.angle,
+              angle: 0,
               name: '텍스트',
             });
           } else if (layer.type === 'rect') {
@@ -579,7 +581,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               height: layer.height,
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
-              angle: originalBox.angle,
+              angle: 0,
               name: '도형',
             });
           } else if (layer.type === 'circle') {
@@ -588,14 +590,14 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               radius: (Math.max(layer.width, layer.height) / 2),
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
-              angle: originalBox.angle,
+              angle: 0,
               name: '원형',
             });
           } else if (layer.type === 'image' && layer.image) {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
             img.set({
               ...props,
-              angle: originalBox.angle,
+              angle: 0,
               name: '이미지 요소',
               originX: 'left',
               originY: 'top',

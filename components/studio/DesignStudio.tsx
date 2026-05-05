@@ -422,57 +422,43 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       return;
     }
 
-    // [AI-v2] 원본 객체의 상태를 정확하게 캡처 (절대 좌표 기준 AABB)
-    const boundingRect = activeObj.getBoundingRect();
-    const originalBox = {
-      left: boundingRect.left,
-      top: boundingRect.top,
-      width: boundingRect.width,
-      height: boundingRect.height,
-      angle: activeObj.angle || 0,
-    };
+    // [AI-v7] 객체의 실제 속성을 직접 읽어서 사용 (getBoundingRect 사용하지 않음)
+    const objLeft = activeObj.left ?? 0;
+    const objTop = activeObj.top ?? 0;
+    const objScaleX = activeObj.scaleX ?? 1;
+    const objScaleY = activeObj.scaleY ?? 1;
+    const objWidth = activeObj.width ?? 0;    // 이미지의 고유(intrinsic) 너비
+    const objHeight = activeObj.height ?? 0;  // 이미지의 고유(intrinsic) 높이
+    const objAngle = activeObj.angle ?? 0;
+    const objOriginX = activeObj.originX ?? 'center';  // Fabric v7 기본값: 'center'
+    const objOriginY = activeObj.originY ?? 'center';
 
-    console.log('[AI-v2] Starting processing with bounding rect:', originalBox);
+    // 캔버스에서의 실제 표시 크기 (스케일 적용된 크기)
+    const displayWidth = objWidth * Math.abs(objScaleX);
+    const displayHeight = objHeight * Math.abs(objScaleY);
+
+    // 객체의 좌상단(top-left) 좌표 계산 (origin에 따라 다름)
+    let topLeftX = objLeft;
+    let topLeftY = objTop;
+    if (objOriginX === 'center') topLeftX = objLeft - displayWidth / 2;
+    else if (objOriginX === 'right') topLeftX = objLeft - displayWidth;
+    if (objOriginY === 'center') topLeftY = objTop - displayHeight / 2;
+    else if (objOriginY === 'bottom') topLeftY = objTop - displayHeight;
+
+    console.log('[AI-v7] === OBJECT PROPERTIES ===');
+    console.log('[AI-v7] left:', objLeft, 'top:', objTop, 'originX:', objOriginX, 'originY:', objOriginY);
+    console.log('[AI-v7] intrinsic size:', objWidth, '×', objHeight);
+    console.log('[AI-v7] scale:', objScaleX, '×', objScaleY);
+    console.log('[AI-v7] display size:', displayWidth, '×', displayHeight);
+    console.log('[AI-v7] computed top-left:', topLeftX, ',', topLeftY);
 
     setIsProcessingAI(true);
     setAiStatus(mode === 'object-extract' ? '요소를 분석 중...' : '피사체 분석 중...');
 
     try {
-      // [AI-v5] 캔버스 줌/이동 상태를 임시로 초기화하여 정확한 좌표 캡처
-      const originalVPT = [...canvas.viewportTransform];
-      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+      // [AI-v7] 객체 자체의 toDataURL 사용 (뷰포트 조작 없이 깔끔하게 캡처)
+      const dataURL = activeObj.toDataURL({ format: 'png', multiplier: 1 });
 
-      const allObjects = canvas.getObjects();
-      const originalVisibility = allObjects.map(o => ({ obj: o, visible: o.visible }));
-      
-      // 선택된 객체(또는 그룹)만 보이게 설정
-      allObjects.forEach(o => {
-        o.visible = (o === activeObj || activeObj.contains?.(o));
-      });
-      canvas.renderAll();
-
-      // 리셋된 상태에서 다시 정확한 Bounding Box 측정
-      const rect = activeObj.getBoundingRect();
-
-      const dataURL = canvas.toDataURL({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-        format: 'png',
-        multiplier: 1
-      });
-
-      // 가시성 및 뷰포트 복구
-      originalVisibility.forEach(item => {
-        item.obj.visible = item.visible;
-      });
-      canvas.setViewportTransform(originalVPT);
-      canvas.renderAll();
-
-      // AI 결과 처리를 위해 캡처 당시의 좌표 저장
-      const captureBox = rect;
-      
       const blob = await (await fetch(dataURL)).blob();
       const formData = new FormData();
       formData.append('file', blob, 'image.png');
@@ -488,39 +474,38 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       }
 
       const result: ExtractionResult = await response.json();
-      console.log('[AI-v3] === FULL API RESPONSE ===');
-      console.log('[AI-v3] result.width:', result.width, 'result.height:', result.height);
-      console.log('[AI-v3] result.mode:', result.mode);
+      console.log('[AI-v7] === API RESPONSE ===');
+      console.log('[AI-v7] result.width:', result.width, 'result.height:', result.height);
+      console.log('[AI-v7] result.mode:', result.mode);
       if (!result || !result.elements) throw new Error('AI 분석 결과가 비어있습니다.');
 
-      const aiWidth = result.width || 1024;
-      const aiHeight = result.height || 1024;
+      // AI가 반환한 이미지 크기 (= 객체의 intrinsic 크기와 동일해야 함)
+      const aiWidth = result.width || objWidth;
+      const aiHeight = result.height || objHeight;
       
-      // [AI-v6] AI 결과를 현재 캔버스 상의 실제 크기(AABB)로 매핑하는 비율
-      // captureBox는 줌이 1인 상태에서 측정된 순수 캔버스 좌표계 크기입니다.
-      const fitScaleX = captureBox.width / aiWidth;
-      const fitScaleY = captureBox.height / aiHeight;
+      // [AI-v7] AI 좌표 → 캔버스 좌표 매핑 비율
+      // AI는 intrinsic 해상도(multiplier=1)의 이미지를 분석했으므로
+      // AI 좌표를 캔버스의 실제 표시 크기로 변환해야 합니다.
+      const fitScaleX = displayWidth / aiWidth;
+      const fitScaleY = displayHeight / aiHeight;
 
-      console.log('[AI-v6] === MAPPING INFO ===');
-      console.log('[AI-v6] captureBox:', JSON.stringify(captureBox));
-      console.log('[AI-v6] aiWidth:', aiWidth, 'aiHeight:', aiHeight);
-      console.log('[AI-v6] fitScaleX:', fitScaleX, 'fitScaleY:', fitScaleY);
-
-      // [AI-v5] captureBox 기준으로 좌표 계산
-      const baseLeft = captureBox.left;
-      const baseTop = captureBox.top;
-      console.log('[AI-v3] baseLeft:', baseLeft, 'baseTop:', baseTop, '(using getBoundingRect)');
+      console.log('[AI-v7] === MAPPING INFO ===');
+      console.log('[AI-v7] aiSize:', aiWidth, '×', aiHeight);
+      console.log('[AI-v7] displaySize:', displayWidth, '×', displayHeight);
+      console.log('[AI-v7] fitScale:', fitScaleX, '×', fitScaleY);
+      console.log('[AI-v7] baseTopLeft:', topLeftX, ',', topLeftY);
 
       const addedObjects: FabricObject[] = [];
 
+      // [AI-v7] AI 좌표를 캔버스 좌표로 변환하는 헬퍼
       const toCanvasProps = (layer: ExtractedLayer) => ({
-        left: baseLeft + (layer.left * fitScaleX),
-        top: baseTop + (layer.top * fitScaleY),
+        left: topLeftX + (layer.left * fitScaleX),
+        top: topLeftY + (layer.top * fitScaleY),
         scaleX: fitScaleX,
         scaleY: fitScaleY,
         originX: 'left' as const,
         originY: 'top' as const,
-        angle: 0, // 이미 회전된 이미지를 캡처했으므로 결과물 각도는 0
+        angle: objAngle, // 원본 이미지와 동일한 각도 적용
       });
 
       canvas.remove(activeObj);
@@ -532,7 +517,6 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         const fgImg = await FabricImage.fromURL(fgLayer.image, { crossOrigin: 'anonymous' });
         fgImg.set({
           ...toCanvasProps(fgLayer),
-          angle: 0,
           name: '피사체',
         });
         
@@ -544,11 +528,11 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         if (result.background) {
           const bgImg = await FabricImage.fromURL(result.background, { crossOrigin: 'anonymous' });
           bgImg.set({
-            left: baseLeft,
-            top: baseTop,
-            scaleX: captureBox.width / bgImg.width!,
-            scaleY: captureBox.height / bgImg.height!,
-            angle: 0,
+            left: topLeftX,
+            top: topLeftY,
+            scaleX: displayWidth / bgImg.width!,
+            scaleY: displayHeight / bgImg.height!,
+            angle: objAngle,
             selectable: true,
             name: '복원된 배경',
             originX: 'left',
@@ -556,7 +540,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
           });
           canvas.add(bgImg);
           addedObjects.push(bgImg);
-          console.log('[AI-v3] Added background:', { left: baseLeft, top: baseTop });
+          console.log('[AI-v7] Added background:', { left: topLeftX, top: topLeftY });
         }
 
         for (const layer of result.elements) {
@@ -571,7 +555,6 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               fontFamily: 'Inter',
               fontWeight: layer.fontWeight || 'normal',
               textAlign: layer.textAlign || 'left' as any,
-              angle: 0,
               name: '텍스트',
             });
           } else if (layer.type === 'rect') {
@@ -581,7 +564,6 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               height: layer.height,
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
-              angle: 0,
               name: '도형',
             });
           } else if (layer.type === 'circle') {
@@ -590,23 +572,19 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               radius: (Math.max(layer.width, layer.height) / 2),
               fill: layer.fill || '#3B82F6',
               opacity: layer.opacity || 1,
-              angle: 0,
               name: '원형',
             });
           } else if (layer.type === 'image' && layer.image) {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
             img.set({
               ...props,
-              angle: 0,
               name: '이미지 요소',
-              originX: 'left',
-              originY: 'top',
             });
             obj = img;
           }
 
           if (obj) {
-            console.log(`[AI-v3] Adding ${layer.type}: left=${obj.left} top=${obj.top} w=${(obj as any).width} h=${(obj as any).height} scaleX=${obj.scaleX} scaleY=${obj.scaleY}`);
+            console.log(`[AI-v7] Adding ${layer.type}: left=${obj.left} top=${obj.top} scaleX=${obj.scaleX} scaleY=${obj.scaleY}`);
             canvas.add(obj);
             addedObjects.push(obj);
           }

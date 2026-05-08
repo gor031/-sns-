@@ -29,6 +29,9 @@ import {
   Share2,
   Wand2
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터'입니다.
 모바일 환경은 가독성이 생명입니다. 사용자가 주제를 던지면 무조건 **짧고, 강렬하고, 직관적인** 원고를 작성해야 합니다.
@@ -235,13 +238,11 @@ const App: React.FC = () => {
       const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
       
-      // @ts-ignore
-      const canvas = await window.html2canvas(element, {
+      const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
         backgroundColor: null,
-        logging: false,
-        // No longer need onclone to toggle opacity since we use left: -9999px
+        logging: false
       });
 
       const data = canvas.toDataURL('image/png');
@@ -262,16 +263,17 @@ const App: React.FC = () => {
     setIsDownloading(true);
 
     try {
-      // @ts-ignore
-      const zip = new window.JSZip();
+      const zip = new JSZip();
       const folder = zip.folder("card-news");
 
       for (let i = 0; i < cardData.slides.length; i++) {
         const element = document.getElementById(`export-slide-inner-${i}`);
         if (element) {
-          // @ts-ignore
-          const canvas = await window.html2canvas(element, {
-            scale: 3,
+          // 브라우저 렌더링 부하를 줄이기 위해 약간의 지연 시간 추가
+          if (i > 0) await new Promise(r => setTimeout(r, 100));
+
+          const canvas = await html2canvas(element, {
+            scale: 2.5, // 안정성을 위해 3.0에서 2.5로 조정
             useCORS: true,
             backgroundColor: null,
             logging: false
@@ -279,18 +281,17 @@ const App: React.FC = () => {
           
           const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
           if (blob) {
-            folder.file(`slide-${i + 1}.png`, blob);
+            folder!.file(`slide-${i + 1}.png`, blob);
           }
         }
       }
 
       const content = await zip.generateAsync({ type: "blob" });
-      // @ts-ignore
-      window.saveAs(content, `card-news-${Date.now()}.zip`);
+      saveAs(content, `card-news-${Date.now()}.zip`);
 
     } catch (err) {
       console.error("Batch download failed", err);
-      alert("전체 이미지 저장에 실패했습니다.");
+      alert("전체 이미지 저장에 실패했습니다. (브라우저 메모리 부족일 수 있습니다)");
     } finally {
       setIsDownloading(false);
     }

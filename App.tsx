@@ -28,7 +28,7 @@ import {
   Share2,
   Wand2
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -237,16 +237,13 @@ const App: React.FC = () => {
       const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
       
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false
+      const dataUrl = await toPng(element, {
+        pixelRatio: 3,
+        skipFonts: false,
       });
 
-      const data = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = data;
+      link.href = dataUrl;
       link.download = `card-news-${currentSlideIndex + 1}.png`;
       document.body.appendChild(link);
       link.click();
@@ -271,14 +268,14 @@ const App: React.FC = () => {
           // 브라우저 렌더링 부하를 줄이기 위해 약간의 지연 시간 추가
           if (i > 0) await new Promise(r => setTimeout(r, 100));
 
-          const canvas = await html2canvas(element, {
-            scale: 2.5, // 안정성을 위해 3.0에서 2.5로 조정
-            useCORS: true,
-            backgroundColor: null,
-            logging: false
+          const dataUrl = await toPng(element, {
+            pixelRatio: 2, // 안정성을 위해 2로 설정
+            skipFonts: false,
           });
           
-          const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+          const response = await fetch(dataUrl);
+          const blob = await response.blob();
+          
           if (blob) {
             folder!.file(`slide-${i + 1}.png`, blob);
           }
@@ -290,7 +287,7 @@ const App: React.FC = () => {
 
     } catch (err) {
       console.error("Batch download failed", err);
-      alert("전체 이미지 저장에 실패했습니다. (브라우저 메모리 부족일 수 있습니다)");
+      alert("전체 이미지 저장에 실패했습니다. (현상: " + (err instanceof Error ? err.message : String(err)) + ")");
     } finally {
       setIsDownloading(false);
     }

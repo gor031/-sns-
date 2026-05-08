@@ -21,7 +21,6 @@ import {
   CheckCircle2,
   Bot,
   ArrowDown,
-  // Added missing Check icon import
   Check,
   Store,
   Edit3,

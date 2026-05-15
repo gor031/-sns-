@@ -24,13 +24,14 @@ image = (
         "accelerate",
         "easyocr",
         "rembg", "onnxruntime",
+        "simple-lama-inpainting",
         "fastapi[standard]", "python-multipart",
         "numpy", "Pillow", "requests",
     )
     # SAM 2
     .pip_install("git+https://github.com/facebookresearch/sam2.git")
-    # opencv headless로 통일 (easyocr 충돌 방지)
-    .run_commands("pip install opencv-python-headless --force-reinstall --quiet")
+    # opencv headless로 통일하되 LaMa가 요구하는 numpy<2를 유지한다.
+    .run_commands("pip install 'numpy<2.0.0' 'opencv-python-headless==4.11.0.86' --force-reinstall --quiet")
 )
 
 volume = modal.Volume.from_name("ai-models-cache", create_if_missing=True)
@@ -87,6 +88,17 @@ class ImageProcessor:
             gpu=self.device == "cuda",
             model_storage_directory=f"{CACHE_DIR}/easyocr",
         )
+
+        # ── LaMa inpainting (배경 복원) ──
+        # 실패해도 서비스는 OpenCV fallback으로 계속 동작해야 한다.
+        self.lama = None
+        try:
+            print("Loading LaMa inpainting...")
+            from simple_lama_inpainting import SimpleLama
+            self.lama = SimpleLama()
+            print("LaMa loaded!")
+        except Exception as e:
+            print(f"LaMa unavailable, using OpenCV fallback: {e}")
 
         print("All models loaded!")
 
@@ -220,6 +232,45 @@ class ImageProcessor:
                 "offsetX": max(1, int(font_size * 0.06)),
                 "offsetY": max(1, int(font_size * 0.08)),
             }, outer
+
+        def build_restore_mask(mask_uint8):
+            area_ratio = cv2.countNonZero(mask_uint8) / max(full_area, 1)
+            if area_ratio < 0.003:
+                k = 5
+            elif area_ratio < 0.03:
+                k = 9
+            else:
+                k = 13
+            kernel = np.ones((k, k), np.uint8)
+            restore = cv2.dilate(mask_uint8, kernel)
+            restore = cv2.morphologyEx(restore, cv2.MORPH_CLOSE, kernel)
+            return restore
+
+        def opencv_restore(mask_uint8):
+            area_ratio = cv2.countNonZero(mask_uint8) / max(full_area, 1)
+            radius = 5 if area_ratio < 0.003 else 9 if area_ratio < 0.04 else 13
+            try:
+                return cv2.inpaint(image_np, mask_uint8, inpaintRadius=radius, flags=cv2.INPAINT_NS)
+            except Exception:
+                return cv2.inpaint(image_np, mask_uint8, inpaintRadius=radius, flags=cv2.INPAINT_TELEA)
+
+        def restore_background(mask_uint8):
+            restore_mask = build_restore_mask(mask_uint8)
+            area_ratio = cv2.countNonZero(restore_mask) / max(full_area, 1)
+
+            # Very tiny holes are faster and often cleaner with OpenCV.
+            if self.lama is None or area_ratio < 0.001:
+                return Image.fromarray(opencv_restore(restore_mask)), "opencv"
+
+            try:
+                mask_pil = Image.fromarray(restore_mask).convert("L")
+                result = self.lama(image_pil, mask_pil)
+                if isinstance(result, Image.Image):
+                    return result.convert("RGB"), "lama"
+                return Image.fromarray(np.array(result)).convert("RGB"), "lama"
+            except Exception as e:
+                print(f"LaMa restore failed, using OpenCV fallback: {e}")
+                return Image.fromarray(opencv_restore(restore_mask)), "opencv"
 
         # ── 이미지 로드 ──
         image_pil = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -513,11 +564,10 @@ class ImageProcessor:
             -(item["width"] * item["height"])
         ))
 
-        # ── 배경 복원: 추출한 영역을 주변 픽셀로 자연스럽게 메운다 ──
+        # ── 배경 복원: LaMa 우선, 실패 시 OpenCV fallback ──
+        restore_method = "none"
         if cv2.countNonZero(removal_mask) > 0:
-            inpaint_mask = cv2.dilate(removal_mask, np.ones((7, 7), np.uint8))
-            bg_np = cv2.inpaint(image_np, inpaint_mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
-            background_pil = Image.fromarray(bg_np)
+            background_pil, restore_method = restore_background(removal_mask)
         else:
             background_pil = image_pil
 
@@ -530,6 +580,7 @@ class ImageProcessor:
                 "texts": len([x for x in layers if x["type"] == "text"]),
                 "shapes": 0,
                 "images": len([x for x in layers if x["type"] == "image"]),
+                "restore": restore_method,
             }
         }
 

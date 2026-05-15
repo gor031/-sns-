@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Canvas, Rect, Circle, Textbox, Line, Triangle, FabricImage, FabricObject, ActiveSelection, Group } from 'fabric';
+import { Canvas, Rect, Circle, Textbox, Line, Triangle, FabricImage, FabricObject, ActiveSelection, Group, Shadow } from 'fabric';
 import { Toolbar } from './Toolbar';
 import { PropertyPanel } from './PropertyPanel';
 import {
@@ -35,6 +35,12 @@ interface ExtractedLayer {
   fontSize?: number;
   fontWeight?: string;
   textAlign?: 'left' | 'center' | 'right';
+  shadow?: {
+    color: string;
+    blur: number;
+    offsetX: number;
+    offsetY: number;
+  };
   name?: string;
 }
 
@@ -135,6 +141,23 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     if (!fabricRef.current) return;
     saveHistoryDirect(fabricRef.current);
   }, [saveHistoryDirect]);
+
+  const resetHistoryToCurrent = useCallback((canvas: Canvas) => {
+    const idx = currentPageIndexRef.current;
+    const newPages = [...pagesRef.current];
+    newPages[idx] = JSON.stringify(canvas.toJSON());
+    const stateToSave: StudioState = {
+      pages: newPages,
+      currentPageIndex: idx,
+      width: canvasWidthRef.current,
+      height: canvasHeightRef.current,
+    };
+
+    setPages(newPages);
+    setHistory([stateToSave]);
+    setHistoryIndex(0);
+    historyIndexRef.current = 0;
+  }, []);
 
   const applyZoom = (canvas: Canvas, z: number, w: number, h: number) => {
     canvas.setZoom(z);
@@ -571,6 +594,12 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
               fontFamily: 'Inter',
               fontWeight: layer.fontWeight || 'normal',
               textAlign: layer.textAlign || 'left' as any,
+              shadow: layer.shadow ? new Shadow({
+                color: layer.shadow.color,
+                blur: layer.shadow.blur * Math.max(fitScaleX, fitScaleY),
+                offsetX: layer.shadow.offsetX * fitScaleX,
+                offsetY: layer.shadow.offsetY * fitScaleY,
+              }) : undefined,
               name: '텍스트',
             });
           } else if (layer.type === 'rect') {
@@ -594,7 +623,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
             const img = await FabricImage.fromURL(layer.image, { crossOrigin: 'anonymous' });
             img.set({
               ...props,
-              name: '이미지 요소',
+              name: layer.name || '이미지 요소',
             });
             obj = img;
           }
@@ -616,7 +645,11 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       }
 
       canvas.renderAll();
-      saveHistory();
+      if (mode === 'object-extract') {
+        resetHistoryToCurrent(canvas);
+      } else {
+        saveHistory();
+      }
       setAiStatus('완료!');
       setTimeout(() => setAiStatus(''), 2000);
     } catch (err: any) {

@@ -132,6 +132,95 @@ class ImageProcessor:
             union = np.logical_or(m1, m2).sum()
             return inter / max(union, 1)
 
+        def mask_overlap(m1, m2):
+            inter = np.logical_and(m1, m2).sum()
+            return inter / max(min(m1.sum(), m2.sum()), 1)
+
+        def mask_bbox(mask_bool, pad=2):
+            ys, xs = np.where(mask_bool)
+            if len(xs) == 0 or len(ys) == 0:
+                return None
+            return (
+                max(0, int(xs.min()) - pad),
+                max(0, int(ys.min()) - pad),
+                min(w, int(xs.max()) + 1 + pad),
+                min(h, int(ys.max()) + 1 + pad),
+            )
+
+        def is_duplicate_mask(mask_bool, previous_masks):
+            for prev in previous_masks:
+                if mask_iou(mask_bool, prev) > 0.35 or mask_overlap(mask_bool, prev) > 0.82:
+                    return True
+            return False
+
+        def looks_like_background_mask(mask_bool, bbox, area):
+            x1, y1, x2, y2 = bbox
+            bw, bh = max(1, x2 - x1), max(1, y2 - y1)
+            bbox_area = bw * bh
+            touches_edges = sum([x1 <= 2, y1 <= 2, x2 >= w - 2, y2 >= h - 2])
+            fill_ratio = area / max(bbox_area, 1)
+            # Large edge-touching sheets are usually backgrounds or broad regions, not editable objects.
+            return area > full_area * 0.35 and touches_edges >= 2 and fill_ratio > 0.45
+
+        def looks_like_noise_or_line(mask_bool, bbox, area):
+            x1, y1, x2, y2 = bbox
+            bw, bh = max(1, x2 - x1), max(1, y2 - y1)
+            bbox_area = bw * bh
+            fill_ratio = area / max(bbox_area, 1)
+            long_side = max(bw, bh)
+            short_side = min(bw, bh)
+            aspect = long_side / max(short_side, 1)
+
+            # SAM often returns anti-aliased edges, hairlines, text-shadow crumbs, or border fragments.
+            if area < full_area * 0.0015 and (fill_ratio < 0.28 or aspect > 8):
+                return True
+            if short_side <= 5 and long_side > 24:
+                return True
+            if aspect > 14 and fill_ratio < 0.55:
+                return True
+            return False
+
+        def rgb_luma(rgb):
+            return 0.2126 * int(rgb[0]) + 0.7152 * int(rgb[1]) + 0.0722 * int(rgb[2])
+
+        def rgba_from_rgb(rgb, alpha=0.45):
+            r, g, b = [int(x) for x in rgb]
+            return f"rgba({r},{g},{b},{alpha:.2f})"
+
+        def detect_text_shadow(text_mask, bbox, font_size):
+            x1, y1, x2, y2 = bbox
+            shadow_pad = max(4, min(28, int(font_size * 0.55)))
+            kernel = np.ones((shadow_pad, shadow_pad), np.uint8)
+            outer = cv2.dilate(text_mask, kernel)
+            inner = cv2.dilate(text_mask, np.ones((3, 3), np.uint8))
+            ring = cv2.subtract(outer, inner)
+
+            # Bias toward the common lower/right shadow area, but still allow centered glow.
+            roi = np.zeros((h, w), dtype=np.uint8)
+            roi[
+                max(0, y1 - shadow_pad):min(h, y2 + shadow_pad),
+                max(0, x1 - shadow_pad):min(w, x2 + shadow_pad)
+            ] = 255
+            ring = cv2.bitwise_and(ring, roi)
+
+            ring_pixels = image_np[ring > 0]
+            text_pixels = image_np[text_mask > 0]
+            if len(ring_pixels) < 20 or len(text_pixels) < 20:
+                return None, outer
+
+            shadow_rgb = np.median(ring_pixels, axis=0).astype(int)
+            text_rgb = np.median(text_pixels, axis=0).astype(int)
+            contrast = abs(rgb_luma(shadow_rgb) - rgb_luma(text_rgb))
+            if contrast < 18:
+                return None, outer
+
+            return {
+                "color": rgba_from_rgb(shadow_rgb, 0.42),
+                "blur": max(2, int(font_size * 0.12)),
+                "offsetX": max(1, int(font_size * 0.06)),
+                "offsetY": max(1, int(font_size * 0.08)),
+            }, outer
+
         # ── 이미지 로드 ──
         image_pil = Image.open(io.BytesIO(contents)).convert("RGB")
         image_np = np.array(image_pil)
@@ -174,27 +263,39 @@ class ImageProcessor:
 
             text_mask = np.zeros((h, w), dtype=np.uint8)
             cv2.fillPoly(text_mask, [np.array(points, dtype=np.int32)], 255)
+            font_size = max(12, int(bh * 0.78))
+            shadow, text_protection_mask = detect_text_shadow(
+                text_mask,
+                (x1, y1, x2, y2),
+                font_size
+            )
             removal_mask = cv2.bitwise_or(
                 removal_mask,
-                cv2.dilate(text_mask, np.ones((5, 5), np.uint8))
+                cv2.dilate(text_protection_mask, np.ones((5, 5), np.uint8))
             )
-            used_masks.append(text_mask > 0)
+            used_masks.append(text_protection_mask > 0)
 
-            layers.append({
+            text_layer = {
                 "id": f"text_{idx + 1}", "type": "text",
                 "text": text.strip(),
                 "left": x1, "top": y1, "width": bw, "height": bh,
-                "fontSize": max(12, int(bh * 0.78)),
+                "fontSize": font_size,
                 "fill": median_color(image_np, text_mask),
                 "fontWeight": "bold" if bh > 42 else "normal",
                 "textAlign": "center", "name": "텍스트"
-            })
+            }
+            if shadow:
+                text_layer["shadow"] = shadow
+            layers.append(text_layer)
 
         # ── Step 2: Grounding DINO 객체 탐지 ──
         # 텍스트가 아닌 시각 요소들을 의미 단위로 탐지
         DINO_PROMPT = (
-            "logo . icon . illustration . photo . graphic . "
-            "shape . product . object . element . background ."
+            "person . face . character . animal . product . package . bottle . cup . food . "
+            "phone . laptop . book . document . card . logo . icon . symbol . sticker . emoji . "
+            "illustration . photo . graphic . chart . diagram . badge . label . button . "
+            "speech bubble . callout . arrow . line . divider . frame . box . rectangle . "
+            "circle . triangle . star . shape . object . foreground element . design element ."
         )
         inputs = self.dino_processor(
             images=image_pil, text=DINO_PROMPT, return_tensors="pt"
@@ -214,8 +315,8 @@ class ImageProcessor:
         all_scores = dino_results[0]["scores"].cpu().numpy()
         all_labels = dino_results[0]["labels"]
 
-        # confidence 0.25 이상만 사용
-        keep = all_scores >= 0.25
+        # confidence를 조금 낮춰 작은 아이콘/장식 후보를 살리고, 뒤에서 SAM/중복 필터로 정리한다.
+        keep = all_scores >= 0.16
         boxes_xyxy = all_boxes[keep]
         det_scores = all_scores[keep]
         det_labels = [all_labels[i] for i, k in enumerate(keep) if k]
@@ -256,8 +357,8 @@ class ImageProcessor:
                 if bw < 20 or bh < 20:
                     continue
                 area = bw * bh
-                # 너무 작거나(0.3% 미만) 너무 큰(90% 초과) 것 제외
-                if area < full_area * 0.003 or area > full_area * 0.90:
+                # 너무 작거나 너무 큰 것 제외. 작은 아이콘은 0.08%까지 허용한다.
+                if area < full_area * 0.0008 or area > full_area * 0.92:
                     continue
 
                 # SAM 2: box prompt로 정밀 마스크 생성
@@ -275,10 +376,24 @@ class ImageProcessor:
                         )
 
                 mask_bool = masks[0].astype(bool)  # (H, W)
+                mask_area = int(mask_bool.sum())
+                if mask_area < full_area * 0.0006 or mask_area > full_area * 0.92:
+                    continue
 
-                # 기존 마스크와 50% 이상 겹치면 중복 → 스킵
-                skip = any(mask_iou(mask_bool, prev) > 0.35 for prev in used_masks)
-                if skip:
+                refined_bbox = mask_bbox(mask_bool, pad=3)
+                if not refined_bbox:
+                    continue
+                x1, y1, x2, y2 = refined_bbox
+                bw, bh = x2 - x1, y2 - y1
+                if bw < 12 or bh < 12:
+                    continue
+                if looks_like_background_mask(mask_bool, refined_bbox, mask_area):
+                    continue
+                if looks_like_noise_or_line(mask_bool, refined_bbox, mask_area):
+                    continue
+
+                # 기존 마스크와 과하게 겹치면 중복 → 스킵
+                if is_duplicate_mask(mask_bool, used_masks):
                     continue
                 used_masks.append(mask_bool)
 
@@ -324,21 +439,31 @@ class ImageProcessor:
                 mask_bool = am["segmentation"]  # bool (H, W)
                 area = int(am["area"])
 
-                # 너무 작거나 너무 큰 것 제외
-                if area < full_area * 0.003 or area > full_area * 0.90:
+                # 너무 작거나 너무 큰 것 제외. AutoMask는 작은 디자인 요소 보완용이다.
+                if area < full_area * 0.0008 or area > full_area * 0.80:
                     continue
 
-                # 이미 처리된 마스크와 50% 이상 겹치면 스킵
-                if any(mask_iou(mask_bool, prev) > 0.35 for prev in used_masks):
+                refined_bbox = mask_bbox(mask_bool, pad=3)
+                if not refined_bbox:
+                    continue
+                x1, y1, x2, y2 = refined_bbox
+                bw, bh = x2 - x1, y2 - y1
+                if bw < 12 or bh < 12:
+                    continue
+                if looks_like_background_mask(mask_bool, refined_bbox, area):
+                    continue
+                if looks_like_noise_or_line(mask_bool, refined_bbox, area):
+                    continue
+
+                pred_iou = float(am.get("predicted_iou", 1.0))
+                stability = float(am.get("stability_score", 1.0))
+                if pred_iou < 0.78 or stability < 0.86:
+                    continue
+
+                # 이미 처리된 마스크와 과하게 겹치면 스킵
+                if is_duplicate_mask(mask_bool, used_masks):
                     continue
                 used_masks.append(mask_bool)
-
-                ys, xs = np.where(mask_bool)
-                x1, y1 = int(xs.min()), int(ys.min())
-                x2, y2 = int(xs.max()), int(ys.max())
-                bw, bh = x2 - x1, y2 - y1
-                if bw < 20 or bh < 20:
-                    continue
 
                 mask_uint8 = (mask_bool * 255).astype(np.uint8)
                 alpha = cv2.GaussianBlur(mask_uint8, (5, 5), 0)

@@ -167,11 +167,22 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     });
   };
 
+  const getFitZoomForSize = useCallback((w: number, h: number) => {
+    const isMobile = window.innerWidth < 640;
+    const sideToolbarWidth = isMobile ? 72 : 0;
+    const horizontalPadding = isMobile ? 32 : 96;
+    const verticalPadding = isMobile ? 180 : 220;
+    const availableWidth = Math.max(240, window.innerWidth - sideToolbarWidth - horizontalPadding);
+    const availableHeight = Math.max(320, window.innerHeight - verticalPadding);
+    return Math.min(availableWidth / w, availableHeight / h, isMobile ? 0.72 : 1);
+  }, []);
+
   const resizeCanvasTo = useCallback((canvas: Canvas, w: number, h: number, z: number = zoom) => {
     setCanvasWidth(w);
     setCanvasHeight(h);
     setCustomWidth(w.toString());
     setCustomHeight(h.toString());
+    setZoom(z);
     applyZoom(canvas, z, w, h);
   }, [zoom]);
 
@@ -646,6 +657,10 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
 
       canvas.renderAll();
       if (mode === 'object-extract') {
+        canvas.discardActiveObject();
+        setSelectedObject(null);
+        setIsPanelOpen(false);
+        canvas.requestRenderAll();
         resetHistoryToCurrent(canvas);
       } else {
         saveHistory();
@@ -761,7 +776,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       if (!isInitialized) {
         const w = img.width || 1080;
         const h = img.height || 1080;
-        resizeCanvasTo(canvas, w, h);
+        resizeCanvasTo(canvas, w, h, getFitZoomForSize(w, h));
         setIsInitialized(true);
         
         img.set({
@@ -797,7 +812,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     }).catch(() => {
       alert('이미지를 불러올 수 없습니다.');
     });
-  }, [canvasWidth, canvasHeight, isInitialized, resizeCanvasTo, saveHistory]);
+  }, [canvasWidth, canvasHeight, getFitZoomForSize, isInitialized, resizeCanvasTo, saveHistory]);
 
   const handleImageUpload = useCallback((mode?: AIMode) => {
     const input = document.createElement('input');
@@ -820,7 +835,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
             const w = img.width || 1080;
             const h = img.height || 1080;
             if (fabricRef.current) {
-              resizeCanvasTo(fabricRef.current, w, h);
+              resizeCanvasTo(fabricRef.current, w, h, getFitZoomForSize(w, h));
               fabricRef.current.clear();
               fabricRef.current.backgroundColor = '#ffffff';
             } else {
@@ -841,7 +856,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       reader.readAsDataURL(file);
     };
     input.click();
-  }, [isInitialized, addImage, resizeCanvasTo]);
+  }, [isInitialized, addImage, getFitZoomForSize, resizeCanvasTo]);
 
   // Delete, Copy, Paste
   const handleDelete = useCallback(() => {

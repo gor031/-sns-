@@ -236,14 +236,20 @@ class ImageProcessor:
         def build_restore_mask(mask_uint8):
             area_ratio = cv2.countNonZero(mask_uint8) / max(full_area, 1)
             if area_ratio < 0.003:
-                k = 5
+                k = 11
             elif area_ratio < 0.03:
-                k = 9
+                k = 19
             else:
-                k = 13
+                k = 27
             kernel = np.ones((k, k), np.uint8)
             restore = cv2.dilate(mask_uint8, kernel)
             restore = cv2.morphologyEx(restore, cv2.MORPH_CLOSE, kernel)
+            # Thin objects such as stems often leave a narrow halo even when the visible
+            # object mask is correct. A small blur-threshold pass absorbs that edge halo
+            # only for background restoration, without changing the extracted object alpha.
+            halo = cv2.GaussianBlur(restore, (0, 0), sigmaX=max(2, k / 3))
+            _, halo = cv2.threshold(halo, 12, 255, cv2.THRESH_BINARY)
+            restore = cv2.bitwise_or(restore, halo.astype(np.uint8))
             return restore
 
         def opencv_restore(mask_uint8):

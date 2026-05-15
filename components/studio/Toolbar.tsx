@@ -85,7 +85,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <div className="flex flex-shrink-0 relative z-20 shadow-2xl">
       {/* Icon Strip */}
-      <div className="w-18 bg-slate-900 border-r border-slate-800 flex flex-col items-center py-6 gap-2">
+      <div className="w-[72px] sm:w-18 bg-slate-900 border-r border-slate-800 flex flex-col items-center py-4 sm:py-6 gap-2">
         {[
           { icon: Type, section: 'text' as SectionType, label: '텍스트' },
           { icon: Shapes, section: 'shapes' as SectionType, label: '도형' },
@@ -95,7 +95,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             key={section}
             onClick={() => toggleSection(section)}
-            className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-300 ${
+            className={`w-12 h-14 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-300 ${
               activeSection === section
                 ? 'bg-gradient-to-br from-primary to-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.4)] scale-105'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800 hover:scale-105 active:scale-95'
@@ -109,7 +109,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* Expanded Panel */}
       {activeSection && (
-        <div className="w-72 bg-white/80 backdrop-blur-2xl border-r border-white/50 shadow-[10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-y-auto animate-fade-in-right">
+        <div className="w-[min(72vw,18rem)] sm:w-72 bg-white/80 backdrop-blur-2xl border-r border-white/50 shadow-[10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-y-auto animate-fade-in-right">
           {/* TEXT Section */}
           {activeSection === 'text' && (
             <div className="p-5 space-y-4">

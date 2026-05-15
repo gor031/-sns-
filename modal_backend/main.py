@@ -275,18 +275,38 @@ class ImageProcessor:
             )
             used_masks.append(text_protection_mask > 0)
 
-            text_layer = {
-                "id": f"text_{idx + 1}", "type": "text",
-                "text": text.strip(),
-                "left": x1, "top": y1, "width": bw, "height": bh,
-                "fontSize": font_size,
-                "fill": median_color(image_np, text_mask),
-                "fontWeight": "bold" if bh > 42 else "normal",
-                "textAlign": "center", "name": "텍스트"
-            }
-            if shadow:
-                text_layer["shadow"] = shadow
-            layers.append(text_layer)
+            # Large/stylized title text should preserve its original pixels, including shadow,
+            # stroke, blur, and texture. Small/plain text stays editable.
+            is_stylized_title = bool(shadow) or bh > max(42, h * 0.045)
+            if is_stylized_title:
+                text_bbox = mask_bbox(text_protection_mask > 0, pad=3)
+                if text_bbox:
+                    tx1, ty1, tx2, ty2 = text_bbox
+                    tw, th = tx2 - tx1, ty2 - ty1
+                    text_alpha = cv2.GaussianBlur(text_protection_mask, (5, 5), 0)
+                    crop_rgb = image_np[ty1:ty2, tx1:tx2].copy()
+                    crop_alpha = text_alpha[ty1:ty2, tx1:tx2]
+                    rgba = cv2.cvtColor(crop_rgb, cv2.COLOR_RGB2RGBA)
+                    rgba[:, :, 3] = crop_alpha
+                    layers.append({
+                        "id": f"text_image_{idx + 1}", "type": "image",
+                        "image": encode_rgba_png(rgba),
+                        "left": tx1, "top": ty1, "width": tw, "height": th,
+                        "name": "텍스트 이미지"
+                    })
+            else:
+                text_layer = {
+                    "id": f"text_{idx + 1}", "type": "text",
+                    "text": text.strip(),
+                    "left": x1, "top": y1, "width": bw, "height": bh,
+                    "fontSize": font_size,
+                    "fill": median_color(image_np, text_mask),
+                    "fontWeight": "bold" if bh > 42 else "normal",
+                    "textAlign": "center", "name": "텍스트"
+                }
+                if shadow:
+                    text_layer["shadow"] = shadow
+                layers.append(text_layer)
 
         # ── Step 2: Grounding DINO 객체 탐지 ──
         # 텍스트가 아닌 시각 요소들을 의미 단위로 탐지
@@ -493,13 +513,13 @@ class ImageProcessor:
             -(item["width"] * item["height"])
         ))
 
-        # ── 배경 복원: 추출한 영역을 투명하게 처리 (진짜 구멍) ──
-        bg_rgba = cv2.cvtColor(image_np, cv2.COLOR_RGB2RGBA)
+        # ── 배경 복원: 추출한 영역을 주변 픽셀로 자연스럽게 메운다 ──
         if cv2.countNonZero(removal_mask) > 0:
-            # 가장자리 블러로 자연스러운 투명 경계
-            soft_alpha = cv2.GaussianBlur(removal_mask, (7, 7), 0)
-            bg_rgba[:, :, 3] = 255 - soft_alpha
-        background_pil = Image.fromarray(bg_rgba)
+            inpaint_mask = cv2.dilate(removal_mask, np.ones((7, 7), np.uint8))
+            bg_np = cv2.inpaint(image_np, inpaint_mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
+            background_pil = Image.fromarray(bg_np)
+        else:
+            background_pil = image_pil
 
         return {
             "version": 2, "mode": mode,

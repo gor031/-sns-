@@ -1255,7 +1255,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
   }, []); // Empty dependency array means it stays stable throughout the component lifecycle
 
   return (
-    <div className="flex h-[calc(100vh-65px)] bg-slate-50 overflow-hidden font-sans text-slate-800 relative">
+    <div className="flex h-[calc(100dvh-64px)] sm:h-[calc(100vh-65px)] bg-slate-50 overflow-hidden font-sans text-slate-800 relative">
       {/* Welcome Dashboard Overlay */}
       {!isInitialized && (
         <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-50 p-6 overflow-auto">
@@ -1338,8 +1338,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
 
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Top Action Bar */}
-        <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 py-3 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
-          <div className="flex items-center gap-1.5">
+        <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-3 sm:px-6 py-3 flex items-center gap-3 flex-shrink-0 z-20 shadow-sm overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2 rounded-xl hover:bg-slate-100 disabled:opacity-30 transition-all hover:scale-105 active:scale-95 text-slate-600" title="실행 취소 (Ctrl+Z)"><Undo2 size={18} /></button>
             <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2 rounded-xl hover:bg-slate-100 disabled:opacity-30 transition-all hover:scale-105 active:scale-95 text-slate-600" title="다시 실행 (Ctrl+Y)"><Redo2 size={18} /></button>
             <div className="w-px h-6 bg-slate-200 mx-2"></div>
@@ -1358,8 +1358,8 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
                     그룹 해제
                   </button>
                 )}
-                <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-200/60 ml-1">
-                  <span className="text-xs font-bold text-slate-400 px-2">레이어 순서:</span>
+                <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-200/60 ml-1 shrink-0">
+                  <span className="text-xs font-bold text-slate-400 px-2 whitespace-nowrap">레이어 순서:</span>
                   <button onClick={bringToFront} className="px-2 py-1.5 rounded-lg hover:bg-white hover:shadow-sm transition-all text-slate-600 text-xs font-bold flex items-center gap-1" title="제일 위에 덮기">
                     <ChevronUp size={14} className="text-primary" />맨 위로
                   </button>
@@ -1377,10 +1377,10 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 relative">
+          <div className="flex items-center gap-1.5 relative shrink-0">
             <button 
               onClick={() => setShowSizeSettings(!showSizeSettings)} 
-              className="p-2 px-3 rounded-xl hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 text-slate-600 flex items-center gap-2 text-sm font-semibold"
+              className="p-2 px-3 rounded-xl hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 text-slate-600 flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
             >
               <LayoutTemplate size={16} /> 크기 조정
             </button>
@@ -1424,17 +1424,17 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
             <button onClick={handleFitToScreen} className="p-2 rounded-xl hover:bg-slate-100 transition-all hover:scale-105 active:scale-95 text-slate-600" title="화면에 맞추기"><Maximize size={18} /></button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={handleLoadJSON} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100/50 hover:bg-slate-200/50 rounded-xl transition-all hover:scale-[1.02] active:scale-95">불러오기</button>
-            <button onClick={handleSaveJSON} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100/50 hover:bg-slate-200/50 rounded-xl transition-all hover:scale-[1.02] active:scale-95">프로젝트 저장</button>
-            <button onClick={handleExportPNG} className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-primary to-rose-500 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button onClick={handleLoadJSON} className="px-3 sm:px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100/50 hover:bg-slate-200/50 rounded-xl transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">불러오기</button>
+            <button onClick={handleSaveJSON} className="px-3 sm:px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100/50 hover:bg-slate-200/50 rounded-xl transition-all hover:scale-[1.02] active:scale-95 whitespace-nowrap">프로젝트 저장</button>
+            <button onClick={handleExportPNG} className="px-4 sm:px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-primary to-rose-500 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 whitespace-nowrap">
               <Download size={16} /> {pages.length > 1 ? '전체 내보내기' : '내보내기'}
             </button>
           </div>
         </div>
 
         {/* Canvas Container */}
-        <div ref={containerRef} className="flex-1 overflow-auto flex items-center justify-center p-8 relative pb-24">
+        <div ref={containerRef} className="flex-1 overflow-auto flex items-start sm:items-center justify-start sm:justify-center p-4 sm:p-8 relative pb-24 touch-pan-x touch-pan-y">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-slate-50/50 to-purple-50/50 pointer-events-none"></div>
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
           
@@ -1456,7 +1456,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         </div>
         
         {/* Pages Bottom Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-md border-t border-slate-200/60 z-20 flex items-center px-6 overflow-x-auto gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] scrollbar-hide">
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-md border-t border-slate-200/60 z-20 flex items-center px-4 sm:px-6 overflow-x-auto gap-3 sm:gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] scrollbar-hide">
           {pages.map((_, idx) => (
             <div 
               key={idx} 
@@ -1488,13 +1488,15 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
 
       {/* Right Property Panel */}
       {isPanelOpen && selectedObject && fabricRef.current?.getActiveObject() && (
-        <PropertyPanel
-          selectedObject={fabricRef.current.getActiveObject()!}
-          onUpdate={updateObjectProp}
-          onCommit={commitObjectChange}
-          onAIExtract={handleAIExtract}
-          onClose={() => setIsPanelOpen(false)}
-        />
+        <div className="absolute inset-x-0 bottom-0 z-40 max-h-[72dvh] overflow-hidden rounded-t-3xl bg-white shadow-[0_-16px_40px_rgba(15,23,42,0.18)] sm:static sm:inset-auto sm:z-auto sm:max-h-none sm:rounded-none sm:shadow-none">
+          <PropertyPanel
+            selectedObject={fabricRef.current.getActiveObject()!}
+            onUpdate={updateObjectProp}
+            onCommit={commitObjectChange}
+            onAIExtract={handleAIExtract}
+            onClose={() => setIsPanelOpen(false)}
+          />
+        </div>
       )}
 
       {(!isPanelOpen || !selectedObject) && selectedObject && (

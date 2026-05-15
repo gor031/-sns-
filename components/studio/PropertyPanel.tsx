@@ -48,7 +48,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({
   };
 
   return (
-    <div className="w-80 bg-white/80 backdrop-blur-2xl border-l border-white/50 shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-y-auto flex-shrink-0 animate-fade-in-left z-20">
+    <div className="w-full sm:w-80 max-h-[72dvh] sm:max-h-none bg-white/80 backdrop-blur-2xl border-l border-white/50 shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] overflow-y-auto flex-shrink-0 animate-fade-in-left z-20">
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-slate-200/60 bg-white/50 sticky top-0 z-10 backdrop-blur-md">
         <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2.5">

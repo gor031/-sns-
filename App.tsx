@@ -320,19 +320,19 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20 font-sans">
+    <div className="min-h-screen pb-20 font-sans overflow-x-hidden">
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg text-white">
-              <MessageCircleHeart size={24} fill="currentColor" />
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-3 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 shrink-0 min-w-0">
+            <div className="bg-primary p-2 rounded-lg text-white shrink-0">
+              <MessageCircleHeart size={22} fill="currentColor" />
             </div>
-            <h1 className="text-xl font-black text-gray-800 tracking-tight">카드뉴스 생성기</h1>
+            <h1 className="text-lg sm:text-xl font-black text-gray-800 tracking-tight whitespace-nowrap">카드뉴스 생성기</h1>
           </div>
-          <div className="flex items-center gap-3">
-             <button onClick={() => setCurrentTab('editor')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'editor' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}><Edit3 size={16}/> 에디터</button>
-             <button onClick={() => setCurrentTab('studio')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'studio' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}><Wand2 size={16}/> 디자인 스튜디오</button>
-             <button onClick={() => setCurrentTab('market')} className={`px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}><Store size={16}/> 템플릿 마켓</button>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+             <button onClick={() => setCurrentTab('editor')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'editor' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}><Edit3 size={16}/> 에디터</button>
+             <button onClick={() => setCurrentTab('studio')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'studio' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}><Wand2 size={16}/> 디자인 스튜디오</button>
+             <button onClick={() => setCurrentTab('market')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}><Store size={16}/> 템플릿 마켓</button>
           </div>
         </div>
       </header>

@@ -36,6 +36,14 @@ export default defineConfig(({ mode }) => {
                 /color\(display-p3\s+[^)]*\)/g,
                 'rgb(0, 0, 0)'
               );
+              // html2canvas가 color-mix(in oklab, ...) 파싱 중 oklab 키워드에서 터지는 문제 해결
+              // color-mix(in oklab, X Y%, transparent) -> X 로 대체 (알파 채널은 손실되지만 크래시 방지)
+              chunk.source = chunk.source.replace(
+                /color-mix\(\s*in\s+oklab\s*,\s*(var\([^)]+\)|[a-zA-Z]+|#[0-9a-fA-F]+)[\s\S]*?,\s*transparent\s*\)/g,
+                '$1'
+              );
+              // 혹시 다른 곳에 남은 "in oklab" 도 제거 (예: gradient position)
+              chunk.source = chunk.source.replace(/\s+in\s+oklab/g, '');
             }
           }
         }

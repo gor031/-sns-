@@ -16,6 +16,30 @@ export default defineConfig(({ mode }) => {
     plugins: [
       tailwindcss(),
       react(),
+      // html2canvas가 color(display-p3 ...) 함수를 파싱하지 못하는 문제를 해결하기 위해
+      // 빌드된 CSS에서 @supports (color: color(display-p3 ...)) 블록 전체를 제거합니다.
+      // display-p3 는 와이드 가뮤 컬러로 일반 모니터에서는 sRGB 폴백(이미 정의됨)과 동일하게 보입니다.
+      {
+        name: 'strip-display-p3-colors',
+        enforce: 'post' as const,
+        generateBundle(_options: any, bundle: any) {
+          for (const fileName in bundle) {
+            const chunk = bundle[fileName];
+            if (chunk.type === 'asset' && fileName.endsWith('.css') && typeof chunk.source === 'string') {
+              // @supports (color: color(display-p3 ...)) { ... } 블록 전체 제거
+              chunk.source = chunk.source.replace(
+                /@supports\s*\(color:\s*color\(display-p3[^)]*\)\)\s*\{[^}]*\{[^}]*\}[^}]*\}/gs,
+                '/* display-p3 wide-gamut colors stripped for html2canvas compatibility */'
+              );
+              // 혹시 남은 개별 color(display-p3 ...) 값도 안전하게 rgb(0,0,0) 으로 폴백
+              chunk.source = chunk.source.replace(
+                /color\(display-p3\s+[^)]*\)/g,
+                'rgb(0, 0, 0)'
+              );
+            }
+          }
+        }
+      },
       {
         name: 'local-api-proxy',
         configureServer(server) {

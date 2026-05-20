@@ -1,6 +1,7 @@
 export default {
   plugins: {
     '@csstools/postcss-oklab-function': { preserve: false },
+    '@csstools/postcss-color-function': { preserve: false },
     'autoprefixer': {},
   }
 }

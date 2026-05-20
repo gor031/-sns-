@@ -126,6 +126,34 @@ const dataURLtoBlob = (dataurl: string) => {
   return new Blob([u8arr], { type: mime });
 };
 
+const resolveOklchStylesForClone = (element: HTMLElement, clonedElement: HTMLElement) => {
+  const processElement = (orig: HTMLElement, clone: HTMLElement) => {
+    try {
+      const computed = window.getComputedStyle(orig);
+      clone.style.color = computed.color;
+      clone.style.backgroundColor = computed.backgroundColor;
+      clone.style.borderColor = computed.borderColor;
+      clone.style.backgroundImage = computed.backgroundImage;
+      clone.style.boxShadow = computed.boxShadow;
+      clone.style.fill = computed.fill;
+      clone.style.stroke = computed.stroke;
+    } catch (e) {
+      console.error("Style clone error for element:", orig, e);
+    }
+  };
+
+  processElement(element, clonedElement);
+
+  const origChildren = element.getElementsByTagName('*');
+  const cloneChildren = clonedElement.getElementsByTagName('*');
+  
+  for (let i = 0; i < origChildren.length; i++) {
+    if (cloneChildren[i]) {
+      processElement(origChildren[i] as HTMLElement, cloneChildren[i] as HTMLElement);
+    }
+  }
+};
+
 const App: React.FC = () => {
   // State
   const [jsonInput, setJsonInput] = useState('');
@@ -253,7 +281,13 @@ const App: React.FC = () => {
         scale: 3,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: null
+        backgroundColor: null,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById(`export-slide-inner-${currentSlideIndex}`);
+          if (clonedElement) {
+            resolveOklchStylesForClone(element, clonedElement as HTMLElement);
+          }
+        }
       });
 
       const dataUrl = canvas.toDataURL('image/png');
@@ -288,7 +322,13 @@ const App: React.FC = () => {
             scale: 2,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null
+            backgroundColor: null,
+            onclone: (clonedDoc) => {
+              const clonedElement = clonedDoc.getElementById(`export-slide-inner-${i}`);
+              if (clonedElement) {
+                resolveOklchStylesForClone(element, clonedElement as HTMLElement);
+              }
+            }
           });
           
           const dataUrl = canvas.toDataURL('image/png');

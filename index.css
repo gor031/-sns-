@@ -27,3 +27,5 @@
       scrollbar-width: none;  /* Firefox */
   }
 }
+
+.dummy-cache-buster-oklab-fix { display: none; }

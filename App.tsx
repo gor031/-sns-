@@ -28,7 +28,7 @@ import {
   Share2,
   Wand2
 } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -113,6 +113,18 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     return this.props.children;
   }
 }
+
+const dataURLtoBlob = (dataurl: string) => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)![1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+};
 
 const App: React.FC = () => {
   // State
@@ -237,10 +249,14 @@ const App: React.FC = () => {
       const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
       
-      const dataUrl = await toPng(element, {
-        pixelRatio: 3,
-        skipFonts: false,
+      const canvas = await html2canvas(element, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null
       });
+
+      const dataUrl = canvas.toDataURL('image/png');
 
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -268,13 +284,15 @@ const App: React.FC = () => {
           // 브라우저 렌더링 부하를 줄이기 위해 약간의 지연 시간 추가
           if (i > 0) await new Promise(r => setTimeout(r, 100));
 
-          const dataUrl = await toPng(element, {
-            pixelRatio: 2, // 안정성을 위해 2로 설정
-            skipFonts: false,
+          const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null
           });
           
-          const response = await fetch(dataUrl);
-          const blob = await response.blob();
+          const dataUrl = canvas.toDataURL('image/png');
+          const blob = dataURLtoBlob(dataUrl);
           
           if (blob) {
             folder!.file(`slide-${i + 1}.png`, blob);

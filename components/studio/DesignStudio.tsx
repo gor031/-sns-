@@ -224,7 +224,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       if (obj) {
         moveStartPos = { left: obj.left || 0, top: obj.top || 0 };
         // lockUniScaling 버튼: 객체에 비율고정이 켜져있으면 캔버스도 비율고정
-        if (obj.lockUniScaling) {
+        if ((obj as typeof obj & { lockUniScaling?: boolean }).lockUniScaling) {
           canvas.uniformScaling = true;
         }
       }
@@ -233,7 +233,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
     canvas.on('mouse:up', () => {
       // lockUniScaling이 아닌 경우 기본값(false)으로 복원 → Shift 토글이 정상 작동
       const obj = canvas.getActiveObject();
-      canvas.uniformScaling = !!(obj?.lockUniScaling);
+      canvas.uniformScaling = !!(obj as (typeof obj & { lockUniScaling?: boolean }) | undefined)?.lockUniScaling;
     });
 
     canvas.on('object:moving', (e) => {
@@ -647,7 +647,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
         }
 
         if (addedObjects.length > 1) {
-          const selectables = addedObjects.filter(o => o.name !== '복원된 배경');
+          const selectables = addedObjects.filter((object) => (object as typeof object & { name?: string }).name !== '복원된 배경');
           if (selectables.length > 0) {
             const selection = new ActiveSelection(selectables, { canvas });
             canvas.setActiveObject(selection);

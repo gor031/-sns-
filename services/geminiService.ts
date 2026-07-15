@@ -62,9 +62,13 @@ export const parseCardNewsJson = (input: string): CardNewsData => {
       topic: data.topic || "제목 없음",
       targetAudience: data.targetAudience || "전체",
       tone: data.tone || "기본",
-      hashtags: data.hashtags || [],
+      hashtags: Array.isArray(data.hashtags) ? data.hashtags.map(String) : [],
       slides: validatedSlides,
-      themeIndex: data.themeIndex // Preserve if exists, or App.tsx will assign random
+      snsTitle: typeof data.snsTitle === 'string' ? data.snsTitle : '',
+      snsBody: typeof data.snsBody === 'string' ? data.snsBody : '',
+      signature: typeof data.signature === 'string' ? data.signature : '',
+      themeIndex: data.themeIndex,
+      customBackgroundImage: typeof data.customBackgroundImage === 'string' ? data.customBackgroundImage : undefined
     };
   } catch (error) {
     console.error("Parse Error:", error);

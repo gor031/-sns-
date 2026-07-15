@@ -17,6 +17,19 @@
     text-size-adjust: 100%;
   }
 
+  button, input, select, textarea {
+    font: inherit;
+  }
+
+  button, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgb(255 107 107 / 35%);
+    outline-offset: 2px;
+  }
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -25,6 +38,64 @@
   .no-scrollbar {
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
+  }
+}
+
+@layer components {
+  .tool-icon-button {
+    display: inline-grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #374151;
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+
+  .tool-icon-button:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+
+  .tool-panel {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: #fff;
+  }
+
+  .tool-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .tool-input {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #fff;
+    padding: 0.65rem 0.75rem;
+    color: #111827;
+  }
+
+  .tool-input:focus {
+    border-color: #ff6b6b;
+    outline: 3px solid rgb(255 107 107 / 16%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

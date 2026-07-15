@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 
 .vercel
+.netlify
+test-results
+playwright-report
+.vite-stdout.log
+.vite-stderr.log
+.vite.pid
+.functions-stdout.log
+.functions-stderr.log

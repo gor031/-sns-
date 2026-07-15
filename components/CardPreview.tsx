@@ -15,6 +15,9 @@ interface CardPreviewProps {
   captureId: string;
   hideControls?: boolean;
   forExport?: boolean;
+  signature?: string;
+  textStrokeWidth?: number;
+  textStrokeColor?: string;
 }
 
 export const THEMES = [
@@ -255,7 +258,18 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
   );
 };
 
-export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0, bgImageUrl, onUpdate, captureId, hideControls = false, forExport = false }) => {
+export const CardPreview: React.FC<CardPreviewProps> = ({
+  slide,
+  themeIndex = 0,
+  bgImageUrl,
+  onUpdate,
+  captureId,
+  hideControls = false,
+  forExport = false,
+  signature = '',
+  textStrokeWidth = 0,
+  textStrokeColor = '#000000',
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editHeader, setEditHeader] = useState('');
   const [editBody, setEditBody] = useState('');
@@ -277,7 +291,11 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
     <div
       className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || theme.text} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
-      style={{ lineHeight: '1.4' }}
+      style={{
+        lineHeight: '1.4',
+        WebkitTextStroke: textStrokeWidth > 0 ? `${textStrokeWidth}px ${textStrokeColor}` : undefined,
+        paintOrder: textStrokeWidth > 0 ? 'stroke fill' : undefined,
+      }}
       dangerouslySetInnerHTML={{ __html: processHtmlForPreview(/<\/?[a-z][\s\S]*>/i.test(content) ? content : markdownToHtml(content), theme, isHeader, forExport) }}
     />
   );
@@ -291,8 +309,12 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
             <div className="absolute inset-0 bg-black/50" />
           </div>
         )}
-        <div className="absolute top-[-20%] right-[-20%] w-[100%] h-[70%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob1} 0%, transparent 60%)` }}></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
+        {!bgImageUrl && (
+          <div className="absolute top-[-20%] right-[-20%] w-[100%] h-[70%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob1} 0%, transparent 60%)` }}></div>
+        )}
+        {!bgImageUrl && (
+          <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] z-[1]" style={{ background: `radial-gradient(circle at center, ${theme.blob2} 0%, transparent 60%)` }}></div>
+        )}
         <div className="relative z-10 h-full flex flex-col p-8 justify-center">
           <div className={`${isCover ? 'flex-1 flex flex-col items-center justify-center' : 'mb-6 pb-6 border-b border-black/10'}`}>
             {isCover && <div className={`w-12 h-1 mb-8 opacity-50 ${theme.accent.includes('#') ? '' : theme.accent.replace('text-', 'bg-')}`} style={theme.accent.includes('#') ? { backgroundColor: theme.accent } : {}}></div>}
@@ -300,6 +322,17 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
             {isCover && <div className={`w-32 h-2.5 rounded-full mt-8 ${theme.decoration}`}></div>}
           </div>
           {!isCover && <div className="flex-1 relative">{renderContent(slide.body, false, slide.bodyStyle)}</div>}
+          {signature && (
+            <div
+              className={`absolute bottom-5 right-6 max-w-[70%] truncate text-right text-xs font-bold opacity-80 ${theme.text}`}
+              style={{
+                WebkitTextStroke: textStrokeWidth > 0 ? `${Math.min(1, textStrokeWidth)}px ${textStrokeColor}` : undefined,
+                paintOrder: textStrokeWidth > 0 ? 'stroke fill' : undefined,
+              }}
+            >
+              {signature}
+            </div>
+          )}
         </div>
       </div>
       {!hideControls && (
@@ -307,7 +340,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ slide, themeIndex = 0,
           {!isEditing ? (
             <button onClick={() => setIsEditing(true)} className="w-full py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-lg"><Wand2 size={20} />디자인 및 텍스트 수정</button>
           ) : (
-            <div className="bg-white rounded-3xl border-2 border-primary/20 p-6 shadow-xl space-y-6">
+            <div className="bg-white rounded-3xl border-2 border-[#FFD4D4] p-6 shadow-xl space-y-6">
               <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                 <h3 className="font-bold flex items-center gap-2"><Edit2 size={18} className="text-primary" /> 에디터</h3>
                 <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-md hover:bg-red-500 transition-colors flex items-center gap-2"><Check size={16} /> 완료</button>

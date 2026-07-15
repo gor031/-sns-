@@ -19,8 +19,27 @@ export interface CardNewsData {
   tone: string;
   slides: Slide[];
   hashtags: string[];
+  snsTitle?: string;
+  snsBody?: string;
+  signature?: string;
   themeIndex?: number; // Stores the random visual theme ID for this deck
   customBackgroundImage?: string; // For Creator's custom uploaded image
+}
+
+export type SubtitlePosition = 'top' | 'center' | 'bottom';
+
+export interface SubtitleStyle {
+  colorHex: string;
+  fontSize: number;
+  position: SubtitlePosition;
+}
+
+export interface SubtitleSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+  style: SubtitleStyle;
 }
 
 export interface TemplateMarketData {

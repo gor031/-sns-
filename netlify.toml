@@ -16,3 +16,18 @@
   from = "/api/search"
   to = "/.netlify/functions/search"
   status = 200
+
+[[redirects]]
+  from = "/api/generate-card-news"
+  to = "/.netlify/functions/generate-card-news"
+  status = 200
+
+[[redirects]]
+  from = "/api/synthesize"
+  to = "/.netlify/functions/synthesize"
+  status = 200
+
+[[redirects]]
+  from = "/api/transcribe"
+  to = "/.netlify/functions/transcribe"
+  status = 200

@@ -1,5 +1,13 @@
-exports.handler = async function(event, context) {
+export const config = {
+  rateLimit: { action: 'rate_limit', aggregateBy: 'ip', windowLimit: 60, windowSize: 60 },
+};
+
+export const handler = async function(event) {
   const { query, source } = event.queryStringParameters || {};
+
+  if (event.httpMethod !== 'GET') {
+    return { statusCode: 405, body: JSON.stringify({ error: 'GET 요청만 지원합니다.' }) };
+  }
 
   if (!query || !source) {
     return {
@@ -9,17 +17,21 @@ exports.handler = async function(event, context) {
     };
   }
 
+  const safeQuery = String(query).trim().slice(0, 120);
   let apiUrl = '';
   let headers = {};
 
   try {
     if (source === 'pexels') {
-      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=30`;
+      if (!process.env.PEXELS_API_KEY) throw new Error('PEXELS_API_KEY is missing');
+      apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=30`;
       headers = { Authorization: process.env.PEXELS_API_KEY };
     } else if (source === 'pixabay') {
-      apiUrl = `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q=${encodeURIComponent(query)}&per_page=30&image_type=photo`;
+      if (!process.env.PIXABAY_API_KEY) throw new Error('PIXABAY_API_KEY is missing');
+      apiUrl = `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q=${encodeURIComponent(safeQuery)}&per_page=30&image_type=photo&safesearch=true`;
     } else if (source === 'freepik') {
-      apiUrl = `https://api.freepik.com/v1/resources?term=${encodeURIComponent(query)}&limit=30`;
+      if (!process.env.FREEPIK_API_KEY) throw new Error('FREEPIK_API_KEY is missing');
+      apiUrl = `https://api.freepik.com/v1/resources?term=${encodeURIComponent(safeQuery)}&limit=30`;
       headers = { 
         'Accept-Language': 'en-US', 
         'Accept': 'application/json', 
@@ -71,7 +83,8 @@ exports.handler = async function(event, context) {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Cache-Control': 'public, max-age=300',
+        'X-Content-Type-Options': 'nosniff'
       },
       body: JSON.stringify({ results })
     };
@@ -80,8 +93,8 @@ exports.handler = async function(event, context) {
     console.error(`Error fetching from ${source}:`, error.message);
     return {
       statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: 'Failed to fetch images' })
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ error: '이미지 검색 요청을 처리하지 못했습니다.' })
     };
   }
 };

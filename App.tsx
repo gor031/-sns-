@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { parseCardNewsJson } from './services/geminiService';
-import { CardNewsData, TextStyle } from './types';
+import { generateCardNews } from './services/cardNewsApi';
+import { CardNewsData, Slide, TextStyle } from './types';
 import { CardPreview, THEMES } from './components/CardPreview';
 import { Marketplace } from './components/Marketplace';
 import { DesignStudio } from './components/studio/DesignStudio';
@@ -25,8 +26,12 @@ import {
   Store,
   Edit3,
   Upload,
-  Share2,
-  Wand2
+  Wand2,
+  ArrowLeft,
+  Braces,
+  PenLine,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
@@ -40,7 +45,9 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
 ---
 
 ### [1단계: sns 올릴 제목과 내용]
-사용자가 주제나 키워드를 입력하면 sns에 올릴 제목과 내용을 먼저생성해줘(반드시 복사 버튼으로 한번에 복사가 가능하게 해줘야되)
+사용자가 주제나 키워드를 입력하면 sns에 올릴 제목과 내용을 먼저 생성해줘(반드시 복사 버튼으로 한번에 복사가 가능하게 해줘야되).
+- **이모지 절대 금지**: 제목과 본문을 포함한 전체 텍스트에 이모티콘이나 이모지(emoji, 😊, 🔥, 🚀 등)를 절대 사용하지 마세요. (No emojis/emoticons allowed).
+- **풍성하고 긴 본문**: sns에 올릴 본문 내용은 절대 짧게 쓰지 말고, 상세하고 풍성하게 길게 작성하세요. (최소 3~5문단, 500자 이상).
 
 ### [2단계: 원고 기획 및 컨펌]
 제목과 내용 생성한 뒤에, 바로 JSON을 만들지 말고 먼저 **텍스트 원고**를 작성하여 보여주세요.
@@ -48,6 +55,7 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
 **1. 작성 원칙 (매우 중요):**
 - **다이어트**: 불필요한 조사, 형용사, 부사를 모두 삭제하세요.
 - **길이 제한**: 한 슬라이드당 **최대 2문장**을 넘기지 마세요. (이미지가 텍스트를 압도하지 않게)
+- **이모지 금지**: 카드뉴스 원고 내용 전체에도 이모지나 이모티콘은 절대 포함되어선 안 됩니다.
 - **구조**: 
    - 표지 (후킹 제목)
    - 본문 (6~10장 내외, 핵심 정보만 딱딱 끊어서)
@@ -73,6 +81,8 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
   "targetAudience": "타겟",
   "tone": "어조",
   "hashtags": ["태그1", "태그2"],
+  "snsTitle": "SNS 업로드용 제목",
+  "snsBody": "SNS 업로드용 500자 이상 상세 본문",
   "slides": [
     {
       "pageNumber": 1,
@@ -103,7 +113,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     if (this.state.hasError) {
       return (
         <div style={{padding: 40, background: '#fff0f0', margin: 20, borderRadius: 12, border: '2px solid red'}}>
-          <h2 style={{color: 'red', marginBottom: 10}}>⚠️ 컴포넌트 에러 발생</h2>
+          <h2 style={{color: 'red', marginBottom: 10}}>컴포넌트 에러 발생</h2>
           <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, color: '#333'}}>{this.state.error?.message}</pre>
           <pre style={{whiteSpace: 'pre-wrap', fontSize: 12, color: '#666', marginTop: 10}}>{this.state.error?.stack}</pre>
           <button onClick={() => this.setState({hasError: false, error: null})} style={{marginTop: 16, padding: '8px 16px', background: '#333', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer'}}>다시 시도</button>
@@ -154,7 +164,19 @@ const resolveOklchStylesForClone = (element: HTMLElement, clonedElement: HTMLEle
   }
 };
 
-const App: React.FC = () => {
+interface AppProps {
+  onBack?: () => void;
+}
+
+type InputMode = 'auto' | 'manual' | 'json';
+
+const createManualSlide = (pageNumber: number): Slide => ({
+  pageNumber,
+  header: pageNumber === 1 ? '표지 제목을 입력하세요' : `핵심 내용 ${pageNumber - 1}`,
+  body: pageNumber === 1 ? '' : '본문을 입력하세요.',
+});
+
+const App: React.FC<AppProps> = ({ onBack }) => {
   // State
   const [jsonInput, setJsonInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,10 +185,35 @@ const App: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [showGuide, setShowGuide] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [copiedField, setCopiedField] = useState<'title' | 'body' | null>(null);
   const [currentTab, setCurrentTab] = useState<'editor'|'market'|'studio'>('editor');
+  const [inputMode, setInputMode] = useState<InputMode>('auto');
+  const [autoTopic, setAutoTopic] = useState('');
+  const [targetAudience, setTargetAudience] = useState('일반 사용자');
+  const [tone, setTone] = useState('친절하고 명확한 어조');
+  const [slideCount, setSlideCount] = useState(7);
+  const [signature, setSignature] = useState('');
+  const [manualSlides, setManualSlides] = useState<Slide[]>([
+    createManualSlide(1),
+    createManualSlide(2),
+  ]);
+  const [textStrokeWidth, setTextStrokeWidth] = useState(0);
+  const [textStrokeColor, setTextStrokeColor] = useState('#000000');
 
   // Refs for scrolling
   const resultRef = useRef<HTMLDivElement>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
+
+  const applyCardData = (data: CardNewsData) => {
+    const nextData = {
+      ...data,
+      signature: signature.trim() || data.signature || '',
+      themeIndex: data.themeIndex ?? Math.floor(Math.random() * THEMES.length),
+    };
+    setCardData(nextData);
+    setCurrentSlideIndex(0);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
 
   const handleParse = () => {
     if (!jsonInput.trim()) {
@@ -181,22 +228,77 @@ const App: React.FC = () => {
     try {
       const data = parseCardNewsJson(jsonInput);
       
-      // Assign a random theme index if not present
-      if (data.themeIndex === undefined) {
-        data.themeIndex = Math.floor(Math.random() * THEMES.length);
-      }
-      
-      setCardData(data);
-      
-      // Scroll to result
-      setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      applyCardData(data);
     } catch (error) {
       alert(error instanceof Error ? error.message : '변환 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAutoGenerate = async () => {
+    if (!autoTopic.trim()) {
+      alert('카드뉴스 주제를 입력해주세요.');
+      return;
+    }
+    setLoading(true);
+    setCardData(null);
+    try {
+      const data = await generateCardNews({
+        topic: autoTopic.trim(),
+        targetAudience: targetAudience.trim(),
+        tone,
+        slideCount,
+      });
+      applyCardData(data);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '카드뉴스 생성 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualCreate = () => {
+    const slides = manualSlides
+      .map((slide, index) => ({
+        ...slide,
+        pageNumber: index + 1,
+        header: slide.header.trim(),
+        body: slide.body.trim(),
+      }))
+      .filter((slide) => slide.header || slide.body);
+    if (!slides.length || !slides[0].header) {
+      alert('표지 제목을 입력해주세요.');
+      return;
+    }
+    applyCardData({
+      topic: slides[0].header,
+      targetAudience: targetAudience.trim() || '전체',
+      tone,
+      slides,
+      hashtags: [],
+      snsTitle: slides[0].header,
+      snsBody: slides.slice(1).map((slide) => `${slide.header}\n${slide.body}`).join('\n\n'),
+    });
+  };
+
+  const updateManualSlide = (index: number, field: 'header' | 'body', value: string) => {
+    setManualSlides((previous) => previous.map((slide, slideIndex) => slideIndex === index
+      ? { ...slide, [field]: value }
+      : slide));
+  };
+
+  const addManualSlide = () => {
+    setManualSlides((previous) => previous.length >= 10
+      ? previous
+      : [...previous, createManualSlide(previous.length + 1)]);
+  };
+
+  const removeManualSlide = (index: number) => {
+    if (index === 0) return;
+    setManualSlides((previous) => previous
+      .filter((_, slideIndex) => slideIndex !== index)
+      .map((slide, slideIndex) => ({ ...slide, pageNumber: slideIndex + 1 })));
   };
 
   const loadSampleData = () => {
@@ -359,6 +461,7 @@ const App: React.FC = () => {
   };
 
   const handleUseTemplate = (tmpl: TemplateMarketData) => {
+    setSignature(tmpl.jsonData.signature || '');
     setCardData(tmpl.jsonData);
     setJsonInput(JSON.stringify(tmpl.jsonData, null, 2));
     setCurrentSlideIndex(0);
@@ -367,30 +470,60 @@ const App: React.FC = () => {
   };
 
   const handleCustomBackground = () => {
-    const url = prompt('크리에이터 전용 기능입니다.\n사용할 이미지 URL을 입력하세요 (예: https://...)');
-    if (url && cardData) {
-      setCardData({ ...cardData, customBackgroundImage: url });
-    }
+    backgroundInputRef.current?.click();
   };
 
-  const handleMarketPublish = () => {
-    alert('템플릿이 성공적으로 마켓에 심사 요청되었습니다! (데모 화면)');
+  const handleBackgroundFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !cardData) return;
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일을 선택해주세요.');
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert('12MB 이하 이미지를 선택해주세요.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setCardData((previous) => previous ? { ...previous, customBackgroundImage: reader.result as string } : previous);
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
+
+  const handleSignatureChange = (value: string) => {
+    setSignature(value);
+    setCardData((previous) => previous ? { ...previous, signature: value } : previous);
+  };
+
+  const copySnsField = async (field: 'title' | 'body', value: string) => {
+    await navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 1600);
   };
 
   return (
     <div className="min-h-screen pb-20 font-sans overflow-x-hidden">
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-3 overflow-x-auto no-scrollbar">
+          {onBack && (
+            <button type="button" onClick={onBack} className="tool-icon-button" aria-label="도구 선택으로 돌아가기" title="뒤로">
+              <ArrowLeft size={20} />
+            </button>
+          )}
           <div className="flex items-center gap-2 shrink-0 min-w-0">
             <div className="bg-primary p-2 rounded-lg text-white shrink-0">
               <MessageCircleHeart size={22} fill="currentColor" />
             </div>
-            <h1 className="text-lg sm:text-xl font-black text-gray-800 tracking-tight whitespace-nowrap">카드뉴스 생성기</h1>
+            <h1 className="text-lg sm:text-xl font-black text-gray-800 whitespace-nowrap">카드뉴스 만들기</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
              <button onClick={() => setCurrentTab('editor')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'editor' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}><Edit3 size={16}/> 에디터</button>
              <button onClick={() => setCurrentTab('studio')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'studio' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}><Wand2 size={16}/> 디자인 스튜디오</button>
-             <button onClick={() => setCurrentTab('market')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}><Store size={16}/> 템플릿 마켓</button>
+             <button onClick={() => setCurrentTab('market')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md' : 'bg-[#FFF0F0] text-primary hover:bg-[#FFE0E0]'}`}><Store size={16}/> 템플릿 마켓</button>
           </div>
         </div>
       </header>
@@ -400,14 +533,13 @@ const App: React.FC = () => {
       ) : currentTab === 'market' ? (
          <Marketplace onUseTemplate={handleUseTemplate} />
       ) : (
-      <main className="max-w-2xl mx-auto px-6 py-8 space-y-8">
-        <section className="text-center space-y-3 mb-10">
-          <h2 className="text-3xl font-black text-gray-900 leading-tight">
-            주제만 입력하면<br/>
-            <span className="text-primary">원고와 디자인이 뚝딱!</span>
-          </h2>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+        <section className="space-y-1">
+          <p className="text-sm font-bold text-primary">모두뚝딱 카드뉴스</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">원고부터 이미지 저장까지</h2>
         </section>
 
+        {inputMode === 'json' && (
         <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <button 
             onClick={() => setShowGuide(!showGuide)}
@@ -469,29 +601,80 @@ const App: React.FC = () => {
             </div>
           )}
         </section>
+        )}
 
-        <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <ClipboardPaste size={16} /> AI 결과 붙여넣기
-              </label>
-              <button onClick={loadSampleData} className="text-xs font-bold text-gray-400 hover:text-primary flex items-center gap-1 transition-colors">
-                <Sparkles size={12} /> 예시 불러오기
-              </button>
-            </div>
-            <textarea
-              value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
-              placeholder="AI가 생성한 JSON 코드를 여기에 붙여넣으세요..."
-              className="w-full h-64 p-4 rounded-xl bg-gray-50 text-gray-800 text-sm border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none placeholder-gray-400 transition-all leading-relaxed shadow-inner"
-              spellCheck={false}
-            />
+        <section className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1" role="tablist" aria-label="카드뉴스 입력 방식">
+            <button type="button" role="tab" aria-selected={inputMode === 'auto'} onClick={() => setInputMode('auto')} className={`flex min-h-11 items-center justify-center gap-1 whitespace-nowrap rounded-md px-1 text-xs font-bold sm:gap-2 sm:px-2 sm:text-sm ${inputMode === 'auto' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}><Bot size={16} /> AI 자동</button>
+            <button type="button" role="tab" aria-selected={inputMode === 'manual'} onClick={() => setInputMode('manual')} className={`flex min-h-11 items-center justify-center gap-1 whitespace-nowrap rounded-md px-1 text-xs font-bold sm:gap-2 sm:px-2 sm:text-sm ${inputMode === 'manual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}><PenLine size={16} /> 직접 입력</button>
+            <button type="button" role="tab" aria-selected={inputMode === 'json'} onClick={() => setInputMode('json')} className={`flex min-h-11 items-center justify-center gap-1 whitespace-nowrap rounded-md px-1 text-xs font-bold sm:gap-2 sm:px-2 sm:text-sm ${inputMode === 'json' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}><Braces size={16} /> JSON</button>
           </div>
-          <Button onClick={handleParse} isLoading={loading} className="w-full py-4 text-base">
-            <Play size={18} fill="currentColor" />
-            카드뉴스 변환하기
-          </Button>
+
+          {inputMode === 'auto' && (
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="auto-topic" className="tool-label">주제</label>
+                <textarea id="auto-topic" value={autoTopic} onChange={(event) => setAutoTopic(event.target.value)} placeholder="예: 초보자를 위한 생성형 AI 활용법" className="tool-input min-h-32 resize-y leading-7" />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="target-audience" className="tool-label">대상</label>
+                  <input id="target-audience" value={targetAudience} onChange={(event) => setTargetAudience(event.target.value)} className="tool-input" />
+                </div>
+                <div>
+                  <label htmlFor="card-tone" className="tool-label">어조</label>
+                  <select id="card-tone" value={tone} onChange={(event) => setTone(event.target.value)} className="tool-input">
+                    <option>친절하고 명확한 어조</option>
+                    <option>전문적이고 신뢰감 있는 어조</option>
+                    <option>짧고 강렬한 어조</option>
+                    <option>차분하고 공감하는 어조</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="slide-count" className="tool-label">페이지 수</label>
+                  <select id="slide-count" value={slideCount} onChange={(event) => setSlideCount(Number(event.target.value))} className="tool-input">
+                    {[4, 5, 6, 7, 8, 9, 10].map((count) => <option key={count} value={count}>{count}장</option>)}
+                  </select>
+                </div>
+              </div>
+              <Button onClick={handleAutoGenerate} isLoading={loading} className="w-full py-4 text-base"><Sparkles size={18} />AI로 카드뉴스 만들기</Button>
+            </div>
+          )}
+
+          {inputMode === 'manual' && (
+            <div className="space-y-4">
+              <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-1">
+                {manualSlides.map((slide, index) => (
+                  <div key={index} className="rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-black text-gray-700">{index === 0 ? '표지' : `${index + 1}페이지`}</span>
+                      {index > 0 && <button type="button" onClick={() => removeManualSlide(index)} className="tool-icon-button !size-9 text-red-600" aria-label={`${index + 1}페이지 삭제`} title="페이지 삭제"><Trash2 size={16} /></button>}
+                    </div>
+                    <input value={slide.header} onChange={(event) => updateManualSlide(index, 'header', event.target.value)} aria-label={`${index + 1}페이지 제목`} placeholder="제목" className="tool-input" />
+                    {index > 0 && <textarea value={slide.body} onChange={(event) => updateManualSlide(index, 'body', event.target.value)} aria-label={`${index + 1}페이지 본문`} placeholder="본문" className="tool-input mt-2 min-h-24 resize-y leading-6" />}
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={addManualSlide} disabled={manualSlides.length >= 10} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40"><Plus size={18} />페이지 추가</button>
+              <Button onClick={handleManualCreate} className="w-full py-4 text-base"><Play size={18} fill="currentColor" />카드뉴스 미리보기</Button>
+            </div>
+          )}
+
+          {inputMode === 'json' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label htmlFor="json-input" className="text-sm font-bold text-gray-700 flex items-center gap-2"><ClipboardPaste size={16} />AI 결과 붙여넣기</label>
+                <button type="button" onClick={loadSampleData} className="text-xs font-bold text-gray-500 hover:text-primary flex items-center gap-1"><Sparkles size={12} />예시 불러오기</button>
+              </div>
+              <textarea id="json-input" value={jsonInput} onChange={(event) => setJsonInput(event.target.value)} placeholder="AI가 생성한 JSON 코드를 여기에 붙여넣으세요." className="tool-input h-64 resize-y text-sm leading-relaxed" spellCheck={false} />
+              <Button onClick={handleParse} isLoading={loading} className="w-full py-4 text-base"><Play size={18} fill="currentColor" />카드뉴스 변환하기</Button>
+            </div>
+          )}
+
+          <div className="border-t border-gray-200 pt-5">
+            <label htmlFor="card-signature" className="tool-label">서명</label>
+            <input id="card-signature" value={signature} onChange={(event) => handleSignatureChange(event.target.value)} maxLength={40} placeholder="예: 모두뚝딱 · @계정명" className="tool-input" />
+          </div>
         </section>
 
         {cardData && (
@@ -511,8 +694,11 @@ const App: React.FC = () => {
                     slide={slide}
                     bgImageUrl={cardData.customBackgroundImage}
                     totalSlides={cardData.slides.length}
-                    themeIndex={cardData.themeIndex}
-                    onUpdate={() => {}} 
+                     themeIndex={cardData.themeIndex}
+                    signature={cardData.signature}
+                    textStrokeWidth={textStrokeWidth}
+                    textStrokeColor={textStrokeColor}
+                    onUpdate={() => {}}
                     hideControls={true}
                     forExport={true} 
                   />
@@ -527,6 +713,9 @@ const App: React.FC = () => {
                 bgImageUrl={cardData.customBackgroundImage}
                 totalSlides={cardData.slides.length}
                 themeIndex={cardData.themeIndex}
+                signature={cardData.signature}
+                textStrokeWidth={textStrokeWidth}
+                textStrokeColor={textStrokeColor}
                 onUpdate={handleUpdateSlide}
               />
               <div className="flex items-center justify-between mt-6 px-4">
@@ -540,7 +729,7 @@ const App: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Palette size={16} className="text-primary"/>배경 테마
                       </div>
-                      <button onClick={handleCustomBackground} className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded hover:bg-primary/20 flex items-center gap-1 transition-colors"><Upload size={12}/> 배경 업로드 (크리에이터 전용)</button>
+                      <button type="button" onClick={handleCustomBackground} className="min-h-9 text-xs font-bold text-primary bg-[#FFF0F0] px-3 rounded-lg hover:bg-[#FFE0E0] flex items-center gap-1 transition-colors"><Upload size={12}/> 배경 업로드</button>
                   </div>
                   <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50 no-scrollbar">
                     {THEMES.map((theme, i) => (
@@ -550,7 +739,21 @@ const App: React.FC = () => {
                          )}
                       </button>
                     ))}
-                  </div>
+                   </div>
+                   <input ref={backgroundInputRef} type="file" accept="image/*" className="sr-only" onChange={handleBackgroundFile} />
+                   <div className="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                     <div>
+                       <div className="mb-2 flex items-center justify-between text-xs font-bold text-gray-600">
+                         <label htmlFor="stroke-width">글자 외곽선</label>
+                         <span className="tabular-nums">{textStrokeWidth.toFixed(1)}px</span>
+                       </div>
+                       <input id="stroke-width" type="range" min="0" max="3" step="0.5" value={textStrokeWidth} onChange={(event) => setTextStrokeWidth(Number(event.target.value))} className="w-full accent-[#FF6B6B]" />
+                     </div>
+                     <label className="flex items-center gap-2 text-xs font-bold text-gray-600">
+                       색상
+                       <input type="color" value={textStrokeColor} onChange={(event) => setTextStrokeColor(event.target.value)} className="size-10 cursor-pointer rounded border border-gray-200 bg-white p-1" aria-label="글자 외곽선 색상" />
+                     </label>
+                   </div>
                </div>
 
                <div className="flex gap-2 mt-4">
@@ -558,11 +761,40 @@ const App: React.FC = () => {
                  <Button onClick={handleDownloadAll} variant="primary" isLoading={isDownloading} className="flex-1 py-3 text-sm"><FolderDown size={18} />전체 저장 (ZIP)</Button>
                </div>
 
-               <div className="mt-8 pt-6 border-t border-gray-100/50 flex flex-col items-center gap-3">
-                  <p className="text-sm text-gray-500 font-medium">이 디자인 그대로 공유해서 수익을 창출해보세요!</p>
-                  <button onClick={handleMarketPublish} className="w-full max-w-xs py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-600/30"><Share2 size={18} /> 템플릿 마켓에 등록하기</button>
-               </div>
             </div>
+
+            {(cardData.snsTitle || cardData.snsBody || cardData.hashtags.length > 0) && (
+              <section className="tool-panel mx-auto max-w-2xl overflow-hidden">
+                <div className="border-b border-gray-200 px-4 py-3 sm:px-5">
+                  <h3 className="font-black text-gray-900">SNS 게시 원고</h3>
+                </div>
+                {cardData.snsTitle && (
+                  <div className="border-b border-gray-100 p-4 sm:p-5">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-gray-500">제목</span>
+                      <button type="button" onClick={() => copySnsField('title', cardData.snsTitle || '')} className="flex min-h-9 items-center gap-1 rounded-lg border border-gray-200 px-3 text-xs font-bold text-gray-700 hover:bg-gray-50">
+                        {copiedField === 'title' ? <CheckCircle2 size={14} className="text-green-600" /> : <Copy size={14} />}
+                        {copiedField === 'title' ? '복사됨' : '제목 복사'}
+                      </button>
+                    </div>
+                    <p className="font-bold leading-7 text-gray-900">{cardData.snsTitle}</p>
+                  </div>
+                )}
+                {cardData.snsBody && (
+                  <div className="p-4 sm:p-5">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-gray-500">본문</span>
+                      <button type="button" onClick={() => copySnsField('body', cardData.snsBody || '')} className="flex min-h-9 items-center gap-1 rounded-lg border border-gray-200 px-3 text-xs font-bold text-gray-700 hover:bg-gray-50">
+                        {copiedField === 'body' ? <CheckCircle2 size={14} className="text-green-600" /> : <Copy size={14} />}
+                        {copiedField === 'body' ? '복사됨' : '본문 복사'}
+                      </button>
+                    </div>
+                    <p className="whitespace-pre-wrap text-sm font-medium leading-7 text-gray-700">{cardData.snsBody}</p>
+                    {cardData.hashtags.length > 0 && <p className="mt-4 text-sm font-bold leading-7 text-primary">{cardData.hashtags.map((tag) => `#${tag.replace(/^#/, '')}`).join(' ')}</p>}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         )}
       </main>

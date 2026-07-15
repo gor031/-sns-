@@ -3,6 +3,7 @@ import { parseCardNewsJson } from './services/geminiService';
 import { generateCardNews } from './services/cardNewsApi';
 import { CardNewsData, Slide, TextStyle } from './types';
 import { CardPreview, THEMES } from './components/CardPreview';
+import { DisplayAd } from './components/DisplayAd';
 import { Marketplace } from './components/Marketplace';
 import { TemplateMarketData } from './types';
 import { Button } from './components/Button';
@@ -590,6 +591,8 @@ const App: React.FC<AppProps> = ({ onBack }) => {
           <h2 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">원고부터 이미지 저장까지</h2>
         </section>
 
+        <DisplayAd />
+
         {inputMode === 'json' && (
         <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <button 
@@ -787,7 +790,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                   </div>
                   <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50 no-scrollbar">
                     {THEMES.map((theme, i) => (
-                      <button key={theme.id} onClick={() => changeTheme(i)} className={`aspect-square w-full rounded-full border-2 transition-all cursor-pointer relative ${cardData.themeIndex === i ? 'border-primary shadow-md ring-2 ring-primary/20' : 'border-gray-200 hover:scale-110 opacity-80 hover:opacity-100'} ${theme.bg}`}>
+                      <button key={theme.id} type="button" aria-label={`${i + 1}번 배경 테마`} onClick={() => changeTheme(i)} className={`aspect-square w-full rounded-full border-2 transition-all cursor-pointer relative ${cardData.themeIndex === i ? 'border-primary shadow-md ring-2 ring-primary/20' : 'border-gray-200 hover:scale-110 opacity-80 hover:opacity-100'} ${theme.bg}`}>
                          {cardData.themeIndex === i && (
                              <div className="absolute inset-0 flex items-center justify-center text-white drop-shadow-sm"><Check size={14} strokeWidth={4} /></div>
                          )}

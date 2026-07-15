@@ -96,94 +96,29 @@ const markdownToHtml = (text: string): string => {
     .replace(/\*(.*?)\*/g, '<i>$1</i>');
 };
 
-const processHtmlForPreview = (html: string, theme: any, isHeader: boolean, forExport: boolean = false) => {
+type CardTheme = (typeof THEMES)[number];
+
+const resolveThemeAccentColor = (accent: string) => {
+  if (/^#[0-9a-f]{3,8}$/i.test(accent)) return accent;
+  return accent.match(/(?:^|\s)text-\[(#[0-9a-f]{3,8})\](?:\s|$)/i)?.[1] || '';
+};
+
+const processHtmlForPreview = (html: string, theme: CardTheme, isHeader: boolean, _forExport: boolean = false) => {
   if (!html) return '';
 
-  if (forExport) {
-    const headerColor = theme.accent.includes('#') ? theme.accent : 'inherit';
-
-    // Helper to resolve text color from Tailwind class for html2canvas
-    const getTextColorFromClass = (className: string) => {
-      if (!className) return '#000000';
-
-      // Handle arbitrary values like text-[#1B5E20]
-      const hexMatch = className.match(/text-\[#([0-9A-Fa-f]{6})\]/);
-      if (hexMatch) return `#${hexMatch[1]}`;
-
-      // Standard Tailwind classes used in themes
-      if (className.includes('text-white')) return '#ffffff';
-      if (className.includes('text-black')) return '#000000';
-
-      // Grays / Slates / Zincs / Neutrals
-      if (className.includes('text-gray-800')) return '#1f2937';
-      if (className.includes('text-gray-900')) return '#111827';
-      if (className.includes('text-slate-900')) return '#0f172a';
-      if (className.includes('text-neutral-900')) return '#171717';
-
-      // Reds / Pinks / Roses
-      if (className.includes('text-red-600')) return '#dc2626';
-      if (className.includes('text-rose-600')) return '#e11d48';
-      if (className.includes('text-pink-500')) return '#ec4899';
-      if (className.includes('text-pink-600')) return '#db2777';
-      if (className.includes('text-pink-700')) return '#be185d';
-      if (className.includes('text-pink-800')) return '#9d174d';
-
-      // Oranges / Yellows / Ambers
-      if (className.includes('text-orange-500')) return '#f97316';
-      if (className.includes('text-orange-900')) return '#7c2d12';
-      if (className.includes('text-yellow-400')) return '#facc15';
-      if (className.includes('text-yellow-800')) return '#854d0e';
-
-      // Greens / Emeralds / Teals
-      if (className.includes('text-green-600')) return '#16a34a';
-      if (className.includes('text-emerald-800')) return '#065f46';
-      if (className.includes('text-emerald-900')) return '#064e3b';
-      if (className.includes('text-teal-900')) return '#134e4a';
-
-      // Blues / Cyans / Skys / Indigos
-      if (className.includes('text-blue-900')) return '#1e3a8a';
-      if (className.includes('text-cyan-800')) return '#155e75';
-      if (className.includes('text-sky-800')) return '#075985';
-      if (className.includes('text-indigo-900')) return '#312e81';
-
-      // Purples / Violets
-      if (className.includes('text-purple-800')) return '#6b21a8';
-      if (className.includes('text-purple-900')) return '#581c87';
-
-      return '#000000'; // Default fallback
-    };
-
-    const highlightTextColor = getTextColorFromClass(theme.highlightText);
-
-    // Export-Optimized Rendering Strategy:
-    // Highlighting now changes text color only, removing background to fix vertical alignment and wrapping issues.
-    return html
-      .replace(/<b>(.*?)<\/b>/g, (match, p1) => {
-        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
-
-        // Highlight: Change text color to highlightBg (accent color), remove background
-        return `<span style="color: ${theme.highlightBg}; display: inline;">${p1}</span>`;
-      })
-      .replace(/<strong>(.*?)<\/strong>/g, (match, p1) => {
-        if (isHeader) return `<span class="${theme.accent.includes('#') ? '' : theme.accent}" style="color: ${theme.accent.includes('#') ? theme.accent : ''}; display: inline;">${p1}</span>`;
-
-        // Highlight: Change text color to highlightBg (accent color), remove background
-        return `<span style="color: ${theme.highlightBg}; display: inline;">${p1}</span>`;
-      });
-  }
-
-  // Normal preview style using Tailwind classes
-  const decorationClass = 'box-decoration-clone';
-  // Removed padding/rounded/highlightText from highlightClass as we are now just coloring the text
+  const accentColor = resolveThemeAccentColor(theme.accent);
+  const accentClass = accentColor === theme.accent ? '' : theme.accent;
   const highlightClass = isHeader
-    ? `${theme.accent} inline`
-    : `font-bold ${decorationClass} leading-snug`;
+    ? `${accentClass} inline`
+    : 'font-bold box-decoration-clone leading-snug';
+  const highlightColor = isHeader ? accentColor : theme.highlightBg;
+  const highlightStyle = `${highlightColor ? `color: ${highlightColor};` : ''} display: inline;`;
+  const openingTag = `<span data-card-theme-highlight class="${highlightClass}" style="${highlightStyle}">`;
 
-  // We use an inline style for the text color (previously background color)
   return html
-    .replace(/<b>/g, `<span class="${highlightClass}" style="${!isHeader ? `color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<b>/g, openingTag)
     .replace(/<\/b>/g, '</span>')
-    .replace(/<strong>/g, `<span class="${highlightClass}" style="${!isHeader ? `color: ${theme.highlightBg};` : ''}">`)
+    .replace(/<strong>/g, openingTag)
     .replace(/<\/strong>/g, '</span>');
 };
 

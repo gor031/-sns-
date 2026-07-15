@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const TEST_BACKGROUND_PNG = Buffer.from(
@@ -29,6 +29,7 @@ test('main creation tools and direct card flow render without overflow', async (
 
   await page.getByRole('button', { name: /카드뉴스 만들기/ }).click();
   await expect(page).toHaveURL(/#cardnews$/);
+  await expect(page.locator('ins.adsbygoogle[data-ad-slot="7502566555"]')).toHaveAttribute('data-ad-client', 'ca-pub-5968986592421768');
   await expect(page.getByRole('button', { name: '디자인 스튜디오 점검 중' })).toBeDisabled();
   await page.getByRole('tab', { name: /직접 입력/ }).click();
   await page.getByRole('textbox', { name: '1페이지 제목' }).fill('AI 모임을 오래 운영하는 법');
@@ -84,6 +85,107 @@ test('main creation tools and direct card flow render without overflow', async (
   await expect(page.getByRole('button', { name: '파일 열기' })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath('subtitles-empty.png'), fullPage: true });
+});
+
+test('saved card keeps theme highlights and custom text colors', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium', 'PNG color export is covered once on desktop.');
+  await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+  await page.goto('/#cardnews', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('tab', { name: /직접 입력/ }).click();
+  await page.getByRole('textbox', { name: '1페이지 제목' }).fill('**원고부터** 사용자색 **디자인**');
+  await page.getByRole('button', { name: '카드뉴스 미리보기' }).click();
+  await page.getByRole('button', { name: '1번 배경 테마', exact: true }).click();
+
+  const greenBackgroundDataUrl = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 8;
+    canvas.height = 8;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas is unavailable');
+    context.fillStyle = '#173b32';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png');
+  });
+  await page.getByLabel('배경 이미지 파일').setInputFiles({
+    name: 'solid-green.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(greenBackgroundDataUrl.split(',')[1], 'base64'),
+  });
+  await expect(page.getByText('배경 적용됨')).toBeVisible();
+
+  await page.getByRole('button', { name: '디자인 및 텍스트 수정' }).click();
+  await page.locator('[contenteditable="true"]').first().evaluate((editor) => {
+    editor.innerHTML = '<b>원고부터</b> <span style="color: #facc15;">사용자색</span> <b>디자인</b>';
+    editor.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+  });
+
+  const exportRoot = page.locator('#export-slide-inner-0');
+  const exportedHighlights = exportRoot.locator('[data-card-theme-highlight]');
+  await expect(exportedHighlights).toHaveCount(2);
+  await expect(exportedHighlights.first()).toHaveCSS('color', 'rgb(255, 0, 85)');
+  await expect(exportedHighlights.last()).toHaveCSS('color', 'rgb(255, 0, 85)');
+  const exportedCustomColor = exportRoot.getByText('사용자색', { exact: true });
+  await expect(exportedCustomColor).toHaveCSS('color', 'rgb(250, 204, 21)');
+
+  const regions = await Promise.all([
+    exportedHighlights.first().evaluate((element) => {
+      const root = document.getElementById('export-slide-inner-0')!;
+      const rootRect = root.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x - rootRect.x, y: rect.y - rootRect.y, width: rect.width, height: rect.height };
+    }),
+    exportedCustomColor.evaluate((element) => {
+      const root = document.getElementById('export-slide-inner-0')!;
+      const rootRect = root.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x - rootRect.x, y: rect.y - rootRect.y, width: rect.width, height: rect.height };
+    }),
+  ]);
+
+  await page.getByRole('button', { name: '완료' }).click();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: '현재 장 저장' }).click();
+  const download = await downloadPromise;
+  const outputPath = testInfo.outputPath('card-export-colors.png');
+  await download.saveAs(outputPath);
+  const pngDataUrl = `data:image/png;base64,${(await readFile(outputPath)).toString('base64')}`;
+  const pixelCounts = await page.evaluate(async ({ imageUrl, regions }) => {
+    const image = new Image();
+    image.src = imageUrl;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas is unavailable');
+    context.drawImage(image, 0, 0);
+    const scaleX = image.naturalWidth / 384;
+    const scaleY = image.naturalHeight / 480;
+    const countColor = (region: { x: number; y: number; width: number; height: number }, target: [number, number, number]) => {
+      const x = Math.max(0, Math.floor(region.x * scaleX));
+      const y = Math.max(0, Math.floor(region.y * scaleY));
+      const width = Math.min(image.naturalWidth - x, Math.ceil(region.width * scaleX));
+      const height = Math.min(image.naturalHeight - y, Math.ceil(region.height * scaleY));
+      const pixels = context.getImageData(x, y, width, height).data;
+      let count = 0;
+      for (let index = 0; index < pixels.length; index += 4) {
+        if (
+          Math.abs(pixels[index] - target[0]) <= 18
+          && Math.abs(pixels[index + 1] - target[1]) <= 18
+          && Math.abs(pixels[index + 2] - target[2]) <= 18
+          && pixels[index + 3] > 200
+        ) count += 1;
+      }
+      return count;
+    };
+    return {
+      themeHighlight: countColor(regions[0], [255, 0, 85]),
+      customYellow: countColor(regions[1], [250, 204, 21]),
+    };
+  }, { imageUrl: pngDataUrl, regions });
+
+  expect(pixelCounts.themeHighlight).toBeGreaterThan(25);
+  expect(pixelCounts.customYellow).toBeGreaterThan(25);
 });
 
 test('subtitle media flow exports SRT and burned MP4', async ({ page }, testInfo) => {

@@ -290,11 +290,12 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
 
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
     <div
-      className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || theme.text} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
+      className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || (bgImageUrl ? 'text-white' : theme.text)} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
       style={{
         lineHeight: '1.4',
         WebkitTextStroke: textStrokeWidth > 0 ? `${textStrokeWidth}px ${textStrokeColor}` : undefined,
         paintOrder: textStrokeWidth > 0 ? 'stroke fill' : undefined,
+        textShadow: bgImageUrl && textStrokeWidth === 0 ? '0 2px 10px rgba(0, 0, 0, 0.7)' : undefined,
       }}
       dangerouslySetInnerHTML={{ __html: processHtmlForPreview(/<\/?[a-z][\s\S]*>/i.test(content) ? content : markdownToHtml(content), theme, isHeader, forExport) }}
     />
@@ -311,10 +312,15 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
               aria-hidden="true"
               data-card-background
               decoding="async"
-              className="h-full w-full object-cover opacity-60"
+              className="h-full w-full object-cover"
+              style={{ opacity: 0.88 }}
               crossOrigin={/^https?:\/\//i.test(bgImageUrl) ? 'anonymous' : undefined}
             />
-            <div className="absolute inset-0 bg-black/50" />
+            <div
+              className="absolute inset-0"
+              data-card-background-overlay
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+            />
           </div>
         )}
         {!bgImageUrl && (
@@ -332,10 +338,11 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
           {!isCover && <div className="flex-1 relative">{renderContent(slide.body, false, slide.bodyStyle)}</div>}
           {signature && (
             <div
-              className={`absolute bottom-5 right-6 max-w-[70%] truncate text-right text-xs font-bold opacity-80 ${theme.text}`}
+              className={`absolute bottom-5 right-6 max-w-[70%] truncate text-right text-xs font-bold opacity-80 ${bgImageUrl ? 'text-white' : theme.text}`}
               style={{
                 WebkitTextStroke: textStrokeWidth > 0 ? `${Math.min(1, textStrokeWidth)}px ${textStrokeColor}` : undefined,
                 paintOrder: textStrokeWidth > 0 ? 'stroke fill' : undefined,
+                textShadow: bgImageUrl && textStrokeWidth === 0 ? '0 1px 6px rgba(0, 0, 0, 0.75)' : undefined,
               }}
             >
               {signature}

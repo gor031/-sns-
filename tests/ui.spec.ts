@@ -3,7 +3,7 @@ import { stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const TEST_BACKGROUND_PNG = Buffer.from(
-  'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFElEQVR42mP8z8AARAwMjIwgAQAEEgEBDpq2WQAAAABJRU5ErkJggg==',
+  'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAJElEQVR4AYTIsQ0AAAgCQcN+OLWtM2FobfjkmodIWe/IUK88DgAA//8IEdDbAAAABklEQVQDAIdWCvWZ5Vn3AAAAAElFTkSuQmCC',
   'base64',
 );
 
@@ -48,6 +48,22 @@ test('main creation tools and direct card flow render without overflow', async (
   const previewBackground = page.locator('#card-capture-target [data-card-background]');
   await expect(previewBackground).toBeVisible();
   await expect.poll(() => previewBackground.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('#card-capture-target [data-card-background-overlay]')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.32)');
+  const averageBackgroundChannel = await previewBackground.evaluate((image: HTMLImageElement) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 4;
+    canvas.height = 4;
+    const context = canvas.getContext('2d');
+    if (!context) return 0;
+    context.drawImage(image, 0, 0, 4, 4);
+    const pixels = context.getImageData(0, 0, 4, 4).data;
+    let total = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      total += pixels[index] + pixels[index + 1] + pixels[index + 2];
+    }
+    return total / (pixels.length / 4) / 3;
+  });
+  expect(averageBackgroundChannel).toBeGreaterThan(40);
   await expect(page.getByText('SNS용 제목·본문')).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath('card-direct.png'), fullPage: true });

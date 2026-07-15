@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Slide, TextStyle } from '../types';
+import { FONT_OPTIONS } from '../fontCatalog';
 import {
   Check, Edit2, Undo, AlignLeft, AlignCenter, AlignRight,
   Type, Palette, Minus, Plus, Wand2, Eraser, HelpCircle, MousePointerClick, Hand
@@ -86,6 +87,7 @@ const TEXT_COLORS = [
 ];
 
 const SIZES = ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'];
+const FONT_GROUPS = Array.from(new Set(FONT_OPTIONS.map((font) => font.group)));
 
 const markdownToHtml = (text: string): string => {
   if (!text) return '';
@@ -122,7 +124,7 @@ const processHtmlForPreview = (html: string, theme: CardTheme, isHeader: boolean
     .replace(/<\/strong>/g, '</span>');
 };
 
-const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeholder, className = "" }: any) => {
+const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, fieldLabel, className = "" }: any) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -160,6 +162,26 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
     <div className="flex flex-col gap-2 bg-white rounded-xl border border-gray-200 overflow-visible shadow-sm z-10">
       <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 border-b border-gray-100 relative select-none">
         <button onClick={() => execCmd('undo')} className="p-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 text-gray-600 shadow-sm mr-2"><Undo size={16} /></button>
+        <div className="flex min-w-0 max-w-full items-center rounded-md border border-gray-200 bg-white px-2 shadow-sm sm:max-w-[190px]">
+          <Type size={14} className="shrink-0 text-gray-500" aria-hidden="true" />
+          <select
+            aria-label={`${fieldLabel} 글꼴`}
+            value={styleState.fontFamily || FONT_OPTIONS[0].family}
+            onChange={(event) => {
+              const fontFamily = event.target.value === FONT_OPTIONS[0].family ? undefined : event.target.value;
+              setStyleState({ ...styleState, fontFamily });
+            }}
+            className="h-9 min-w-0 flex-1 cursor-pointer bg-transparent px-2 text-sm font-medium text-gray-700 outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            {FONT_GROUPS.map((group) => (
+              <optgroup key={group} label={group}>
+                {FONT_OPTIONS.filter((font) => font.group === group).map((font) => (
+                  <option key={font.id} value={font.family}>{font.label}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
         <div className="flex bg-white rounded-md border border-gray-200 mr-2 overflow-hidden shadow-sm">
           <button onClick={() => setStyleState({ ...styleState, align: 'left' })} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'left' ? 'bg-gray-100' : ''}`}><AlignLeft size={16} /></button>
           <button onClick={() => setStyleState({ ...styleState, align: 'center' })} className={`p-1.5 hover:bg-gray-50 ${styleState.align === 'center' ? 'bg-gray-100' : ''}`}><AlignCenter size={16} /></button>
@@ -188,7 +210,14 @@ const ContentEditableInput = ({ html, setHtml, styleState, setStyleState, placeh
         <button onClick={() => execCmd('underline')} className="p-1.5 underline hover:bg-gray-100 px-3">U</button>
         <button onClick={() => setShowHelp(!showHelp)} className="ml-auto p-1.5 text-gray-400 hover:text-primary"><HelpCircle size={18} /></button>
       </div>
-      <div ref={contentEditableRef} className={`w-full p-4 outline-none min-h-[80px] break-keep break-words ${styleState.align === 'center' ? 'text-center' : styleState.align === 'right' ? 'text-right' : 'text-left'} ${className}`} contentEditable onInput={(e) => setHtml(e.currentTarget.innerHTML)} />
+      <div
+        ref={contentEditableRef}
+        aria-label={`${fieldLabel} 내용`}
+        className={`w-full p-4 outline-none min-h-[80px] break-keep break-words ${styleState.align === 'center' ? 'text-center' : styleState.align === 'right' ? 'text-right' : 'text-left'} ${className}`}
+        style={{ fontFamily: styleState.fontFamily }}
+        contentEditable
+        onInput={(e) => setHtml(e.currentTarget.innerHTML)}
+      />
     </div>
   );
 };
@@ -229,6 +258,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
       className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || (bgImageUrl ? 'text-white' : theme.text)} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
       style={{
         lineHeight: '1.4',
+        fontFamily: style?.fontFamily,
         WebkitTextStroke: textStrokeWidth > 0 ? `${textStrokeWidth}px ${textStrokeColor}` : undefined,
         paintOrder: textStrokeWidth > 0 ? 'stroke fill' : undefined,
         textShadow: bgImageUrl && textStrokeWidth === 0 ? '0 2px 10px rgba(0, 0, 0, 0.7)' : undefined,
@@ -296,8 +326,8 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
                 <h3 className="font-bold flex items-center gap-2"><Edit2 size={18} className="text-primary" /> 에디터</h3>
                 <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-md hover:bg-red-500 transition-colors flex items-center gap-2"><Check size={16} /> 완료</button>
               </div>
-              <ContentEditableInput html={editHeader} setHtml={setEditHeader} styleState={editHeaderStyle} setStyleState={setEditHeaderStyle} className="font-bold" />
-              <ContentEditableInput html={editBody} setHtml={setEditBody} styleState={editBodyStyle} setStyleState={setEditBodyStyle} className="font-medium" />
+              <ContentEditableInput html={editHeader} setHtml={setEditHeader} styleState={editHeaderStyle} setStyleState={setEditHeaderStyle} fieldLabel="제목" className="font-bold" />
+              <ContentEditableInput html={editBody} setHtml={setEditBody} styleState={editBodyStyle} setStyleState={setEditBodyStyle} fieldLabel="본문" className="font-medium" />
             </div>
           )}
         </div>

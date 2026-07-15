@@ -193,6 +193,21 @@ const resolveOklchStylesForClone = (element: HTMLElement, clonedElement: HTMLEle
   }
 };
 
+const waitForCaptureAssets = async (element: HTMLElement) => {
+  const fontLoads = Array.from(element.querySelectorAll<HTMLElement>('[data-card-text]')).map((textElement) => {
+    const style = window.getComputedStyle(textElement);
+    const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    return document.fonts.load(font, textElement.textContent || '가나다라마바사 ABC 123');
+  });
+  await Promise.all(fontLoads);
+
+  const imageLoads = Array.from(element.querySelectorAll<HTMLImageElement>('img')).map(async (image) => {
+    if (image.complete && image.naturalWidth > 0) return;
+    await image.decode();
+  });
+  await Promise.all(imageLoads);
+};
+
 interface AppProps {
   onBack?: () => void;
 }
@@ -415,6 +430,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
     try {
       const element = document.getElementById(`export-slide-inner-${currentSlideIndex}`);
       if (!element) return;
+      await waitForCaptureAssets(element);
       
       const canvas = await html2canvas(element, {
         scale: 3,
@@ -456,6 +472,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
         if (element) {
           // 브라우저 렌더링 부하를 줄이기 위해 약간의 지연 시간 추가
           if (i > 0) await new Promise(r => setTimeout(r, 100));
+          await waitForCaptureAssets(element);
 
           const canvas = await html2canvas(element, {
             scale: 2,

@@ -66,8 +66,13 @@ test('main creation tools and direct card flow render without overflow', async (
   });
   expect(averageBackgroundChannel).toBeGreaterThan(40);
   await expect(page.getByText('SNS용 제목·본문')).toBeVisible();
+  await page.getByRole('button', { name: '디자인 및 텍스트 수정' }).click();
+  await expect(page.getByLabel('제목 글꼴')).toBeVisible();
+  await expect(page.getByLabel('본문 글꼴')).toBeVisible();
+  expect(await page.getByLabel('제목 글꼴').locator('option').count()).toBe(130);
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath('card-direct.png'), fullPage: true });
+  await page.getByRole('button', { name: '완료' }).click();
   await page.getByRole('button', { name: '배경 이미지 삭제' }).click();
   await expect(previewBackground).toHaveCount(0);
 
@@ -117,6 +122,11 @@ test('saved card keeps theme highlights and custom text colors', async ({ page }
   await strokeWidth.fill('8');
 
   await page.getByRole('button', { name: '디자인 및 텍스트 수정' }).click();
+  const webFontResponse = page.waitForResponse((response) => (
+    response.url().endsWith('/fonts/mdd-129-01.woff2') && response.status() === 200
+  ));
+  await page.getByLabel('제목 글꼴').selectOption({ label: '온글잎 긍정' });
+  await webFontResponse;
   await page.locator('[contenteditable="true"]').first().evaluate((editor) => {
     editor.innerHTML = '<b>원고부터</b> <span style="color: #facc15;">사용자색</span> <b>디자인</b>';
     editor.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
@@ -124,8 +134,11 @@ test('saved card keeps theme highlights and custom text colors', async ({ page }
 
   const exportRoot = page.locator('#export-slide-inner-0');
   const exportedHighlights = exportRoot.locator('[data-card-theme-highlight]');
+  const exportedHeader = exportRoot.locator('[data-card-text="header"]');
   await expect(exportedHighlights).toHaveCount(2);
-  await expect(exportRoot.locator('[data-card-text="header"]')).toHaveCSS('-webkit-text-stroke-width', '8px');
+  await expect(exportedHeader).toHaveCSS('-webkit-text-stroke-width', '8px');
+  await expect.poll(() => exportedHeader.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('MDD_Font_129');
+  await expect.poll(() => page.evaluate(() => document.fonts.check('700 48px "MDD_Font_129"', '원고부터 디자인'))).toBe(true);
   await expect(exportedHighlights.first()).toHaveCSS('color', 'rgb(255, 0, 85)');
   await expect(exportedHighlights.last()).toHaveCSS('color', 'rgb(255, 0, 85)');
   const exportedCustomColor = exportRoot.getByText('사용자색', { exact: true });

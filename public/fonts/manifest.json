@@ -1,0 +1,1918 @@
+{
+  "families": [
+    {
+      "id": "font-001",
+      "label": "G마켓 산스",
+      "family": "Gmarket Sans TTF",
+      "group": "고딕",
+      "faces": [
+        {
+          "file": "mdd-001-01.woff2",
+          "weight": "300",
+          "style": "normal",
+          "source": "GmarketSansTTF.zip!GmarketSansTTFLight.ttf"
+        },
+        {
+          "file": "mdd-001-02.woff2",
+          "weight": "500",
+          "style": "normal",
+          "source": "GmarketSansTTF.zip!GmarketSansTTFMedium.ttf"
+        },
+        {
+          "file": "mdd-001-03.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "GmarketSansTTF.zip!GmarketSansTTFBold.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-002",
+      "label": "페이퍼로지",
+      "family": "Paperlogy",
+      "group": "고딕",
+      "faces": [
+        {
+          "file": "mdd-002-01.woff2",
+          "weight": "250",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-1Thin.ttf"
+        },
+        {
+          "file": "mdd-002-02.woff2",
+          "weight": "300",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-3Light.ttf"
+        },
+        {
+          "file": "mdd-002-03.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-4Regular.ttf"
+        },
+        {
+          "file": "mdd-002-04.woff2",
+          "weight": "500",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-5Medium.ttf"
+        },
+        {
+          "file": "mdd-002-05.woff2",
+          "weight": "600",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-6SemiBold.ttf"
+        },
+        {
+          "file": "mdd-002-06.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-7Bold.ttf"
+        },
+        {
+          "file": "mdd-002-07.woff2",
+          "weight": "800",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-8ExtraBold.ttf"
+        },
+        {
+          "file": "mdd-002-08.woff2",
+          "weight": "900",
+          "style": "normal",
+          "source": "Paperlogy-1.000.zip!Paperlogy-9Black.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-003",
+      "label": "프리텐다드",
+      "family": "Pretendard",
+      "group": "고딕",
+      "faces": [
+        {
+          "file": "mdd-003-01.woff2",
+          "weight": "45 930",
+          "style": "normal",
+          "source": "Pretendard-1.3.9.zip!web/variable/woff2/PretendardVariable.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-004",
+      "label": "나눔명조",
+      "family": "NanumMyeongjo",
+      "group": "명조",
+      "faces": [
+        {
+          "file": "mdd-004-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "nanum-myeongjo.zip!NanumMyeongjo.ttf"
+        },
+        {
+          "file": "mdd-004-02.woff2",
+          "weight": "600",
+          "style": "normal",
+          "source": "nanum-myeongjo.zip!NanumMyeongjoBold.ttf"
+        },
+        {
+          "file": "mdd-004-03.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "nanum-myeongjo.zip!NanumMyeongjoExtraBold.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-005",
+      "label": "마루부리",
+      "family": "MaruBuri",
+      "group": "명조",
+      "faces": [
+        {
+          "file": "mdd-005-01.woff2",
+          "weight": "300",
+          "style": "normal",
+          "source": "maruburi.zip!╕╢╖τ ║╬╕«/MaruBuriTTF.zip!MaruBuri-ExtraLight.ttf"
+        },
+        {
+          "file": "mdd-005-02.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "maruburi.zip!╕╢╖τ ║╬╕«/MaruBuriTTF.zip!MaruBuri-Regular.ttf"
+        },
+        {
+          "file": "mdd-005-03.woff2",
+          "weight": "600",
+          "style": "normal",
+          "source": "maruburi.zip!╕╢╖τ ║╬╕«/MaruBuriTTF.zip!MaruBuri-SemiBold.ttf"
+        },
+        {
+          "file": "mdd-005-04.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "maruburi.zip!╕╢╖τ ║╬╕«/MaruBuriTTF.zip!MaruBuri-Bold.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-006",
+      "label": "조선100년체",
+      "family": "Chosun Centennial",
+      "group": "명조",
+      "faces": [
+        {
+          "file": "mdd-006-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "ChosunCentennial_ttf.zip!ChosunCentennial_ttf.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-007",
+      "label": "카페24 고운밤",
+      "family": "Cafe24 OnePrettyNight",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-007-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24Oneprettynight-v2.0.zip!Cafe24Oneprettynight-v2.0/webfont/Cafe24Oneprettynight-v2.0.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-008",
+      "label": "카페24 단정해",
+      "family": "Cafe24 Danjunghae",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-008-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24Danjunghae-v2.0.zip!Cafe24Danjunghae-v2.0/webfont/Cafe24Danjunghae-v2.0.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-009",
+      "label": "카페24 동동",
+      "family": "Cafe24 Dongdong",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-009-01.woff2",
+          "weight": "300",
+          "style": "normal",
+          "source": "Cafe24DongdongLight_v3.0.zip!Cafe24DongdongLight_v3.0/webfont/Cafe24DongdongLight.woff2"
+        },
+        {
+          "file": "mdd-009-02.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24DongdongRegular_v3.0.zip!Cafe24DongdongRegular_v3.0/webfont/Cafe24DongdongRegular.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-010",
+      "label": "카페24 빛나는별",
+      "family": "Cafe24 Shiningstar",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-010-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24Shiningstar-v2.0.zip!Cafe24Shiningstar-v2.0/webfont/Cafe24Shiningstar-v2.0.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-011",
+      "label": "카페24 숑숑",
+      "family": "Cafe24 Syongsyong",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-011-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24Syongsyong-v2.0.zip!Cafe24Syongsyong-v2.0/webfont/Cafe24Syongsyong-v2.0.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-012",
+      "label": "카페24 써라운드",
+      "family": "Cafe24 Ssurround",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-012-01.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "Cafe24Ssurround-v2.0.zip!Cafe24Ssurround-v2.0/webfont/Cafe24Ssurround-v2.0.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-013",
+      "label": "카페24 클래식타입",
+      "family": "Cafe24 ClassicType",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-013-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Cafe24Classictype-v1.1.zip!Cafe24Classictype-v1.1/webfont/Cafe24Classictype-v1.1.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-014",
+      "label": "카페24 프로 슬림맥스",
+      "family": "Cafe24 PRO Slim Max",
+      "group": "Cafe24",
+      "faces": [
+        {
+          "file": "mdd-014-01.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "Cafe24PROSlimMax_v2.0.zip!Cafe24 PRO Slim Max_v2.0/Webfont/Cafe24PROSlimMax.woff2"
+        }
+      ]
+    },
+    {
+      "id": "font-015",
+      "label": "경기천년바탕",
+      "family": "GyeonggiBatang",
+      "group": "경기서체",
+      "faces": [
+        {
+          "file": "mdd-015-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/Batang_Regular.woff"
+        },
+        {
+          "file": "mdd-015-02.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/Batang_Bold.woff"
+        }
+      ]
+    },
+    {
+      "id": "font-016",
+      "label": "경기천년제목",
+      "family": "GyeonggiTitle",
+      "group": "경기서체",
+      "faces": [
+        {
+          "file": "mdd-016-01.woff2",
+          "weight": "300",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/Title_Light.woff"
+        },
+        {
+          "file": "mdd-016-02.woff2",
+          "weight": "500",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/Title_Medium.woff"
+        },
+        {
+          "file": "mdd-016-03.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/Title_Bold.woff"
+        }
+      ]
+    },
+    {
+      "id": "font-017",
+      "label": "경기천년제목 세로",
+      "family": "GyeonggiTitleV",
+      "group": "경기서체",
+      "faces": [
+        {
+          "file": "mdd-017-01.woff2",
+          "weight": "700",
+          "style": "normal",
+          "source": "경기서체웹폰트.zip!░µ▒Γ╝¡├╝└Ñ╞∙╞«/woff/TitleV.woff"
+        }
+      ]
+    },
+    {
+      "id": "font-018",
+      "label": "Nanum HeuinGgoRiSuRi",
+      "family": "Nanum HeuinGgoRiSuRi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-018-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/흰꼬리수리/나눔손글씨 흰꼬리수리.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-019",
+      "label": "나눔손글씨 가람연꽃",
+      "family": "Nanum GaRamYeonGgoc",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-019-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/가람연꽃/나눔손글씨 가람연꽃.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-020",
+      "label": "나눔손글씨 갈맷글",
+      "family": "Nanum GarMaesGeur",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-020-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/갈맷글/나눔손글씨 갈맷글.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-021",
+      "label": "나눔손글씨 강부장님체",
+      "family": "Nanum GangBuJangNimCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-021-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/강부장님체/나눔손글씨 강부장님체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-022",
+      "label": "나눔손글씨 강인한 위로",
+      "family": "Nanum GangInHanWiRo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-022-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/강인한_위로/나눔손글씨 강인한 위로.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-023",
+      "label": "나눔손글씨 고딕 아니고 고딩",
+      "family": "Nanum GoDigANiGoGoDing",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-023-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/고딕_아니고_고딩/나눔손글씨 고딕 아니고 고딩.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-024",
+      "label": "나눔손글씨 고려글꼴",
+      "family": "Nanum GoRyeoGeurGgor",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-024-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/고려글꼴/나눔손글씨 고려글꼴.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-025",
+      "label": "나눔손글씨 곰신체",
+      "family": "Nanum GomSinCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-025-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/곰신체/나눔손글씨 곰신체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-026",
+      "label": "나눔손글씨 규리의 일기",
+      "family": "Nanum GyuRiEuiIrGi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-026-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/규리의_일기/나눔손글씨 규리의 일기.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-027",
+      "label": "나눔손글씨 금은보화",
+      "family": "Nanum GeumEunBoHwa",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-027-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/금은보화/나눔손글씨 금은보화.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-028",
+      "label": "나눔손글씨 기쁨밝음",
+      "family": "Nanum GiBbeumBarkEum",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-028-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/기쁨밝음/나눔손글씨 기쁨밝음.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-029",
+      "label": "나눔손글씨 김유이체",
+      "family": "Nanum GimYuICe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-029-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/김유이체/나눔손글씨 김유이체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-030",
+      "label": "나눔손글씨 꽃내음",
+      "family": "Nanum GgocNaeEum",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-030-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/꽃내음/나눔손글씨 꽃내음.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-031",
+      "label": "나눔손글씨 끄트머리체",
+      "family": "Nanum GgeuTeuMeoRiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-031-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/끄트머리체/나눔손글씨 끄트머리체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-032",
+      "label": "나눔손글씨 나는 이겨낸다",
+      "family": "Nanum NaNeunIGyeoNaenDa",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-032-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/나는_이겨낸다/나눔손글씨 나는 이겨낸다.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-033",
+      "label": "나눔손글씨 나무정원",
+      "family": "Nanum NaMuJeongWeon",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-033-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/나무정원/나눔손글씨 나무정원.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-034",
+      "label": "나눔손글씨 나의 아내 손글씨",
+      "family": "Nanum NaEuiANaeSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-034-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/나의_아내_손글씨/나눔손글씨 나의 아내 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-035",
+      "label": "나눔손글씨 노력하는 동희",
+      "family": "Nanum NoRyeogHaNeunDongHeui",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-035-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/노력하는_동희/나눔손글씨 노력하는 동희.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-036",
+      "label": "나눔손글씨 느릿느릿체",
+      "family": "Nanum NeuRisNeuRisCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-036-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/느릿느릿체/나눔손글씨 느릿느릿체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-037",
+      "label": "나눔손글씨 다시 시작해",
+      "family": "Nanum DaSiSiJagHae",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-037-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/다시_시작해/나눔손글씨 다시 시작해.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-038",
+      "label": "나눔손글씨 다진체",
+      "family": "Nanum DaJinCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-038-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/다진체/나눔손글씨 다진체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-039",
+      "label": "나눔손글씨 다채사랑",
+      "family": "Nanum DaCaeSaRang",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-039-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/다채사랑/나눔손글씨 다채사랑.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-040",
+      "label": "나눔손글씨 다행체",
+      "family": "Nanum DaHaengCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-040-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/다행체/나눔손글씨 다행체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-041",
+      "label": "나눔손글씨 달의궤도",
+      "family": "Nanum DarEuiGweDo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-041-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/달의궤도/나눔손글씨 달의궤도.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-042",
+      "label": "나눔손글씨 대광유리",
+      "family": "Nanum DaeGwangYuRi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-042-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/대광유리/나눔손글씨 대광유리.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-043",
+      "label": "나눔손글씨 대한민국 열사체",
+      "family": "Nanum DaeHanMinGugYeorSaCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-043-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/대한민국_열사체/나눔손글씨 대한민국 열사체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-044",
+      "label": "나눔손글씨 동화또박",
+      "family": "Nanum DongHwaDdoBag",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-044-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/동화또박/나눔손글씨 동화또박.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-045",
+      "label": "나눔손글씨 둥근인연",
+      "family": "Nanum DungGeunInYeon",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-045-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/둥근인연/나눔손글씨 둥근인연.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-046",
+      "label": "나눔손글씨 따뜻한 작별",
+      "family": "Nanum DdaDdeusHanJagByeor",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-046-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/따뜻한_작별/나눔손글씨 따뜻한 작별.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-047",
+      "label": "나눔손글씨 따악단단",
+      "family": "Nanum DdaAgDanDan",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-047-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/따악단단/나눔손글씨 따악단단.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-048",
+      "label": "나눔손글씨 딸에게 엄마가",
+      "family": "Nanum DdarEGeEomMaGa",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-048-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/딸에게_엄마가/나눔손글씨 딸에게 엄마가.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-049",
+      "label": "나눔손글씨 또박또박",
+      "family": "Nanum DdoBagDdoBag",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-049-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/또박또박/나눔손글씨 또박또박.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-050",
+      "label": "나눔손글씨 마고체",
+      "family": "Nanum MaGoCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-050-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/마고체/나눔손글씨 마고체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-051",
+      "label": "나눔손글씨 맛있는체",
+      "family": "Nanum MasIssNeunCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-051-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/맛있는체/나눔손글씨 맛있는체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-052",
+      "label": "나눔손글씨 몽돌",
+      "family": "Nanum MongDor",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-052-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/몽돌/나눔손글씨 몽돌.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-053",
+      "label": "나눔손글씨 무궁화",
+      "family": "Nanum MuGungHwa",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-053-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/무궁화/나눔손글씨 무궁화.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-054",
+      "label": "나눔손글씨 무진장체",
+      "family": "Nanum MuJinJangCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-054-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/무진장체/나눔손글씨 무진장체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-055",
+      "label": "나눔손글씨 미니 손글씨",
+      "family": "Nanum MiNiSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-055-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/미니_손글씨/나눔손글씨 미니 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-056",
+      "label": "나눔손글씨 미래나무",
+      "family": "Nanum MiRaeNaMu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-056-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/미래나무/나눔손글씨 미래나무.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-057",
+      "label": "나눔손글씨 바른정신",
+      "family": "Nanum BaReunJeongSin",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-057-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/바른정신/나눔손글씨 바른정신.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-058",
+      "label": "나눔손글씨 바른히피",
+      "family": "Nanum BaReunHiPi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-058-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/바른히피/나눔손글씨 바른히피.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-059",
+      "label": "나눔손글씨 반짝반짝 별",
+      "family": "Nanum BanJjagBanJjagByeor",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-059-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/반짝반짝_별/나눔손글씨 반짝반짝 별.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-060",
+      "label": "나눔손글씨 배은혜체",
+      "family": "Nanum BaeEunHyeCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-060-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/배은혜체/나눔손글씨 배은혜체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-061",
+      "label": "나눔손글씨 백의의 천사",
+      "family": "Nanum BaegEuiEuiCeonSa",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-061-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/백의의_천사/나눔손글씨 백의의 천사.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-062",
+      "label": "나눔손글씨 버드나무",
+      "family": "Nanum BeoDeuNaMu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-062-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/버드나무/나눔손글씨 버드나무.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-063",
+      "label": "나눔손글씨 범솜체",
+      "family": "Nanum BeomSomCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-063-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/범솜체/나눔손글씨 범솜체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-064",
+      "label": "나눔손글씨 부장님 눈치체",
+      "family": "Nanum BuJangNimNunCiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-064-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/부장님_눈치체/나눔손글씨 부장님 눈치체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-065",
+      "label": "나눔손글씨 북극성",
+      "family": "Nanum BugGeugSeong",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-065-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/북극성/나눔손글씨 북극성.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-066",
+      "label": "나눔손글씨 비상체",
+      "family": "Nanum BiSangCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-066-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/비상체/나눔손글씨 비상체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-067",
+      "label": "나눔손글씨 빵구니맘 손글씨",
+      "family": "Nanum BbangGuNiMamSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-067-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/빵구니맘_손글씨/나눔손글씨 빵구니맘 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-068",
+      "label": "나눔손글씨 사랑해 아들",
+      "family": "Nanum SaRangHaeADeur",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-068-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/사랑해_아들/나눔손글씨 사랑해 아들.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-069",
+      "label": "나눔손글씨 상해찬미체",
+      "family": "Nanum SangHaeCanMiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-069-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/상해찬미체/나눔손글씨 상해찬미체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-070",
+      "label": "나눔손글씨 성실체",
+      "family": "Nanum SeongSirCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-070-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/성실체/나눔손글씨 성실체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-071",
+      "label": "나눔손글씨 세계적인 한글",
+      "family": "Nanum SeGyeJeogInHanGeur",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-071-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/세계적인_한글/나눔손글씨 세계적인 한글.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-072",
+      "label": "나눔손글씨 세아체",
+      "family": "Nanum SeACe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-072-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/세아체/나눔손글씨 세아체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-073",
+      "label": "나눔손글씨 세화체",
+      "family": "Nanum SeHwaCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-073-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/세화체/나눔손글씨 세화체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-074",
+      "label": "나눔손글씨 소미체",
+      "family": "Nanum SoMiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-074-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/소미체/나눔손글씨 소미체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-075",
+      "label": "나눔손글씨 소방관의 기도",
+      "family": "Nanum SoBangGwanEuiGiDo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-075-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/소방관의_기도/나눔손글씨 소방관의 기도.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-076",
+      "label": "나눔손글씨 손편지체",
+      "family": "Nanum SonPyeonJiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-076-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/손편지체/나눔손글씨 손편지체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-077",
+      "label": "나눔손글씨 수줍은 대학생",
+      "family": "Nanum SuJubEunDaeHagSaeng",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-077-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/수줍은_대학생/나눔손글씨 수줍은 대학생.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-078",
+      "label": "나눔손글씨 시우 귀여워",
+      "family": "Nanum SiUGwiYeoWeo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-078-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/시우_귀여워/나눔손글씨 시우 귀여워.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-079",
+      "label": "나눔손글씨 신혼부부",
+      "family": "Nanum SinHonBuBu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-079-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/신혼부부/나눔손글씨 신혼부부.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-080",
+      "label": "나눔손글씨 아기사랑체",
+      "family": "Nanum AGiSaRangCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-080-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아기사랑체/나눔손글씨 아기사랑체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-081",
+      "label": "나눔손글씨 아름드리 꽃나무",
+      "family": "Nanum AReumDeuRiGgocNaMu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-081-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아름드리_꽃나무/나눔손글씨 아름드리 꽃나무.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-082",
+      "label": "나눔손글씨 아빠글씨",
+      "family": "Nanum ABbaGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-082-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아빠글씨/나눔손글씨 아빠글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-083",
+      "label": "나눔손글씨 아빠의 연애편지",
+      "family": "Nanum ABbaEuiYeonAePyeonJi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-083-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아빠의_연애편지/나눔손글씨 아빠의 연애편지.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-084",
+      "label": "나눔손글씨 아인맘 손글씨",
+      "family": "Nanum AInMamSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-084-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아인맘_손글씨/나눔손글씨 아인맘 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-085",
+      "label": "나눔손글씨 아줌마 자유",
+      "family": "Nanum AJumMaJaYu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-085-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/아줌마_자유/나눔손글씨 아줌마 자유.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-086",
+      "label": "나눔손글씨 안쌍체",
+      "family": "Nanum AnSsangCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-086-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/안쌍체/나눔손글씨 안쌍체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-087",
+      "label": "나눔손글씨 암스테르담",
+      "family": "Nanum AmSeuTeReuDam",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-087-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/암스테르담/나눔손글씨 암스테르담.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-088",
+      "label": "나눔손글씨 야근하는 김주임",
+      "family": "Nanum YaGeunHaNeunGimJuIm",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-088-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/야근하는_김주임/나눔손글씨 야근하는 김주임.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-089",
+      "label": "나눔손글씨 야채장수 백금례",
+      "family": "Nanum YaCaeJangSuBaegGeumRye",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-089-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/야채장수_백금례/나눔손글씨 야채장수 백금례.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-090",
+      "label": "나눔손글씨 엄마사랑",
+      "family": "Nanum EomMaSaRang",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-090-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/엄마사랑/나눔손글씨 엄마사랑.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-091",
+      "label": "나눔손글씨 엉겅퀴체",
+      "family": "Nanum EongGeongKwiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-091-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/엉겅퀴체/나눔손글씨 엉겅퀴체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-092",
+      "label": "나눔손글씨 여름글씨",
+      "family": "Nanum YeoReumGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-092-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/여름글씨/나눔손글씨 여름글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-093",
+      "label": "나눔손글씨 연지체",
+      "family": "Nanum YeonJiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-093-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/연지체/나눔손글씨 연지체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-094",
+      "label": "나눔손글씨 열아홉의 반짝임",
+      "family": "Nanum YeorAHobEuiBanJjagIm",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-094-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/열아홉의_반짝임/나눔손글씨 열아홉의 반짝임.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-095",
+      "label": "나눔손글씨 열일체",
+      "family": "Nanum YeorIrCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-095-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/열일체/나눔손글씨 열일체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-096",
+      "label": "나눔손글씨 예당체",
+      "family": "Nanum YeDangCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-096-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/예당체/나눔손글씨 예당체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-097",
+      "label": "나눔손글씨 예쁜 민경체",
+      "family": "Nanum YeBbeunMinGyeongCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-097-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/예쁜_민경체/나눔손글씨 예쁜 민경체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-098",
+      "label": "나눔손글씨 옥비체",
+      "family": "Nanum OgBiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-098-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/옥비체/나눔손글씨 옥비체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-099",
+      "label": "나눔손글씨 와일드",
+      "family": "Nanum WaIrDeu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-099-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/와일드/나눔손글씨 와일드.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-100",
+      "label": "나눔손글씨 외할머니글씨",
+      "family": "Nanum OeHarMeoNiGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-100-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/외할머니글씨/나눔손글씨 외할머니글씨 (1).ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-101",
+      "label": "나눔손글씨 왼손잡이도 예뻐",
+      "family": "Nanum OenSonJabIDoYeBbeo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-101-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/왼손잡이도_예뻐/나눔손글씨 왼손잡이도 예뻐 (1).ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-102",
+      "label": "나눔손글씨 우리딸 손글씨",
+      "family": "Nanum URiDdarSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-102-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/우리딸_손글씨/나눔손글씨 우리딸 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-103",
+      "label": "나눔손글씨 유니 띵땅띵땅",
+      "family": "Nanum YuNiDdingDdangDdingDdang",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-103-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/유니_띵땅띵땅/나눔손글씨 유니 띵땅띵땅.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-104",
+      "label": "나눔손글씨 의미있는 한글",
+      "family": "Nanum EuiMiIssNeunHanGeur",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-104-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/의미있는_한글/나눔손글씨 의미있는 한글.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-105",
+      "label": "나눔손글씨 자부심지우",
+      "family": "Nanum JaBuSimJiU",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-105-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/자부심지우/나눔손글씨 자부심지우.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-106",
+      "label": "나눔손글씨 잘하고 있어",
+      "family": "Nanum JarHaGoIssEo",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-106-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/잘하고_있어/나눔손글씨 잘하고 있어.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-107",
+      "label": "나눔손글씨 장미체",
+      "family": "Nanum JangMiCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-107-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/장미체/나눔손글씨 장미체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-108",
+      "label": "나눔손글씨 점꼴체",
+      "family": "Nanum JeomGgorCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-108-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/점꼴체/나눔손글씨 점꼴체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-109",
+      "label": "나눔손글씨 정은체",
+      "family": "Nanum JeongEunCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-109-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/정은체/나눔손글씨 정은체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-110",
+      "label": "나눔손글씨 중학생",
+      "family": "Nanum JungHagSaeng",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-110-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/중학생/나눔손글씨 중학생.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-111",
+      "label": "나눔손글씨 진주 박경아체",
+      "family": "Nanum JinJuBagGyeongACe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-111-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/진주_박경아체/나눔손글씨 진주 박경아체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-112",
+      "label": "나눔손글씨 철필글씨",
+      "family": "Nanum CeorPirGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-112-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/철필글씨/나눔손글씨 철필글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-113",
+      "label": "나눔손글씨 초딩희망",
+      "family": "Nanum CoDingHeuiMang",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-113-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/초딩희망/나눔손글씨 초딩희망.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-114",
+      "label": "나눔손글씨 칼국수",
+      "family": "Nanum KarGugSu",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-114-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/칼국수/나눔손글씨 칼국수.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-115",
+      "label": "나눔손글씨 코코체",
+      "family": "Nanum KoKoCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-115-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/코코체/나눔손글씨 코코체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-116",
+      "label": "나눔손글씨 하나되어 손글씨",
+      "family": "Nanum HaNaDoeEoSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-116-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/하나되어_손글씨/나눔손글씨 하나되어 손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-117",
+      "label": "나눔손글씨 하나손글씨",
+      "family": "Nanum HaNaSonGeurSsi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-117-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/하나손글씨/나눔손글씨 하나손글씨.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-118",
+      "label": "나눔손글씨 하람체",
+      "family": "Nanum HaRamCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-118-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/하람체/나눔손글씨 하람체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-119",
+      "label": "나눔손글씨 한윤체",
+      "family": "Nanum HanYunCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-119-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/한윤체/나눔손글씨 한윤체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-120",
+      "label": "나눔손글씨 할아버지의나눔",
+      "family": "Nanum HarABeoJiEuiNaNum",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-120-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/할아버지의나눔/나눔손글씨 할아버지의나눔.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-121",
+      "label": "나눔손글씨 행복한 도비",
+      "family": "Nanum HaengBogHanDoBi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-121-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/행복한_도비/나눔손글씨 행복한 도비.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-122",
+      "label": "나눔손글씨 혁이체",
+      "family": "Nanum HyeogICe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-122-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/혁이체/나눔손글씨 혁이체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-123",
+      "label": "나눔손글씨 혜준체",
+      "family": "Nanum HyeJunCe",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-123-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/갈혜준체/나눔손글씨 혜준체.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-124",
+      "label": "나눔손글씨 효남 늘 화이팅",
+      "family": "Nanum HyoNamNeurHwaITing",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-124-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/효남_늘_화이팅/나눔손글씨 효남 늘 화이팅.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-125",
+      "label": "나눔손글씨 희망누리",
+      "family": "Nanum HeuiMangNuRi",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-125-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/희망누리/나눔손글씨 희망누리.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-126",
+      "label": "나눔손글씨 힘내라는 말보단",
+      "family": "Nanum HimNaeRaNeunMarBoDan",
+      "group": "네이버 손글씨",
+      "faces": [
+        {
+          "file": "mdd-126-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "clova-all.zip!clova-all/힘내라는_말보단/나눔손글씨 힘내라는 말보단.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-127",
+      "label": "그리운 체리 한 스푼",
+      "family": "Griun Cherry 1 Spoon",
+      "group": "개성 글꼴",
+      "faces": [
+        {
+          "file": "mdd-127-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "Griun_Cherry1Spoon-Rg.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-128",
+      "label": "꾸꾸꾸체",
+      "family": "MemomentKkukkukk",
+      "group": "개성 글꼴",
+      "faces": [
+        {
+          "file": "mdd-128-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "kkukkukk.zip!MemomentKkukkukk.ttf"
+        }
+      ]
+    },
+    {
+      "id": "font-129",
+      "label": "온글잎 긍정",
+      "family": "Ownglyph GeungJeong Regular",
+      "group": "개성 글꼴",
+      "faces": [
+        {
+          "file": "mdd-129-01.woff2",
+          "weight": "400",
+          "style": "normal",
+          "source": "온글잎 긍정.ttf"
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@ export interface TextStyle {
   align: 'left' | 'center' | 'right';
   fontSize: string; // tailwind class e.g. "text-3xl"
   color: string; // tailwind class e.g. "text-white" or hex
+  fontFamily?: string;
 }
 
 export interface Slide {

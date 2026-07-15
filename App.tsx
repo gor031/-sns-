@@ -4,12 +4,12 @@ import { generateCardNews } from './services/cardNewsApi';
 import { CardNewsData, Slide, TextStyle } from './types';
 import { CardPreview, THEMES } from './components/CardPreview';
 import { Marketplace } from './components/Marketplace';
-import { DesignStudio } from './components/studio/DesignStudio';
 import { TemplateMarketData } from './types';
 import { Button } from './components/Button';
 import { 
   ChevronRight, 
   ChevronLeft, 
+  ChevronDown,
   MessageCircleHeart, 
   Palette,
   Download,
@@ -26,12 +26,14 @@ import {
   Store,
   Edit3,
   Upload,
-  Wand2,
   ArrowLeft,
   Braces,
   PenLine,
   Plus,
-  Trash2
+  Trash2,
+  LockKeyhole,
+  Loader2,
+  X
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
@@ -98,32 +100,6 @@ const SYSTEM_PROMPT = `당신은 '숏폼/카드뉴스 콘텐츠 전문 마케터
 }
 \`\`\``;
 
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error: Error, info: any) {
-    console.error('ErrorBoundary caught:', error, info);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{padding: 40, background: '#fff0f0', margin: 20, borderRadius: 12, border: '2px solid red'}}>
-          <h2 style={{color: 'red', marginBottom: 10}}>컴포넌트 에러 발생</h2>
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: 14, color: '#333'}}>{this.state.error?.message}</pre>
-          <pre style={{whiteSpace: 'pre-wrap', fontSize: 12, color: '#666', marginTop: 10}}>{this.state.error?.stack}</pre>
-          <button onClick={() => this.setState({hasError: false, error: null})} style={{marginTop: 16, padding: '8px 16px', background: '#333', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer'}}>다시 시도</button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
 const dataURLtoBlob = (dataurl: string) => {
   const arr = dataurl.split(',');
   const mime = arr[0].match(/:(.*?);/)![1];
@@ -134,6 +110,58 @@ const dataURLtoBlob = (dataurl: string) => {
     u8arr[n] = bstr.charCodeAt(n);
   }
   return new Blob([u8arr], { type: mime });
+};
+
+const BACKGROUND_MAX_BYTES = 30 * 1024 * 1024;
+const BACKGROUND_MAX_DIMENSION = 2400;
+
+const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => typeof reader.result === 'string'
+    ? resolve(reader.result)
+    : reject(new Error('이미지 변환 결과를 읽지 못했습니다.'));
+  reader.onerror = () => reject(new Error('이미지 파일을 읽지 못했습니다.'));
+  reader.readAsDataURL(blob);
+});
+
+const prepareBackgroundImage = async (file: File) => {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = 'async';
+    image.src = objectUrl;
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error('브라우저에서 열 수 없는 이미지 형식입니다.'));
+    });
+
+    if (!image.naturalWidth || !image.naturalHeight) {
+      throw new Error('이미지 크기를 확인하지 못했습니다.');
+    }
+
+    const scale = Math.min(
+      1,
+      BACKGROUND_MAX_DIMENSION / image.naturalWidth,
+      BACKGROUND_MAX_DIMENSION / image.naturalHeight,
+    );
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('이미지를 처리할 수 없습니다.');
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const optimized = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => blob ? resolve(blob) : reject(new Error('이미지를 최적화하지 못했습니다.')),
+        'image/webp',
+        0.9,
+      );
+    });
+    return blobToDataUrl(optimized);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 };
 
 const resolveOklchStylesForClone = (element: HTMLElement, clonedElement: HTMLElement) => {
@@ -186,7 +214,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
   const [showGuide, setShowGuide] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [copiedField, setCopiedField] = useState<'title' | 'body' | null>(null);
-  const [currentTab, setCurrentTab] = useState<'editor'|'market'|'studio'>('editor');
+  const [currentTab, setCurrentTab] = useState<'editor'|'market'>('editor');
   const [inputMode, setInputMode] = useState<InputMode>('auto');
   const [autoTopic, setAutoTopic] = useState('');
   const [targetAudience, setTargetAudience] = useState('일반 사용자');
@@ -199,6 +227,9 @@ const App: React.FC<AppProps> = ({ onBack }) => {
   ]);
   const [textStrokeWidth, setTextStrokeWidth] = useState(0);
   const [textStrokeColor, setTextStrokeColor] = useState('#000000');
+  const [backgroundFileName, setBackgroundFileName] = useState('');
+  const [backgroundError, setBackgroundError] = useState('');
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
 
   // Refs for scrolling
   const resultRef = useRef<HTMLDivElement>(null);
@@ -211,6 +242,8 @@ const App: React.FC<AppProps> = ({ onBack }) => {
       themeIndex: data.themeIndex ?? Math.floor(Math.random() * THEMES.length),
     };
     setCardData(nextData);
+    setBackgroundFileName(nextData.customBackgroundImage ? '저장된 배경 이미지' : '');
+    setBackgroundError('');
     setCurrentSlideIndex(0);
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
@@ -349,8 +382,11 @@ const App: React.FC<AppProps> = ({ onBack }) => {
     if (cardData) {
       setCardData({
         ...cardData,
-        themeIndex: index
+        themeIndex: index,
+        customBackgroundImage: undefined,
       });
+      setBackgroundFileName('');
+      setBackgroundError('');
     }
   };
 
@@ -463,6 +499,8 @@ const App: React.FC<AppProps> = ({ onBack }) => {
   const handleUseTemplate = (tmpl: TemplateMarketData) => {
     setSignature(tmpl.jsonData.signature || '');
     setCardData(tmpl.jsonData);
+    setBackgroundFileName(tmpl.jsonData.customBackgroundImage ? '저장된 배경 이미지' : '');
+    setBackgroundError('');
     setJsonInput(JSON.stringify(tmpl.jsonData, null, 2));
     setCurrentSlideIndex(0);
     setCurrentTab('editor');
@@ -473,25 +511,40 @@ const App: React.FC<AppProps> = ({ onBack }) => {
     backgroundInputRef.current?.click();
   };
 
-  const handleBackgroundFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleBackgroundFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
     if (!file || !cardData) return;
+    setBackgroundError('');
     if (!file.type.startsWith('image/')) {
-      alert('이미지 파일을 선택해주세요.');
+      setBackgroundError('JPG, PNG, WebP 같은 이미지 파일을 선택해주세요.');
       return;
     }
-    if (file.size > 12 * 1024 * 1024) {
-      alert('12MB 이하 이미지를 선택해주세요.');
+    if (file.size > BACKGROUND_MAX_BYTES) {
+      setBackgroundError('배경 이미지는 30MB 이하만 사용할 수 있습니다.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setCardData((previous) => previous ? { ...previous, customBackgroundImage: reader.result as string } : previous);
-      }
-    };
-    reader.readAsDataURL(file);
-    event.target.value = '';
+
+    setIsBackgroundLoading(true);
+    try {
+      const dataUrl = await prepareBackgroundImage(file);
+      setCardData((previous) => previous ? { ...previous, customBackgroundImage: dataUrl } : previous);
+      setBackgroundFileName(file.name);
+      window.setTimeout(() => {
+        document.getElementById('card-capture-target')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+    } catch (error) {
+      setBackgroundError(error instanceof Error ? error.message : '배경 이미지를 적용하지 못했습니다.');
+    } finally {
+      setIsBackgroundLoading(false);
+    }
+  };
+
+  const handleRemoveBackground = () => {
+    setCardData((previous) => previous ? { ...previous, customBackgroundImage: undefined } : previous);
+    setBackgroundFileName('');
+    setBackgroundError('');
   };
 
   const handleSignatureChange = (value: string) => {
@@ -522,15 +575,13 @@ const App: React.FC<AppProps> = ({ onBack }) => {
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
              <button onClick={() => setCurrentTab('editor')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'editor' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}><Edit3 size={16}/> 에디터</button>
-             <button onClick={() => setCurrentTab('studio')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'studio' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}><Wand2 size={16}/> 디자인 스튜디오</button>
+             <button type="button" disabled aria-label="디자인 스튜디오 점검 중" title="점검 중" className="flex shrink-0 cursor-not-allowed items-center gap-2 whitespace-nowrap rounded-xl bg-gray-100 px-3 py-2 text-sm font-bold text-gray-400 opacity-60 sm:px-4"><LockKeyhole size={16}/> 디자인 스튜디오</button>
              <button onClick={() => setCurrentTab('market')} className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 font-bold text-sm rounded-xl transition-colors flex items-center gap-2 ${currentTab === 'market' ? 'bg-primary text-white shadow-md' : 'bg-[#FFF0F0] text-primary hover:bg-[#FFE0E0]'}`}><Store size={16}/> 템플릿 마켓</button>
           </div>
         </div>
       </header>
 
-      {currentTab === 'studio' ? (
-         <ErrorBoundary><DesignStudio /></ErrorBoundary>
-      ) : currentTab === 'market' ? (
+      {currentTab === 'market' ? (
          <Marketplace onUseTemplate={handleUseTemplate} />
       ) : (
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -729,7 +780,10 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                       <div className="flex items-center gap-2">
                         <Palette size={16} className="text-primary"/>배경 테마
                       </div>
-                      <button type="button" onClick={handleCustomBackground} className="min-h-9 text-xs font-bold text-primary bg-[#FFF0F0] px-3 rounded-lg hover:bg-[#FFE0E0] flex items-center gap-1 transition-colors"><Upload size={12}/> 배경 업로드</button>
+                      <button type="button" onClick={handleCustomBackground} disabled={isBackgroundLoading} className="flex min-h-11 items-center gap-1 rounded-lg bg-[#FFF0F0] px-3 text-xs font-bold text-primary transition-colors hover:bg-[#FFE0E0] disabled:cursor-wait disabled:opacity-60">
+                        {isBackgroundLoading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                        {isBackgroundLoading ? '처리 중' : cardData.customBackgroundImage ? '배경 변경' : '배경 업로드'}
+                      </button>
                   </div>
                   <div className="grid grid-cols-5 sm:grid-cols-8 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50 no-scrollbar">
                     {THEMES.map((theme, i) => (
@@ -740,7 +794,20 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                       </button>
                     ))}
                    </div>
-                   <input ref={backgroundInputRef} type="file" accept="image/*" className="sr-only" onChange={handleBackgroundFile} />
+                   <input ref={backgroundInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="배경 이미지 파일" className="sr-only" onChange={handleBackgroundFile} />
+                   {cardData.customBackgroundImage && (
+                     <div className="mt-3 flex min-h-14 items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-2.5">
+                       <img src={cardData.customBackgroundImage} alt="" aria-hidden="true" className="size-11 shrink-0 rounded-md object-cover" />
+                       <div className="min-w-0 flex-1">
+                         <p className="text-xs font-bold text-green-800">배경 적용됨</p>
+                         <p className="truncate text-xs text-green-700" title={backgroundFileName}>{backgroundFileName || '배경 이미지'}</p>
+                       </div>
+                       <button type="button" onClick={handleRemoveBackground} aria-label="배경 이미지 삭제" title="배경 이미지 삭제" className="tool-icon-button size-11 border-green-200 text-green-800 hover:bg-green-100">
+                         <X size={17} />
+                       </button>
+                     </div>
+                   )}
+                   {backgroundError && <p role="alert" className="mt-3 text-sm font-bold leading-6 text-red-600">{backgroundError}</p>}
                    <div className="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-[1fr_auto] sm:items-end">
                      <div>
                        <div className="mb-2 flex items-center justify-between text-xs font-bold text-gray-600">
@@ -764,12 +831,13 @@ const App: React.FC<AppProps> = ({ onBack }) => {
             </div>
 
             {(cardData.snsTitle || cardData.snsBody || cardData.hashtags.length > 0) && (
-              <section className="tool-panel mx-auto max-w-2xl overflow-hidden">
-                <div className="border-b border-gray-200 px-4 py-3 sm:px-5">
-                  <h3 className="font-black text-gray-900">SNS 게시 원고</h3>
-                </div>
+              <details className="group tool-panel mx-auto max-w-2xl overflow-hidden">
+                <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-5 [&::-webkit-details-marker]:hidden">
+                  <h3 className="font-black text-gray-900">SNS용 제목·본문</h3>
+                  <ChevronDown size={20} className="shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
+                </summary>
                 {cardData.snsTitle && (
-                  <div className="border-b border-gray-100 p-4 sm:p-5">
+                  <div className="border-t border-gray-100 p-4 sm:p-5">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="text-xs font-bold text-gray-500">제목</span>
                       <button type="button" onClick={() => copySnsField('title', cardData.snsTitle || '')} className="flex min-h-9 items-center gap-1 rounded-lg border border-gray-200 px-3 text-xs font-bold text-gray-700 hover:bg-gray-50">
@@ -781,7 +849,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                   </div>
                 )}
                 {cardData.snsBody && (
-                  <div className="p-4 sm:p-5">
+                  <div className="border-t border-gray-100 p-4 sm:p-5">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="text-xs font-bold text-gray-500">본문</span>
                       <button type="button" onClick={() => copySnsField('body', cardData.snsBody || '')} className="flex min-h-9 items-center gap-1 rounded-lg border border-gray-200 px-3 text-xs font-bold text-gray-700 hover:bg-gray-50">
@@ -793,7 +861,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                     {cardData.hashtags.length > 0 && <p className="mt-4 text-sm font-bold leading-7 text-primary">{cardData.hashtags.map((tag) => `#${tag.replace(/^#/, '')}`).join(' ')}</p>}
                   </div>
                 )}
-              </section>
+              </details>
             )}
           </div>
         )}
@@ -804,5 +872,3 @@ const App: React.FC<AppProps> = ({ onBack }) => {
 };
 
 export default App;
-
-console.log('Cache busted for oklab fix');

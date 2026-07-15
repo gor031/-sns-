@@ -305,7 +305,15 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
       <div id={captureId} className={`relative w-full md:w-96 aspect-[4/5] overflow-hidden flex flex-col ${forExport ? '' : 'transition-colors duration-500 shadow-2xl'} ${bgImageUrl ? 'bg-black' : theme.bg} select-none`}>
         {bgImageUrl && (
           <div className="absolute inset-0 z-0">
-            <img src={bgImageUrl} alt="Custom Background" className="w-full h-full object-cover opacity-60" crossOrigin="anonymous" />
+            <img
+              src={bgImageUrl}
+              alt=""
+              aria-hidden="true"
+              data-card-background
+              decoding="async"
+              className="h-full w-full object-cover opacity-60"
+              crossOrigin={/^https?:\/\//i.test(bgImageUrl) ? 'anonymous' : undefined}
+            />
             <div className="absolute inset-0 bg-black/50" />
           </div>
         )}

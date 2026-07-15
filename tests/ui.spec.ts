@@ -112,6 +112,9 @@ test('saved card keeps theme highlights and custom text colors', async ({ page }
     buffer: Buffer.from(greenBackgroundDataUrl.split(',')[1], 'base64'),
   });
   await expect(page.getByText('배경 적용됨')).toBeVisible();
+  const strokeWidth = page.getByRole('slider', { name: '글자 외곽선', exact: true });
+  await expect(strokeWidth).toHaveAttribute('max', '8');
+  await strokeWidth.fill('8');
 
   await page.getByRole('button', { name: '디자인 및 텍스트 수정' }).click();
   await page.locator('[contenteditable="true"]').first().evaluate((editor) => {
@@ -122,6 +125,7 @@ test('saved card keeps theme highlights and custom text colors', async ({ page }
   const exportRoot = page.locator('#export-slide-inner-0');
   const exportedHighlights = exportRoot.locator('[data-card-theme-highlight]');
   await expect(exportedHighlights).toHaveCount(2);
+  await expect(exportRoot.locator('[data-card-text="header"]')).toHaveCSS('-webkit-text-stroke-width', '8px');
   await expect(exportedHighlights.first()).toHaveCSS('color', 'rgb(255, 0, 85)');
   await expect(exportedHighlights.last()).toHaveCSS('color', 'rgb(255, 0, 85)');
   const exportedCustomColor = exportRoot.getByText('사용자색', { exact: true });

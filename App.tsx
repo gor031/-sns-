@@ -817,7 +817,7 @@ const App: React.FC<AppProps> = ({ onBack }) => {
                          <label htmlFor="stroke-width">글자 외곽선</label>
                          <span className="tabular-nums">{textStrokeWidth.toFixed(1)}px</span>
                        </div>
-                       <input id="stroke-width" type="range" min="0" max="3" step="0.5" value={textStrokeWidth} onChange={(event) => setTextStrokeWidth(Number(event.target.value))} className="w-full accent-[#FF6B6B]" />
+                       <input id="stroke-width" type="range" min="0" max="8" step="0.5" value={textStrokeWidth} onChange={(event) => setTextStrokeWidth(Number(event.target.value))} className="w-full accent-[#FF6B6B]" />
                      </div>
                      <label className="flex items-center gap-2 text-xs font-bold text-gray-600">
                        색상

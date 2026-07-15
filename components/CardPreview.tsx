@@ -225,6 +225,7 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
 
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
     <div
+      data-card-text={isHeader ? 'header' : 'body'}
       className={`${style?.align === 'center' ? 'text-center' : style?.align === 'right' ? 'text-right' : 'text-left'} ${style?.fontSize || (isHeader ? 'text-3xl' : 'text-2xl')} ${style?.color || (bgImageUrl ? 'text-white' : theme.text)} ${isHeader ? 'font-bold' : 'font-medium'} font-sans leading-tight break-keep break-words`}
       style={{
         lineHeight: '1.4',

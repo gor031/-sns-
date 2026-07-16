@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Slide, TextStyle } from '../types';
 import { FONT_OPTIONS } from '../fontCatalog';
 import {
@@ -88,6 +88,8 @@ const TEXT_COLORS = [
 
 const SIZES = ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'];
 const FONT_GROUPS = Array.from(new Set(FONT_OPTIONS.map((font) => font.group)));
+const CARD_WIDTH = 384;
+const CARD_HEIGHT = 480;
 
 const markdownToHtml = (text: string): string => {
   if (!text) return '';
@@ -239,6 +241,8 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
   const [editBody, setEditBody] = useState('');
   const [editHeaderStyle, setEditHeaderStyle] = useState<TextStyle>({ align: 'left', fontSize: 'text-3xl', color: '' });
   const [editBodyStyle, setEditBodyStyle] = useState<TextStyle>({ align: 'left', fontSize: 'text-xl', color: '' });
+  const previewFrameRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(1);
 
   const theme = THEMES[Math.abs(themeIndex) % THEMES.length];
   const isCover = slide.pageNumber === 1;
@@ -251,6 +255,29 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
   }, [slide, isCover]);
 
   useEffect(() => { if (isEditing) onUpdate(editHeader, editBody, editHeaderStyle, editBodyStyle); }, [editHeader, editBody, editHeaderStyle, editBodyStyle, isEditing]);
+
+  useLayoutEffect(() => {
+    if (forExport) {
+      setPreviewScale(1);
+      return;
+    }
+
+    const frame = previewFrameRef.current;
+    if (!frame) return;
+    const updateScale = () => {
+      const nextScale = Math.min(frame.clientWidth / CARD_WIDTH, 1);
+      setPreviewScale((currentScale) => Math.abs(currentScale - nextScale) < 0.001 ? currentScale : nextScale);
+    };
+
+    updateScale();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateScale);
+      return () => window.removeEventListener('resize', updateScale);
+    }
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [forExport]);
 
   const renderContent = (content: string, isHeader: boolean, style: TextStyle | undefined) => (
     <div
@@ -269,7 +296,21 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
 
   return (
     <div className="flex flex-col gap-6 w-full items-center">
-      <div id={captureId} className={`relative w-full md:w-96 aspect-[4/5] overflow-hidden flex flex-col ${forExport ? '' : 'transition-colors duration-500 shadow-2xl'} ${bgImageUrl ? 'bg-black' : theme.bg} select-none`}>
+      <div
+        ref={previewFrameRef}
+        data-card-preview-frame
+        className="relative w-full max-w-[384px]"
+        style={{ height: `${CARD_HEIGHT * (forExport ? 1 : previewScale)}px` }}
+      >
+      <div
+        id={captureId}
+        data-card-stage
+        className={`h-[480px] w-[384px] overflow-hidden flex flex-col ${forExport ? 'relative' : 'absolute left-1/2 top-0 transition-colors duration-500 shadow-2xl'} ${bgImageUrl ? 'bg-black' : theme.bg} select-none`}
+        style={forExport ? undefined : {
+          transform: `translateX(-50%) scale(${previewScale})`,
+          transformOrigin: 'top center',
+        }}
+      >
         {bgImageUrl && (
           <div className="absolute inset-0 z-0">
             <img
@@ -316,8 +357,9 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
           )}
         </div>
       </div>
+      </div>
       {!hideControls && (
-        <div className="w-full md:w-96">
+        <div className="w-full max-w-[384px]">
           {!isEditing ? (
             <button onClick={() => setIsEditing(true)} className="w-full py-4 bg-white border-2 border-gray-100 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all shadow-sm text-lg"><Wand2 size={20} />디자인 및 텍스트 수정</button>
           ) : (

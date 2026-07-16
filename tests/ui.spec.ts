@@ -29,15 +29,16 @@ test('main creation tools and direct card flow render without overflow', async (
 
   await page.getByRole('button', { name: /카드뉴스 만들기/ }).click();
   await expect(page).toHaveURL(/#cardnews$/);
-  await expect(page.locator('ins.adsbygoogle[data-ad-slot="7502566555"]')).toHaveAttribute('data-ad-client', 'ca-pub-5968986592421768');
+  await expect(page.locator('script[src*="pagead2.googlesyndication.com"]')).toHaveCount(0);
+  await expect(page.locator('[data-cardnews-ad]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '디자인 스튜디오 점검 중' })).toBeDisabled();
   await page.getByRole('tab', { name: /직접 입력/ }).click();
-  await page.getByRole('textbox', { name: '1페이지 제목' }).fill('AI 모임을 오래 운영하는 법');
+  await page.getByRole('textbox', { name: '1페이지 제목' }).fill('주제만 던지면 원고부터 디자인까지?');
   await page.getByRole('textbox', { name: '2페이지 제목' }).fill('작게 시작하고 꾸준히 반복하기');
   await page.getByRole('textbox', { name: '2페이지 본문' }).fill('참여자의 질문을 기록하고 다음 수업에 반영하세요.');
   await page.getByLabel('서명').fill('모두뚝딱');
   await page.getByRole('button', { name: '카드뉴스 미리보기' }).click();
-  await expect(page.getByText('AI 모임을 오래 운영하는 법').first()).toBeVisible();
+  await expect(page.getByText('주제만 던지면 원고부터 디자인까지?').first()).toBeVisible();
   await expect(page.getByText('모두뚝딱').last()).toBeVisible();
   await page.getByLabel('배경 이미지 파일').setInputFiles({
     name: 'background.png',
@@ -70,6 +71,54 @@ test('main creation tools and direct card flow render without overflow', async (
   await expect(page.getByLabel('제목 글꼴')).toBeVisible();
   await expect(page.getByLabel('본문 글꼴')).toBeVisible();
   expect(await page.getByLabel('제목 글꼴').locator('option').count()).toBe(130);
+  await page.getByLabel('제목 글꼴').selectOption({ label: '온글잎 긍정' });
+  await expect.poll(() => page.evaluate(() => document.fonts.check('700 48px "MDD_Font_129"', '주제만 던지면 원고부터 디자인까지?'))).toBe(true);
+
+  const readCardLayouts = () => page.evaluate(() => {
+    const readLayout = (cardId: string) => {
+      const card = document.getElementById(cardId)!;
+      const text = card.querySelector<HTMLElement>('[data-card-text="header"]')!;
+      const range = document.createRange();
+      range.selectNodeContents(text);
+      return {
+        cardWidth: card.offsetWidth,
+        cardHeight: card.offsetHeight,
+        visualWidth: card.getBoundingClientRect().width,
+        textWidth: text.offsetWidth,
+        textHeight: text.offsetHeight,
+        lineRects: Array.from(range.getClientRects()).filter((rect) => rect.width > 0 && rect.height > 0).length,
+      };
+    };
+    return {
+      preview: readLayout('card-capture-target'),
+      exported: readLayout('export-slide-inner-0'),
+    };
+  });
+  const cardLayouts = await readCardLayouts();
+  expect(cardLayouts.preview.cardWidth).toBe(384);
+  expect(cardLayouts.preview.cardHeight).toBe(480);
+  expect(cardLayouts.preview.textWidth).toBe(cardLayouts.exported.textWidth);
+  expect(cardLayouts.preview.textHeight).toBe(cardLayouts.exported.textHeight);
+  expect(cardLayouts.preview.lineRects).toBe(cardLayouts.exported.lineRects);
+  if (testInfo.project.name === 'mobile-chromium') {
+    expect(cardLayouts.preview.visualWidth).toBeLessThan(384);
+    for (const width of [320, 360, 375, 390, 430]) {
+      await page.setViewportSize({ width, height: 812 });
+      await page.evaluate(() => new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }));
+      const resizedLayouts = await readCardLayouts();
+      expect(resizedLayouts.preview.cardWidth).toBe(384);
+      expect(resizedLayouts.preview.cardHeight).toBe(480);
+      expect(resizedLayouts.preview.textWidth).toBe(resizedLayouts.exported.textWidth);
+      expect(resizedLayouts.preview.textHeight).toBe(resizedLayouts.exported.textHeight);
+      expect(resizedLayouts.preview.lineRects).toBe(resizedLayouts.exported.lineRects);
+      expect(resizedLayouts.preview.visualWidth).toBeLessThanOrEqual(384);
+      await expectNoHorizontalOverflow(page);
+    }
+  } else {
+    expect(cardLayouts.preview.visualWidth).toBeCloseTo(384, 0);
+  }
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath('card-direct.png'), fullPage: true });
   await page.getByRole('button', { name: '완료' }).click();

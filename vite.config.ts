@@ -56,50 +56,6 @@ export default defineConfig(({ mode }) => {
               res.statusCode = 302;
               res.setHeader('Location', '/favicon.svg');
               res.end();
-            } else if (req.url?.startsWith('/api/extract')) {
-              try {
-                const url = new URL(req.url, `http://${req.headers.host}`);
-                const mode = url.searchParams.get('mode') || 'object-extract';
-                const chunks: Buffer[] = [];
-
-                req.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-                req.on('end', async () => {
-                  try {
-                    const response = await fetch(
-                      `https://gabjagi031--cardnews-ai-backend-v2-fastapi-app.modal.run/extract?mode=${encodeURIComponent(mode)}`,
-                      {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': String(req.headers['content-type'] || ''),
-                        },
-                        body: Buffer.concat(chunks) as any,
-                      }
-                    );
-
-                    const body = Buffer.from(await response.arrayBuffer());
-                    res.statusCode = response.status;
-                    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
-                    res.end(body);
-                  } catch (error: any) {
-                    console.error('AI extract proxy error:', error);
-                    res.statusCode = 502;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify({ error: error?.message || 'AI backend request failed' }));
-                  }
-                });
-
-                req.on('error', (error) => {
-                  console.error('AI extract upload error:', error);
-                  res.statusCode = 400;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ error: 'Failed to read uploaded image' }));
-                });
-              } catch (error: any) {
-                console.error('AI extract proxy setup error:', error);
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ error: 'Failed to proxy AI extraction request' }));
-              }
             } else if (req.url?.startsWith('/api/search')) {
               try {
                 // 파라미터 파싱
@@ -176,10 +132,6 @@ export default defineConfig(({ mode }) => {
         }
       }
     ],
-    define: {
-      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || '')
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

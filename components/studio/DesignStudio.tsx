@@ -512,8 +512,7 @@ export const DesignStudio: React.FC<DesignStudioProps> = () => {
       const formData = new FormData();
       formData.append('file', blob, 'image.png');
 
-      const AI_API_URL = import.meta.env.VITE_AI_API_URL || 'https://gabjagi031--cardnews-ai-backend-v2-fastapi-app.modal.run';
-      const response = await fetch(`${AI_API_URL}/extract?mode=${mode}`, {
+      const response = await fetch(`/api/extract?mode=${mode}`, {
         method: 'POST',
         body: formData,
       });

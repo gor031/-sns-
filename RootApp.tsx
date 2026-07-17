@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Captions, ChevronRight, Hammer, ImagePlus, Infinity, Mic2 } from 'lucide-react';
+import { DisplayAd } from './components/DisplayAd';
 
 const CardNewsTool = lazy(() => import('./App'));
 const VoiceTtsTool = lazy(() => import('./components/VoiceTtsTool'));
@@ -98,6 +99,10 @@ export default function RootApp() {
           <p className="text-sm font-bold text-primary">오늘의 작업</p>
           <h2 className="mt-1 text-2xl font-black text-gray-900 sm:text-3xl">무엇을 만들까요?</h2>
         </div>
+        <div className="mb-7 empty:hidden">
+          <DisplayAd />
+        </div>
+
 
         <section className="grid gap-3 md:grid-cols-3" aria-label="제작 도구">
           {tools.map((tool) => {

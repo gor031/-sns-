@@ -32,7 +32,7 @@ test('main creation tools and direct card flow render without overflow', async (
   await expect(page).toHaveURL(/#cardnews$/);
   await expect(page.locator('meta[name="google-adsense-account"]')).toHaveAttribute('content', 'ca-pub-5968986592421768');
   await expect(page.locator('script[src*="pagead2.googlesyndication.com"]')).toHaveCount(1);
-  await expect(page.locator('[data-cardnews-ad]')).toHaveCount(0);
+  await expect(page.locator('[data-display-ad]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '디자인 스튜디오 점검 중' })).toBeDisabled();
   await page.getByRole('tab', { name: /직접 입력/ }).click();
   await page.getByRole('textbox', { name: '1페이지 제목' }).fill('주제만 던지면 원고부터 디자인까지?');

@@ -11,6 +11,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { ToolHeader } from './app/ToolHeader';
+import { DisplayAd } from './DisplayAd';
 import { SubtitlePosition, SubtitleSegment, SubtitleStyle } from '../types';
 import { burnSubtitlesIntoVideo, extractAudioChunks } from '../services/ffmpegService';
 import { transcribeAudioChunk } from '../services/transcriptionApi';
@@ -264,6 +265,10 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
     <div className="min-h-screen bg-gray-50">
       <ToolHeader title="자막 만들기" onBack={onBack} />
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-5 empty:hidden">
+          <DisplayAd />
+        </div>
+
         {!file ? (
           <section
             className="tool-panel grid min-h-[55vh] place-items-center border-dashed p-6 text-center"

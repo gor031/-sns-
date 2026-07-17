@@ -2,6 +2,7 @@ import React from 'react';
 import { TemplateCard } from './TemplateCard';
 import { TemplateMarketData } from '../types';
 import { Sparkles, TrendingUp, Filter } from 'lucide-react';
+import { DisplayAd } from './DisplayAd';
 
 const MOCK_TEMPLATES: TemplateMarketData[] = [
   {
@@ -69,6 +70,10 @@ export const Marketplace: React.FC<Props> = ({ onUseTemplate }) => {
           </button>
         </div>
       </div>
+      <div className="mb-8 empty:hidden">
+        <DisplayAd />
+      </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {MOCK_TEMPLATES.map((tmpl) => (

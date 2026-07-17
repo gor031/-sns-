@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Download, Gauge, Mic2, Play, SlidersHorizontal } from 'lucide-react';
 import { ToolHeader } from './app/ToolHeader';
+import { DisplayAd } from './DisplayAd';
 import { synthesizeVoice, TTS_VOICES } from '../services/ttsApi';
 
 interface VoiceTtsToolProps {
@@ -62,6 +63,10 @@ export default function VoiceTtsTool({ onBack }: VoiceTtsToolProps) {
     <div className="min-h-screen bg-gray-50">
       <ToolHeader title="음성 만들기" onBack={onBack} />
       <main className="mx-auto grid max-w-5xl gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(280px,0.75fr)]">
+        <div className="empty:hidden lg:col-span-2">
+          <DisplayAd />
+        </div>
+
         <section className="tool-panel p-4 sm:p-6">
           <div className="mb-4 flex items-center gap-2">
             <Mic2 size={20} className="text-primary" />

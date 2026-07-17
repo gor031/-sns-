@@ -7,7 +7,7 @@ declare global {
 }
 
 const ADSENSE_CLIENT = 'ca-pub-5968986592421768';
-const CARDNEWS_AD_SLOT = '7502566555';
+const DISPLAY_AD_SLOT = '7502566555';
 const FUNDING_CHOICES_SCRIPT_ID = 'modu-ddokddak-funding-choices';
 const PRODUCTION_HOSTS = new Set(['card.rnrmk.xyz', 'www.card.rnrmk.xyz']);
 
@@ -86,7 +86,7 @@ export function DisplayAd() {
   return (
     <aside
       aria-label="광고"
-      data-cardnews-ad
+      data-display-ad
       data-slot-state={status}
       className={status === 'unfilled' ? 'hidden' : 'min-h-[100px] w-full overflow-hidden'}
     >
@@ -95,7 +95,7 @@ export function DisplayAd() {
         className="adsbygoogle"
         style={{ display: 'block' }}
         data-ad-client={ADSENSE_CLIENT}
-        data-ad-slot={CARDNEWS_AD_SLOT}
+        data-ad-slot={DISPLAY_AD_SLOT}
         data-ad-format="auto"
         data-full-width-responsive="true"
       />

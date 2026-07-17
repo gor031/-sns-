@@ -19,6 +19,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 
 test('main creation tools and direct card flow render without overflow', async ({ page }, testInfo) => {
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+  await page.route(/(googlesyndication|doubleclick|googleadservices|fundingchoicesmessages)\.com/, (route) => route.abort());
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: '모두뚝딱', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /카드뉴스 만들기/ })).toBeVisible();
@@ -29,7 +30,8 @@ test('main creation tools and direct card flow render without overflow', async (
 
   await page.getByRole('button', { name: /카드뉴스 만들기/ }).click();
   await expect(page).toHaveURL(/#cardnews$/);
-  await expect(page.locator('script[src*="pagead2.googlesyndication.com"]')).toHaveCount(0);
+  await expect(page.locator('meta[name="google-adsense-account"]')).toHaveAttribute('content', 'ca-pub-5968986592421768');
+  await expect(page.locator('script[src*="pagead2.googlesyndication.com"]')).toHaveCount(1);
   await expect(page.locator('[data-cardnews-ad]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '디자인 스튜디오 점검 중' })).toBeDisabled();
   await page.getByRole('tab', { name: /직접 입력/ }).click();

@@ -8,13 +8,10 @@ declare global {
 
 const ADSENSE_CLIENT = 'ca-pub-5968986592421768';
 const CARDNEWS_AD_SLOT = '7502566555';
-const ADSENSE_SCRIPT_ID = 'modu-ddokddak-adsense';
 const FUNDING_CHOICES_SCRIPT_ID = 'modu-ddokddak-funding-choices';
 const PRODUCTION_HOSTS = new Set(['card.rnrmk.xyz', 'www.card.rnrmk.xyz']);
 
 type AdStatus = 'loading' | 'filled' | 'unfilled';
-
-let adsenseLoader: Promise<void> | null = null;
 
 const shouldRequestLiveAds = () => {
   if (!import.meta.env.PROD || !PRODUCTION_HOSTS.has(window.location.hostname.toLowerCase())) return false;
@@ -47,32 +44,6 @@ const loadFundingChoices = () => {
   signalGooglefcPresent();
 };
 
-const loadAdSense = () => {
-  if (adsenseLoader) return adsenseLoader;
-
-  adsenseLoader = new Promise<void>((resolve, reject) => {
-    const existing = document.getElementById(ADSENSE_SCRIPT_ID) as HTMLScriptElement | null;
-    if (existing?.dataset.loaded === 'true') {
-      resolve();
-      return;
-    }
-
-    const script = existing || document.createElement('script');
-    script.id = ADSENSE_SCRIPT_ID;
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
-    script.addEventListener('load', () => {
-      script.dataset.loaded = 'true';
-      resolve();
-    }, { once: true });
-    script.addEventListener('error', () => reject(new Error('AdSense script failed to load')), { once: true });
-    if (!existing) document.head.appendChild(script);
-  });
-
-  return adsenseLoader;
-};
-
 export function DisplayAd() {
   const adRef = useRef<HTMLModElement>(null);
   const requestedRef = useRef(false);
@@ -84,7 +55,6 @@ export function DisplayAd() {
 
     const adElement = adRef.current;
     if (!adElement) return;
-    let cancelled = false;
 
     const updateStatus = () => {
       const nextStatus = adElement.getAttribute('data-ad-status');
@@ -97,18 +67,16 @@ export function DisplayAd() {
     if (!requestedRef.current) {
       requestedRef.current = true;
       loadFundingChoices();
-      loadAdSense().then(() => {
-        if (cancelled) return;
+      try {
         window.adsbygoogle = window.adsbygoogle || [];
         window.adsbygoogle.push({});
-      }).catch((error) => {
+      } catch (error) {
         console.error('AdSense display ad request failed', error);
         setStatus('unfilled');
-      });
+      }
     }
 
     return () => {
-      cancelled = true;
       observer.disconnect();
     };
   }, [adsEnabled]);

@@ -1,3 +1,5 @@
+import { createProtectedHeaders } from './firebase';
+
 export interface TtsVoice {
   name: string;
   label: string;
@@ -43,9 +45,10 @@ interface SynthesizeOptions {
 }
 
 export async function synthesizeVoice(options: SynthesizeOptions): Promise<Blob> {
+  const headers = await createProtectedHeaders({ 'Content-Type': 'application/json' });
   const response = await fetch('/api/synthesize', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(options),
   });
 

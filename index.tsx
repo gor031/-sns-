@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import RootApp from './RootApp';
+import { AuthProvider } from './components/auth/AuthProvider';
 import './index.css';
 import './fontCatalog.css';
 
@@ -12,6 +13,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <RootApp />
+    <AuthProvider>
+      <RootApp />
+    </AuthProvider>
   </React.StrictMode>
 );

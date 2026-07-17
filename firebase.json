@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "모두뚝딱",
+        "supportEmail": "gog031@naver.com",
+        "authorizedRedirectUris": [
+          "https://card.rnrmk.xyz/__/auth/handler"
+        ]
+      }
+    }
+  }
+}

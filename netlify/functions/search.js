@@ -1,3 +1,5 @@
+import { requireFirebaseSecurity } from '../lib/firebase-security.js';
+
 export const config = {
   rateLimit: { action: 'rate_limit', aggregateBy: 'ip', windowLimit: 60, windowSize: 60 },
 };
@@ -8,6 +10,9 @@ export const handler = async function(event) {
   if (event.httpMethod !== 'GET') {
     return { statusCode: 405, body: JSON.stringify({ error: 'GET 요청만 지원합니다.' }) };
   }
+
+  const security = await requireFirebaseSecurity(event);
+  if (!security.ok) return security.response;
 
   if (!query || !source) {
     return {

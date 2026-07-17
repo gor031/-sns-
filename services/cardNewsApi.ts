@@ -1,5 +1,6 @@
 import { CardNewsData } from '../types';
 import { parseCardNewsJson } from './geminiService';
+import { createProtectedHeaders } from './firebase';
 
 interface GenerateCardNewsOptions {
   topic: string;
@@ -9,9 +10,10 @@ interface GenerateCardNewsOptions {
 }
 
 export async function generateCardNews(options: GenerateCardNewsOptions): Promise<CardNewsData> {
+  const headers = await createProtectedHeaders({ 'Content-Type': 'application/json' });
   const response = await fetch('/api/generate-card-news', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(options),
   });
 

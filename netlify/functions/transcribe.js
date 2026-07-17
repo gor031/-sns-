@@ -1,3 +1,5 @@
+import { requireFirebaseSecurity } from '../lib/firebase-security.js';
+
 const jsonResponse = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -22,6 +24,8 @@ export const config = {
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') return jsonResponse(405, { error: 'POST 요청만 지원합니다.' });
+  const security = await requireFirebaseSecurity(event);
+  if (!security.ok) return security.response;
   if (!event.body) return jsonResponse(400, { error: '인식할 음성 파일이 없습니다.' });
 
   const binary = Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'binary');

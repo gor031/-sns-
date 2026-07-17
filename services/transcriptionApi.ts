@@ -1,4 +1,5 @@
 import { SubtitleSegment, SubtitleStyle } from '../types';
+import { createProtectedHeaders } from './firebase';
 
 interface RawSegment {
   start?: number;
@@ -87,12 +88,13 @@ export async function transcribeAudioChunk(
   offset: number,
   idStart: number,
 ): Promise<SubtitleSegment[]> {
+  const headers = await createProtectedHeaders({
+    'Content-Type': blob.type || 'audio/mpeg',
+    'X-File-Name': encodeURIComponent(fileName),
+  });
   const response = await fetch('/api/transcribe', {
     method: 'POST',
-    headers: {
-      'Content-Type': blob.type || 'audio/mpeg',
-      'X-File-Name': encodeURIComponent(fileName),
-    },
+    headers,
     body: blob,
   });
 

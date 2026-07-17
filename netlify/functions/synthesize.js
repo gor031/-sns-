@@ -1,3 +1,5 @@
+import { requireFirebaseSecurity } from '../lib/firebase-security.js';
+
 const jsonResponse = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -26,6 +28,8 @@ export const config = {
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') return jsonResponse(405, { error: 'POST 요청만 지원합니다.' });
+  const security = await requireFirebaseSecurity(event);
+  if (!security.ok) return security.response;
   if ((event.body || '').length > 30_000) return jsonResponse(413, { error: '입력 내용이 너무 깁니다.' });
 
   let input;

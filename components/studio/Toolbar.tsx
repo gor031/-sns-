@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createProtectedHeaders } from '../../services/firebase';
 import {
   Type, Square, Circle as CircleIcon, Triangle as TriangleIcon,
   Minus, Image, Palette, Upload, Heading1, Heading2, AlignLeft,
@@ -70,7 +71,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/search?query=${encodeURIComponent(searchQuery.trim())}&source=${searchSource}`);
+      const headers = await createProtectedHeaders();
+      const res = await fetch(`/api/search?query=${encodeURIComponent(searchQuery.trim())}&source=${searchSource}`, { headers });
       if (!res.ok) throw new Error('Search failed');
       const data = await res.json();
       setSearchResults(data.results || []);

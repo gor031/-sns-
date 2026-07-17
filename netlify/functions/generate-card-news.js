@@ -1,3 +1,5 @@
+import { requireFirebaseSecurity } from '../lib/firebase-security.js';
+
 const SYSTEM_PROMPT = `당신은 숏폼과 카드뉴스 원고를 작성하는 전문 콘텐츠 마케터입니다.
 반드시 부연 설명이나 Markdown 코드 블록 없이 유효한 JSON 객체 하나만 반환하세요.
 
@@ -46,6 +48,8 @@ export const config = {
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') return jsonResponse(405, { error: 'POST 요청만 지원합니다.' });
+  const security = await requireFirebaseSecurity(event);
+  if (!security.ok) return security.response;
   if ((event.body || '').length > 20_000) return jsonResponse(413, { error: '입력 내용이 너무 깁니다.' });
 
   let input;

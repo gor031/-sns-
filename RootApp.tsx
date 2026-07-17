@@ -1,16 +1,20 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { Captions, ChevronRight, Hammer, ImagePlus, Infinity, Mic2 } from 'lucide-react';
+import { Captions, ChevronRight, Hammer, ImagePlus, Mic2 } from 'lucide-react';
 import { DisplayAd } from './components/DisplayAd';
+import { LegalPage } from './components/LegalPage';
+import { SignInGate } from './components/auth/SignInGate';
+import { UserMenu } from './components/auth/UserMenu';
+import { useAuth } from './components/auth/AuthProvider';
 
 const CardNewsTool = lazy(() => import('./App'));
 const VoiceTtsTool = lazy(() => import('./components/VoiceTtsTool'));
 const SubtitleTool = lazy(() => import('./components/SubtitleTool'));
 
-type Route = 'home' | 'cardnews' | 'voice' | 'subtitles';
+type Route = 'home' | 'cardnews' | 'voice' | 'subtitles' | 'terms' | 'privacy';
 
 const routeFromHash = (): Route => {
   const route = window.location.hash.replace(/^#\/?/, '') as Route;
-  return ['cardnews', 'voice', 'subtitles'].includes(route) ? route : 'home';
+  return ['cardnews', 'voice', 'subtitles', 'terms', 'privacy'].includes(route) ? route : 'home';
 };
 
 function LoadingTool() {
@@ -26,6 +30,7 @@ function LoadingTool() {
 
 export default function RootApp() {
   const [route, setRoute] = useState<Route>(() => routeFromHash());
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleHashChange = () => setRoute(routeFromHash());
@@ -42,6 +47,24 @@ export default function RootApp() {
     }
     window.location.hash = next;
   };
+
+  if (route === 'terms' || route === 'privacy') {
+    return <LegalPage kind={route} onBack={() => navigate('home')} />;
+  }
+
+  if (loading) {
+    return <LoadingTool />;
+  }
+
+  if (route !== 'home' && !user) {
+    return (
+      <SignInGate
+        onBack={() => navigate('home')}
+        onOpenTerms={() => navigate('terms')}
+        onOpenPrivacy={() => navigate('privacy')}
+      />
+    );
+  }
 
   if (route !== 'home') {
     return (
@@ -87,10 +110,7 @@ export default function RootApp() {
             </span>
             <h1 className="text-xl font-black text-gray-900">모두뚝딱</h1>
           </div>
-          <div className="flex min-h-10 items-center gap-2 rounded-lg bg-gray-100 px-3 text-sm font-bold text-gray-700">
-            <Infinity size={18} className="text-primary" />
-            무제한 생성
-          </div>
+          <UserMenu />
         </div>
       </header>
 
@@ -127,6 +147,13 @@ export default function RootApp() {
           })}
         </section>
       </main>
+      <footer className="border-t border-rose-100 bg-white">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-5 text-xs font-bold text-gray-500 sm:px-6">
+          <span>모두뚝딱</span>
+          <button type="button" onClick={() => navigate('terms')} className="hover:text-gray-900">이용약관</button>
+          <button type="button" onClick={() => navigate('privacy')} className="hover:text-gray-900">개인정보처리방침</button>
+        </div>
+      </footer>
     </div>
   );
 }

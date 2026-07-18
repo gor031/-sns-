@@ -39,7 +39,7 @@ export interface CreateInquiryInput {
   message: string;
 }
 
-const DEFAULT_ADMIN_EMAIL = 'gog031@naver.com';
+const DEFAULT_ADMIN_EMAIL = 'gog031103@gmail.com';
 export const isInquiryAdmin = (user: User | null) => (
   Boolean(user?.email && user.emailVerified && user.email.toLowerCase() === DEFAULT_ADMIN_EMAIL)
 );

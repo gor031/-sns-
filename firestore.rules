@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'gog031@naver.com';
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'userId', 'userName', 'userEmail', 'category', 'title', 'message',
+          'status', 'reply', 'createdAt', 'updatedAt', 'answeredAt', 'answeredBy'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userEmail == request.auth.token.email
+        && request.resource.data.status == 'open'
+        && request.resource.data.reply == ''
+        && request.resource.data.answeredAt == null
+        && request.resource.data.answeredBy == ''
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 1
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow get, list: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'reply', 'status', 'answeredAt', 'answeredBy', 'updatedAt'
+        ])
+        && request.resource.data.status == 'answered'
+        && request.resource.data.reply is string
+        && request.resource.data.reply.size() >= 1
+        && request.resource.data.reply.size() <= 3000
+        && request.resource.data.answeredAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.answeredBy == request.auth.token.email;
+
+      allow delete: if false;
+    }
+  }
+}

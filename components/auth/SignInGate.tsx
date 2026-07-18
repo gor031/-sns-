@@ -27,7 +27,7 @@ export function SignInGate({ onBack, onOpenTerms, onOpenPrivacy }: SignInGatePro
           <span className="mx-auto grid size-14 place-items-center rounded-lg bg-gray-900 text-white"><ShieldCheck size={27} /></span>
           <h1 className="mt-5 text-2xl font-black text-gray-900">로그인이 필요합니다</h1>
           <p className="mt-2 text-sm font-medium leading-6 text-gray-600">
-            AI 생성 API를 안전하게 제공하기 위해 Google 계정으로 사용자를 확인합니다.
+            서비스 이용 내역과 비공개 문의를 안전하게 보호하기 위해 Google 계정으로 사용자를 확인합니다.
           </p>
           <button
             type="button"

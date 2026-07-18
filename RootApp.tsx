@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { Captions, ChevronRight, Hammer, ImagePlus, Mic2 } from 'lucide-react';
+import { Captions, ChevronRight, Hammer, ImagePlus, MessageCircleQuestion, Mic2 } from 'lucide-react';
 import { DisplayAd } from './components/DisplayAd';
 import { LegalPage } from './components/LegalPage';
 import { SignInGate } from './components/auth/SignInGate';
@@ -9,12 +9,13 @@ import { useAuth } from './components/auth/AuthProvider';
 const CardNewsTool = lazy(() => import('./App'));
 const VoiceTtsTool = lazy(() => import('./components/VoiceTtsTool'));
 const SubtitleTool = lazy(() => import('./components/SubtitleTool'));
+const InquiryPage = lazy(() => import('./components/InquiryPage').then((module) => ({ default: module.InquiryPage })));
 
-type Route = 'home' | 'cardnews' | 'voice' | 'subtitles' | 'terms' | 'privacy';
+type Route = 'home' | 'cardnews' | 'voice' | 'subtitles' | 'inquiry' | 'terms' | 'privacy';
 
 const routeFromHash = (): Route => {
   const route = window.location.hash.replace(/^#\/?/, '') as Route;
-  return ['cardnews', 'voice', 'subtitles', 'terms', 'privacy'].includes(route) ? route : 'home';
+  return ['cardnews', 'voice', 'subtitles', 'inquiry', 'terms', 'privacy'].includes(route) ? route : 'home';
 };
 
 function LoadingTool() {
@@ -66,6 +67,10 @@ export default function RootApp() {
     );
   }
 
+  if (route === 'inquiry') {
+    return <Suspense fallback={<LoadingTool />}><InquiryPage onBack={() => navigate('home')} /></Suspense>;
+  }
+
   if (route !== 'home') {
     return (
       <Suspense fallback={<LoadingTool />}>
@@ -110,7 +115,18 @@ export default function RootApp() {
             </span>
             <h1 className="text-xl font-black text-gray-900">모두뚝딱</h1>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-1 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('inquiry')}
+              className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm font-black text-gray-600 transition hover:bg-rose-50 hover:text-primary focus-visible:ring-4 focus-visible:ring-primary/25 sm:px-3"
+            >
+              <MessageCircleQuestion size={18} aria-hidden="true" />
+              <span className="hidden sm:inline">문의 사항</span>
+              <span className="sr-only sm:hidden">문의 사항</span>
+            </button>
+            <UserMenu />
+          </div>
         </div>
       </header>
 
@@ -152,6 +168,7 @@ export default function RootApp() {
           <span>모두뚝딱</span>
           <button type="button" onClick={() => navigate('terms')} className="hover:text-gray-900">이용약관</button>
           <button type="button" onClick={() => navigate('privacy')} className="hover:text-gray-900">개인정보처리방침</button>
+          <button type="button" onClick={() => navigate('inquiry')} className="hover:text-gray-900">문의 사항</button>
         </div>
       </footer>
     </div>

@@ -22,7 +22,7 @@ const firebaseConfig = {
   messagingSenderId: '1075022418609',
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 void setPersistence(auth, browserLocalPersistence).catch(() => {

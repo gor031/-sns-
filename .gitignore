@@ -32,3 +32,5 @@ playwright-report
 .vite.pid
 .functions-stdout.log
 .functions-stderr.log
+
+.vercel

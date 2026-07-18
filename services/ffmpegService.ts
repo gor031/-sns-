@@ -129,7 +129,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Base,Noto Sans CJK KR,72,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,-1,0,0,0,100,100,0,0,1,4,1,2,90,90,70,1
+Style: Base,Noto Sans CJK KR,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,1,2,90,90,70,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`;
@@ -137,7 +137,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`
   const lines = segments.map((segment) => {
     const alignment = segment.style.position === 'top' ? 8 : segment.style.position === 'center' ? 5 : 2;
     const fontSize = Math.max(30, Math.round(segment.style.fontSize * 3));
-    const overrides = `{\\an${alignment}\\fs${fontSize}\\c${assColor(segment.style.colorHex)}}`;
+    const overrides = `{\\an${alignment}\\fs${fontSize}\\c${assColor(segment.style.colorHex)}\\3c&H00000000\\bord5\\shad1}`;
     return `Dialogue: 0,${assTime(segment.start)},${assTime(segment.end)},Base,,0,0,0,,${overrides}${escapeAssText(segment.text)}`;
   });
 

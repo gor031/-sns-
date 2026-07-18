@@ -323,7 +323,9 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
                         style={{
                           color: activeSegment.style.colorHex,
                           fontSize: `${activeSegment.style.fontSize}px`,
-                          textShadow: '0 2px 2px rgba(0,0,0,.95), 1px 0 2px rgba(0,0,0,.95), -1px 0 2px rgba(0,0,0,.95)',
+                          WebkitTextStroke: `${Math.max(1.5, activeSegment.style.fontSize * 0.08)}px #000000`,
+                          paintOrder: 'stroke fill',
+                          textShadow: '0 2px 3px rgba(0,0,0,.9)',
                         }}
                       >
                         {activeSegment.text}
@@ -416,6 +418,7 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
                       ))}
                     </div>
                   </div>
+                  <p className="mt-4 text-xs font-medium text-gray-500">자막에는 영상 배경에서도 잘 보이도록 검은색 테두리가 자동 적용됩니다.</p>
                 </section>
               )}
             </div>

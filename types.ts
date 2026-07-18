@@ -32,6 +32,7 @@ export type SubtitlePosition = 'top' | 'center' | 'bottom';
 export interface SubtitleStyle {
   colorHex: string;
   fontSize: number;
+  outlineWidth: number;
   position: SubtitlePosition;
 }
 

@@ -23,6 +23,7 @@ interface SubtitleToolProps {
 const DEFAULT_STYLE: SubtitleStyle = {
   colorHex: '#FFFFFF',
   fontSize: 24,
+  outlineWidth: 2,
   position: 'bottom',
 };
 
@@ -323,7 +324,7 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
                         style={{
                           color: activeSegment.style.colorHex,
                           fontSize: `${activeSegment.style.fontSize}px`,
-                          WebkitTextStroke: `${Math.max(1.5, activeSegment.style.fontSize * 0.08)}px #000000`,
+                          WebkitTextStroke: `${activeSegment.style.outlineWidth}px #000000`,
                           paintOrder: 'stroke fill',
                           textShadow: '0 2px 3px rgba(0,0,0,.9)',
                         }}
@@ -401,12 +402,21 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <div className="mb-2 flex justify-between text-sm font-bold text-gray-700">
-                        <label htmlFor="subtitle-size">글자 크기</label>
-                        <span className="tabular-nums text-[#2A9D8F]">{controlStyle.fontSize}px</span>
+                    <div className="space-y-5">
+                      <div>
+                        <div className="mb-2 flex justify-between text-sm font-bold text-gray-700">
+                          <label htmlFor="subtitle-size">글자 크기</label>
+                          <span className="tabular-nums text-[#2A9D8F]">{controlStyle.fontSize}px</span>
+                        </div>
+                        <input id="subtitle-size" type="range" min="10" max="36" step="1" value={controlStyle.fontSize} onChange={(event) => updateStyle({ fontSize: Number(event.target.value) })} className="w-full accent-[#2A9D8F]" />
                       </div>
-                      <input id="subtitle-size" type="range" min="10" max="36" step="1" value={controlStyle.fontSize} onChange={(event) => updateStyle({ fontSize: Number(event.target.value) })} className="w-full accent-[#2A9D8F]" />
+                      <div>
+                        <div className="mb-2 flex justify-between text-sm font-bold text-gray-700">
+                          <label htmlFor="subtitle-outline">테두리 두께</label>
+                          <span className="tabular-nums text-[#2A9D8F]">{controlStyle.outlineWidth}px</span>
+                        </div>
+                        <input id="subtitle-outline" type="range" min="0" max="4" step="0.5" value={controlStyle.outlineWidth} onChange={(event) => updateStyle({ outlineWidth: Number(event.target.value) })} className="w-full accent-[#2A9D8F]" />
+                      </div>
                     </div>
                   </div>
 
@@ -418,7 +428,7 @@ export default function SubtitleTool({ onBack }: SubtitleToolProps) {
                       ))}
                     </div>
                   </div>
-                  <p className="mt-4 text-xs font-medium text-gray-500">자막에는 영상 배경에서도 잘 보이도록 검은색 테두리가 자동 적용됩니다.</p>
+                  <p className="mt-4 text-xs font-medium text-gray-500">테두리 두께는 미리보기와 저장되는 자막 영상에 함께 적용됩니다.</p>
                 </section>
               )}
             </div>

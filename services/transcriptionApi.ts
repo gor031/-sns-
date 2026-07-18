@@ -10,6 +10,7 @@ interface RawSegment {
 const DEFAULT_STYLE: SubtitleStyle = {
   colorHex: '#FFFFFF',
   fontSize: 24,
+  outlineWidth: 2,
   position: 'bottom',
 };
 

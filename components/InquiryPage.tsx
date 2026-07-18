@@ -84,7 +84,7 @@ export function InquiryPage({ onBack }: InquiryPageProps) {
   }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const changeView = (next: View) => {
-    setView(next);
+    setView(admin && (next === 'mine' || next === 'new') ? 'admin' : next);
     setSelected(null);
     setErrorMessage('');
   };
@@ -156,27 +156,28 @@ export function InquiryPage({ onBack }: InquiryPageProps) {
             <button type="button" onClick={onBack} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-bold text-gray-600 hover:text-gray-900">
               <ArrowLeft size={18} aria-hidden="true" /> 홈으로
             </button>
-            <p className="text-sm font-black text-primary">문의 사항</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900">문의 게시판</h1>
-            <p className="mt-2 text-sm font-medium leading-6 text-gray-600">내가 작성한 문의와 관리자 답변은 본인만 볼 수 있습니다.</p>
+            <p className="text-sm font-black text-primary">{admin ? '관리자' : '문의 사항'}</p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900">{admin ? '전체 문의 관리' : '문의 게시판'}</h1>
+            <p className="mt-2 text-sm font-medium leading-6 text-gray-600">
+              {admin ? '사용자가 남긴 문의를 확인하고 답변할 수 있습니다.' : '내가 작성한 문의와 관리자 답변은 본인만 볼 수 있습니다.'}
+            </p>
           </div>
-          <button type="button" onClick={() => changeView('new')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-black text-white shadow-sm transition hover:bg-[#ef5d5d] focus-visible:ring-4 focus-visible:ring-primary/25">
-            <Plus size={19} aria-hidden="true" /> 새 문의 작성
-          </button>
-        </div>
-
-        <nav className="mt-5 flex gap-2 overflow-x-auto pb-1" aria-label="문의 게시판 메뉴">
-          <button type="button" onClick={() => changeView('mine')} aria-current={view === 'mine' ? 'page' : undefined} className={`min-h-11 shrink-0 rounded-lg px-4 text-sm font-black transition ${view === 'mine' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>
-            내 문의
-          </button>
-          {admin && (
-            <button type="button" onClick={() => changeView('admin')} aria-current={view === 'admin' ? 'page' : undefined} className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-black transition ${view === 'admin' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>
-              <ShieldCheck size={17} aria-hidden="true" /> 전체 문의 관리
+          {!admin && (
+            <button type="button" onClick={() => changeView('new')} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 font-black text-white shadow-sm transition hover:bg-[#ef5d5d] focus-visible:ring-4 focus-visible:ring-primary/25">
+              <Plus size={19} aria-hidden="true" /> 새 문의 작성
             </button>
           )}
-        </nav>
+        </div>
 
-        <section className="mt-5">
+        {!admin && (
+          <nav className="mt-5 flex gap-2 overflow-x-auto pb-1" aria-label="문의 게시판 메뉴">
+            <button type="button" onClick={() => changeView('mine')} aria-current={view === 'mine' ? 'page' : undefined} className={`min-h-11 shrink-0 rounded-lg px-4 text-sm font-black transition ${view === 'mine' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>
+              내 문의
+            </button>
+          </nav>
+        )}
+
+        <section className={admin ? 'mt-6' : 'mt-5'}>
           {(view === 'mine' || view === 'admin') && (
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
               <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4 sm:px-6">
@@ -194,8 +195,8 @@ export function InquiryPage({ onBack }: InquiryPageProps) {
               ) : inquiries.length === 0 ? (
                 <div className="flex min-h-64 flex-col items-center justify-center px-5 text-center">
                   <span className="grid size-12 place-items-center rounded-full bg-gray-100 text-gray-500"><Inbox size={23} aria-hidden="true" /></span>
-                  <h3 className="mt-4 font-black text-gray-900">아직 문의가 없습니다</h3>
-                  <p className="mt-1 text-sm font-medium text-gray-500">궁금한 점이 생기면 새 문의를 남겨주세요.</p>
+                  <h3 className="mt-4 font-black text-gray-900">{admin ? '접수된 문의가 없습니다' : '아직 문의가 없습니다'}</h3>
+                  <p className="mt-1 text-sm font-medium text-gray-500">{admin ? '새 문의가 등록되면 이곳에 표시됩니다.' : '궁금한 점이 생기면 새 문의를 남겨주세요.'}</p>
                 </div>
               ) : (
                 <ul className="divide-y divide-gray-100">
@@ -216,7 +217,7 @@ export function InquiryPage({ onBack }: InquiryPageProps) {
             </div>
           )}
 
-          {view === 'new' && (
+          {view === 'new' && !admin && (
             <form onSubmit={(event) => void handleCreate(event)} className="mx-auto max-w-2xl space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
               <div className="flex items-center gap-3 border-b border-gray-100 pb-5">
                 <span className="grid size-11 place-items-center rounded-lg bg-primary text-white"><MessageCircleQuestion size={22} aria-hidden="true" /></span>

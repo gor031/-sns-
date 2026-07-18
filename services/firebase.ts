@@ -14,13 +14,20 @@ import {
 // Firebase web configuration and reCAPTCHA site keys identify this public web app.
 // They are intentionally public; provider API secrets remain in Netlify environment variables.
 const firebaseConfig = {
-  projectId: 'cardnews-ai-studio',
-  appId: '1:1075022418609:web:f5a19dc724be2740158890',
-  storageBucket: 'cardnews-ai-studio.firebasestorage.app',
-  apiKey: 'FIREBASE_API_KEY_REMOVED',
-  authDomain: 'cardnews-ai-studio.firebaseapp.com',
-  messagingSenderId: '1075022418609',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
 };
+
+const missingFirebaseConfig = Object.entries(firebaseConfig)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+if (missingFirebaseConfig.length > 0) {
+  throw new Error(`Firebase 환경변수가 누락되었습니다: ${missingFirebaseConfig.join(', ')}`);
+}
 
 export const app = initializeApp(firebaseConfig);
 
@@ -33,7 +40,7 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaEnterpriseProvider('RECAPTCHA_SITE_KEY_REMOVED'),
+  provider: new ReCaptchaEnterpriseProvider(import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY),
   isTokenAutoRefreshEnabled: true,
 });
 
